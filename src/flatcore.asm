@@ -137,11 +137,48 @@ dispatch:
     test eax, eax
     jnz command_uname
 
+    mov rsi, rbx
+    mov rdi, name_basename
+    call streq
+    test eax, eax
+    jnz command_basename
+
+    mov rsi, rbx
+    mov rdi, name_dirname
+    call streq
+    test eax, eax
+    jnz command_dirname
+
+    mov rsi, rbx
+    mov rdi, name_head
+    call streq
+    test eax, eax
+    jnz command_head
+
+    mov rsi, rbx
+    mov rdi, name_wc
+    call streq
+    test eax, eax
+    jnz command_wc
+
+    mov rsi, rbx
+    mov rdi, name_ln
+    call streq
+    test eax, eax
+    jnz command_ln
+
+    mov rsi, rbx
+    mov rdi, name_readlink
+    call streq
+    test eax, eax
+    jnz command_readlink
+
     mov rsi, unknown_message
     call write_err
     mov edi, 127
     jmp process_exit
 
 include 'src/commands.inc'
+include 'src/commands_extra.inc'
 include 'src/runtime.inc'
 include 'src/data.inc'

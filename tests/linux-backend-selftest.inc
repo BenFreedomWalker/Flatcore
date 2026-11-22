@@ -48,9 +48,10 @@ fc_linux_backend_selftest:
     cmp qword [linux_test_info], 2
     jne .fail11
     cmp dword [linux_test_info + 36], FC_TYPE_REGULAR
-    jne .fail11
-    cmp dword [linux_test_info + 40], 600o
-    jne .fail11
+    jne .fail12
+    ; FC_FILE_INFO.mode retains the complete POSIX st_mode, including S_IFREG.
+    cmp dword [linux_test_info + 40], 100600o
+    jne .fail13
 
     ; Reopen and read back the exact payload.
     mov rdi, linux_test_path
@@ -115,6 +116,10 @@ fc_linux_backend_selftest:
 .fail10: mov eax, 40
     jmp .done
 .fail11: mov eax, 41
+    jmp .done
+.fail12: mov eax, 42
+    jmp .done
+.fail13: mov eax, 43
 .done:
     add rsp, 16
     pop r13

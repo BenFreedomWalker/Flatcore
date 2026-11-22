@@ -53,6 +53,9 @@ actual="$("$BIN" dirname '/tmp/flatcore-test/file.txt')"
     id_output="$("$BIN" id)"
     [[ "$id_output" == uid=* ]]
     [[ "$id_output" == *' gid='* ]]
+    [[ -n "$("$BIN" hostname)" ]]
+    [[ "$("$BIN" uptime)" == *' seconds' ]]
+    "$BIN" sleep 0
 
     printf 'a b\nc\n' > wc.txt
     [[ "$("$BIN" wc wc.txt)" == '2 3 6' ]]

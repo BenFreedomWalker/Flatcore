@@ -212,12 +212,12 @@ Both existing native source files include and assemble these same common modules
 
 - [ ] Implement os_read, os_write, and complete-write handling.
 - [ ] Implement os_open, os_close, and file creation/truncation modes.
-- [ ] Implement os_stat using the shared metadata structure.
+- [x] Implement Linux os_stat using the shared 64-byte metadata structure.
 - [ ] Implement os_dir_open, os_dir_next, and os_dir_close.
 - [x] Implement os_mkdir, os_rmdir, os_unlink, and os_rename in the Linux backend.
 - [x] Implement os_getcwd and os_chdir in the Linux backend.
 - [ ] Implement file timestamps and the operations required by touch.
-- [ ] Complete Linux syscall-backed versions.
+- [ ] Complete remaining Linux syscall-backed versions (directory iteration and timestamps remain).
 - [ ] Implement Windows Unicode Win32-backed versions.
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
@@ -229,7 +229,8 @@ Both existing native source files include and assemble these same common modules
 - Added `src/platform/linux/data.inc` for standard descriptors and backend error state. The Linux runtime self-test target now assembles these backend modules as part of its build.
 - Preserved FC64 output pointers across the Linux `syscall` instruction, which clobbers RCX and R11. Open access-mode decoding masks the access bits so CREATE/TRUNCATE/APPEND flags do not invalidate the mode.
 - Added a Linux backend integration harness to `tests/runtime-linux.asm`. It exercises `os_getcwd`, create/truncate open, write, close, read-back, close, and unlink against a temporary file. The harness is built by `build.sh test`.
-- These routines are not yet wired into the production executable. `os_stat`, directory iteration, timestamps, and the Windows Unicode backend remain outstanding; the new integration assertions are awaiting the user's Linux test run.
+- These routines are not yet wired into the production executable. Directory iteration, timestamps, and the Windows Unicode backend remain outstanding.
+- Added Linux `os_stat` using `newfstatat`, populating file size, mtime/atime nanoseconds, POSIX mode, link count, file type, and read-only attribute. The Linux backend harness now checks a created regular file's size, type, and mode.
 
 **Runtime verification:** pending; no Stage 4 backend test checkpoint has been requested yet.
 
@@ -305,3 +306,9 @@ Both existing native source files include and assemble these same common modules
 **Linux backend test correction (2026-11-23)**
 
 - First integration run exposed a segmentation fault in the new `os_getcwd` test path. The backend saved the output-length pointer from RCX, but the FC64 API defines it as the third argument in RDX. Corrected `os_getcwd` to preserve RDX before preparing the native syscall arguments (commit 4fcdef1). Awaiting a repeat of both test suites.
+
+
+**Stage 4 Linux backend verification (2026-11-23)**
+
+- User reran `./build.sh test` after the `os_getcwd` pointer correction. Shared runtime tests and Linux smoke tests passed; fish exit status was 0. Windows shared runtime tests and smoke tests also passed; CMD exit status was 0.
+- The getcwd correction is verified. The new `os_stat` implementation and its additional assertions were added after this successful run and are awaiting the next test checkpoint.

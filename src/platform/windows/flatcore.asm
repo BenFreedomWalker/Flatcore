@@ -148,6 +148,36 @@ start:
     test eax, eax
     jnz .ls
 
+    mov rdi, r13
+    mov rsi, cp_name
+    call string_equal
+    test eax, eax
+    jnz .cp
+
+    mov rdi, r13
+    mov rsi, mv_name
+    call string_equal
+    test eax, eax
+    jnz .mv
+
+    mov rdi, r13
+    mov rsi, basename_name
+    call string_equal
+    test eax, eax
+    jnz .basename
+
+    mov rdi, r13
+    mov rsi, dirname_name
+    call string_equal
+    test eax, eax
+    jnz .dirname
+
+    mov rdi, r13
+    mov rsi, head_name
+    call string_equal
+    test eax, eax
+    jnz .head
+
     mov rsi, unknown_text
     call write_stdout
     mov ecx, 127
@@ -234,6 +264,188 @@ start:
     jnz .ls_entry
     mov rcx, r15
     call [FindClose]
+    jmp .success
+
+.cp:
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rbx, rax
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rcx, rbx
+    mov rdx, rax
+    xor r8d, r8d
+    call [CopyFileA]
+    test eax, eax
+    jz .api_error
+    jmp .success
+
+.mv:
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rbx, rax
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rcx, rbx
+    mov rdx, rax
+    call [MoveFileA]
+    test eax, eax
+    jz .api_error
+    jmp .success
+
+.basename:
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rdi, rax
+    call string_length
+    mov r8, rax
+.basename_trim:
+    cmp r8, 1
+    jbe .basename_scan_start
+    mov al, [rdi + r8 - 1]
+    cmp al, '\\'
+    je .basename_trim_one
+    cmp al, '/'
+    jne .basename_scan_start
+.basename_trim_one:
+    dec r8
+    jmp .basename_trim
+.basename_scan_start:
+    mov r9, r8
+.basename_scan:
+    test r9, r9
+    jz .basename_output
+    dec r9
+    mov al, [rdi + r9]
+    cmp al, '\\'
+    je .basename_found
+    cmp al, '/'
+    jne .basename_scan
+.basename_found:
+    lea rsi, [rdi + r9 + 1]
+    jmp .basename_print
+.basename_output:
+    mov rsi, rdi
+.basename_print:
+    mov rdi, rsi
+    call string_length
+    mov rdx, rax
+    call write_stdout_n
+    mov rsi, newline_text
+    mov edx, 2
+    call write_stdout_n
+    jmp .success
+
+.dirname:
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rdi, rax
+    call string_length
+    mov r8, rax
+    mov r9, r8
+.dirname_scan:
+    test r9, r9
+    jz .dirname_none
+    dec r9
+    mov al, [rdi + r9]
+    cmp al, '\\'
+    je .dirname_found
+    cmp al, '/'
+    jne .dirname_scan
+.dirname_found:
+    test r9, r9
+    jnz .dirname_drive_root
+    mov byte [rdi + 1], 0
+    jmp .dirname_print
+.dirname_drive_root:
+    cmp r9, 2
+    jne .dirname_cut
+    cmp byte [rdi + 1], ':'
+    jne .dirname_cut
+    mov byte [rdi + 3], 0
+    jmp .dirname_print
+.dirname_cut:
+    mov byte [rdi + r9], 0
+    jmp .dirname_print
+.dirname_none:
+    mov rsi, dot_path
+    jmp .dirname_output
+.dirname_print:
+    mov rsi, rdi
+.dirname_output:
+    mov rdi, rsi
+    call string_length
+    mov rdx, rax
+    call write_stdout_n
+    mov rsi, newline_text
+    mov edx, 2
+    call write_stdout_n
+    jmp .success
+
+.head:
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rcx, rax
+    mov edx, 80000000h
+    mov r8d, 1
+    xor r9d, r9d
+    mov qword [rsp + 32], 3
+    mov qword [rsp + 40], 80h
+    mov qword [rsp + 48], 0
+    call [CreateFileA]
+    cmp rax, -1
+    je .api_error
+    mov rbx, rax
+    xor r14d, r14d
+.head_read:
+    mov rcx, rbx
+    mov rdx, io_buffer
+    mov r8d, 4096
+    lea r9, [rsp + 56]
+    mov qword [rsp + 32], 0
+    mov dword [rsp + 56], 0
+    call [ReadFile]
+    test eax, eax
+    jz .head_close_error
+    mov r10d, [rsp + 56]
+    test r10d, r10d
+    jz .head_close
+    xor r11d, r11d
+.head_scan:
+    cmp r11d, r10d
+    jae .head_write_all
+    cmp byte [io_buffer + r11], 10
+    jne .head_scan_next
+    inc r14d
+    cmp r14d, 10
+    je .head_write_ten
+.head_scan_next:
+    inc r11d
+    jmp .head_scan
+.head_write_ten:
+    lea rsi, [io_buffer]
+    lea rdx, [r11 + 1]
+    call write_stdout_n
+    jmp .head_close
+.head_write_all:
+    mov rsi, io_buffer
+    mov edx, r10d
+    call write_stdout_n
+    jmp .head_read
+.head_close_error:
+    mov rcx, rbx
+    call [CloseHandle]
+    jmp .api_error
+.head_close:
+    mov rcx, rbx
+    call [CloseHandle]
     jmp .success
 
 .mkdir:
@@ -378,6 +590,58 @@ start:
 .exit:
     call [ExitProcess]
 
+; Return the next argument in RAX, advancing RSI. Quoted paths are unwrapped.
+first_argument:
+.arg_skip:
+    cmp byte [rsi], ' '
+    je .arg_skip_one
+    cmp byte [rsi], 9
+    jne .arg_begin
+.arg_skip_one:
+    inc rsi
+    jmp .arg_skip
+.arg_begin:
+    cmp byte [rsi], 0
+    je .arg_missing
+    mov rax, rsi
+    mov r8, rsi
+    mov r9, rsi
+    cmp byte [r8], '"'
+    jne .arg_plain
+    inc r8
+.arg_quoted:
+    mov dl, [r8]
+    test dl, dl
+    jz .arg_finish
+    cmp dl, '"'
+    je .arg_quote_end
+    mov [r9], dl
+    inc r8
+    inc r9
+    jmp .arg_quoted
+.arg_quote_end:
+    inc r8
+    jmp .arg_finish
+.arg_plain:
+    mov dl, [r8]
+    test dl, dl
+    jz .arg_finish
+    cmp dl, ' '
+    je .arg_finish
+    cmp dl, 9
+    je .arg_finish
+    mov [r9], dl
+    inc r8
+    inc r9
+    jmp .arg_plain
+.arg_finish:
+    mov byte [r9], 0
+    mov rsi, r8
+    ret
+.arg_missing:
+    xor eax, eax
+    ret
+
 ; Compare zero-terminated strings: RDI and RSI. EAX=1 if equal.
 string_equal:
 .loop:
@@ -449,7 +713,7 @@ touch_name db 'touch', 0
 cat_name db 'cat', 0
 help_text db 'Flatcore - native Windows x86-64 multicall userspace', 13, 10
           db 'Usage: flatcore.exe COMMAND [ARGUMENTS...]', 13, 10
-          db 'Windows commands: help, echo, true, false, pwd, hostname, ls, mkdir, rmdir, rm, touch, cat', 13, 10, 0
+          db 'Windows commands: help, echo, true, false, pwd, hostname, ls, cp, mv, basename, dirname, head, mkdir, rmdir, rm, touch, cat', 13, 10, 0
 error_text db 'flatcore: Windows API operation failed', 13, 10, 0
 usage_error_text db 'flatcore: command requires a path argument', 13, 10, 0
 unknown_text db 'flatcore: unknown command in this Windows build', 13, 10, 0

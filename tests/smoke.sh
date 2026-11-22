@@ -39,17 +39,28 @@ actual="$("$BIN" dirname '/tmp/flatcore-test/file.txt')"
     cmp input.txt moved.txt
 
     mkdir ls-dir
-    printf 'visible\\n' > ls-dir/visible
-    printf 'secret\\n' > ls-dir/.hidden
+    printf 'visible\n' > ls-dir/visible
+    printf 'secret\n' > ls-dir/.hidden
     "$BIN" ls ls-dir > ls-default.txt
     grep -qx 'visible' ls-default.txt
     if grep -q '.hidden' ls-default.txt; then
-        printf 'ls hidename filtering failed\\n' >&2
+        printf 'ls hidename filtering failed\n' >&2
         exit 1
     fi
     "$BIN" ls -la ls-dir > ls-long.txt
     grep -q '^drwx' ls-long.txt
-    grep -q '\\.hidden    "$BIN" rmdir sample-dir
+    grep -q '\.hidden$' ls-long.txt
+    grep -q 'visible$' ls-long.txt
+    [[ "$("$BIN" ls -d ls-dir)" == 'ls-dir' ]]
+    "$BIN" ls --help > ls-help.txt
+    grep -q -- '--almost-all' ls-help.txt
+    if "$BIN" ls --not-a-real-option >/dev/null 2>&1; then
+        printf 'ls accepted an unknown option\n' >&2
+        exit 1
+    fi
+    "$BIN" rm ls-dir/visible ls-dir/.hidden
+    "$BIN" rmdir ls-dir
+    "$BIN" rmdir sample-dir
 
     "$BIN" ln -s input.txt input-link
     [[ "$("$BIN" readlink input-link)" == 'input.txt' ]]

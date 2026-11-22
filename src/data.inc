@@ -2,6 +2,8 @@ segment readable writeable
 
 argc         rq 1
 argv         rq 1
+normalized_argc rq 1
+normalized_argv rq 1
 io_buffer    rb 4096
 cwd_buffer   rb 4096
 uname_buffer rb 390

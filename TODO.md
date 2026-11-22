@@ -158,18 +158,31 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 - [ ] Implement shared process startup state and argument-vector representation.
 - [ ] Implement Windows command-line parsing with correct quoting and escaping, converting arguments to UTF-8.
 - [ ] Use the Linux process-provided argc/argv and normalize them to the same shared representation.
-- [ ] Implement shared string length, comparison, copy, and search primitives.
-- [ ] Implement shared memory/buffer helpers required by commands.
-- [ ] Implement shared integer parsing and number formatting.
-- [ ] Implement shared output formatting and complete-write loops.
+- [x] Implement shared string length, comparison, copy, and search primitives.
+- [x] Implement shared memory/buffer helpers required by commands.
+- [x] Implement shared unsigned integer parsing and decimal formatting.
+- [x] Implement a backend-neutral complete-write loop and NUL-terminated string output helper.
 - [ ] Implement shared error-message formatting.
-- [ ] Implement one command dispatcher and command registration table.
+- [x] Implement the shared table-driven dispatcher and define its command registry/handler layout.
 - [ ] Support invocation as flatcore COMMAND ...
 - [ ] Define and implement multicall invocation behavior (dispatch by executable name where supported).
-- [ ] Make commands return an exit status to the dispatcher.
+- [x] Define the shared command-handler exit-status contract; migrate command bodies in the later command-port stage.
 - [ ] Make each native entry point perform the final OS-specific process exit.
 
-**Runtime verification:** pending; test argument quoting, empty arguments, spaces, UTF-8, output streams, unknown commands, and exit statuses on both targets.
+**Stage 3 implementation checkpoint (2026-11-23)**
+
+Added platform-neutral FC64 modules under src/common/:
+
+- memory.inc: byte-copy and byte-fill primitives.
+- strings.inc: UTF-8 byte length, equality, bounded copy, and substring search.
+- arguments.inc: a bounded Windows-style UTF-8 command-line tokenizer with quote/backslash handling. Windows UTF-16-to-UTF-8 conversion and native entry-point integration remain pending.
+- formatting.inc: checked unsigned decimal parsing and decimal formatting.
+- output.inc: complete-write loop routed through a backend callback, plus NUL-terminated string output.
+- dispatcher.inc: one registry-driven dispatcher. Registry entries are pairs of command-name and handler pointers; handlers receive argc/argv and return the process status in RAX.
+
+Both existing native source files include and assemble these same common modules. The legacy command dispatchers remain active for now; they will be replaced only after the new platform startup/backend path is ready. No existing command implementation has been removed.
+
+**Runtime verification:** pending; first compile both targets and rerun the existing smoke suites to catch integration/assembly regressions. These legacy smoke suites do not yet exercise the new common helper routines directly.
 
 ## Stage 4 — Implement the filesystem and I/O backends
 

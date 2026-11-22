@@ -1,0 +1,15 @@
+* text=auto
+
+# Keep Unix shell scripts executable by WSL and Linux.
+*.sh text eol=lf
+
+# Keep FASM source and include files consistent across platforms.
+*.asm text eol=lf
+*.inc text eol=lf
+
+# Use Windows-native line endings for batch scripts.
+*.bat text eol=crlf
+
+# Keep repository documentation and metadata in LF.
+*.md text eol=lf
+.gitignore text eol=lf

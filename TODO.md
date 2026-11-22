@@ -151,7 +151,7 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 - Kept the existing Linux and Windows output locations separate.
 - The legacy entry points and command implementations are intentionally still active. Switching both executables to the new shared runtime is a later migration step, not something to fake with empty stubs.
 
-**Runtime verification: passed (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 and `build-windows.bat test` under Windows with FASM 1.73.35. Both targets assembled successfully and both existing smoke suites passed. The Linux `flatcore: operation failed` line is emitted by an expected negative/error-path test; the suite completed successfully.
+**Runtime verification: passed (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 (18 passes, 17,844-byte executable) and `build-windows.bat test` under Windows with FASM 1.73.35 (18 passes, 16,896-byte executable). Both legacy smoke suites passed. Both targets assembled successfully and both existing smoke suites passed. The Linux `flatcore: operation failed` line is emitted by an expected negative/error-path test; the suite completed successfully.
 
 ## Stage 3 — Implement the common runtime
 
@@ -183,7 +183,7 @@ Added platform-neutral FC64 modules under src/common/:
 
 Both existing native source files include and assemble these same common modules. The legacy command dispatchers remain active for now; the new shared startup selector and dispatcher are compiled but not yet used by the executable entry paths. Windows still uses its ANSI command-line API; Unicode startup integration is pending. No existing command implementation has been removed.
 
-**Runtime verification: passed for the first common-module integration checkpoint (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 and `build-windows.bat test` under Windows with FASM 1.73.35. Both targets assembled the shared modules and both existing smoke suites passed. The Linux `flatcore: operation failed` line is the expected negative/error-path case. The newly added startup-selection and error-description helpers now also compile into both targets, with code and static strings placed in their correct executable/read-only sections; the legacy smoke suites still do not exercise these routines directly, so dedicated helper tests remain required.
+**Runtime verification: passed for the first common-module integration checkpoint (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 and `build-windows.bat test` under Windows with FASM 1.73.35. Both targets assembled the shared modules and both existing smoke suites passed. The Linux `flatcore: operation failed` line is the expected negative/error-path case. The newly added startup-selection and error-description helpers now also compile into both targets, with code and static strings placed in their correct executable/read-only sections; the legacy smoke suites still do not exercise these routines directly, so dedicated helper tests remain required. A subsequent user checkpoint on 2026-11-23 again passed both builds and smoke suites after adding startup normalization and error mapping.
 
 ## Stage 4 — Implement the filesystem and I/O backends
 

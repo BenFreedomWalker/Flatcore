@@ -106,18 +106,27 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 
 ## Stage 1 — Define the shared ABI and OS backend contract
 
-- [ ] Define one internal FASM calling convention for all shared runtime and backend functions.
-- [ ] Specify argument registers, return registers, preserved registers, stack alignment, and scratch-register rules.
-- [ ] Define consistent success and error return conventions, including how native OS error codes are exposed.
-- [ ] Define standard input, standard output, and standard error handles.
-- [ ] Define file-handle representation and invalid-handle representation.
-- [ ] Define the shared file metadata structure and its field widths.
-- [ ] Define directory iteration results and end-of-directory behavior.
-- [ ] Define path and string encoding rules (UTF-8 internally).
-- [ ] Define backend capabilities and behavior for unsupported operations.
-- [ ] Document every public runtime/backend entry point in source comments.
+- [x] Define one internal FASM calling convention for all shared runtime and backend functions.
+- [x] Specify argument registers, return registers, preserved registers, stack alignment, and scratch-register rules.
+- [x] Define consistent success and error return conventions, including how native OS error codes are exposed.
+- [x] Define standard input, standard output, and standard error handles.
+- [x] Define file-handle representation and invalid-handle representation.
+- [x] Define the shared file metadata structure and its field widths.
+- [x] Define directory iteration results and end-of-directory behavior.
+- [x] Define path and string encoding rules (UTF-8 internally).
+- [x] Define backend capabilities and behavior for unsupported operations.
+- [x] Document every public runtime/backend entry point in source comments.
 
-**Runtime verification:** pending.
+**Stage 1 contract (2026-11-23)**
+
+- Added `src/include/api.inc` as the authoritative FC64 ABI/backend contract.
+- FC64 uses RDI, RSI, RDX, RCX, R8, R9 for arguments and RAX for results; RBX, RBP, R12-R15, and RSP are callee-preserved. RSP is 16-byte aligned immediately before CALL. Calls with more than six arguments use a parameter block.
+- Backend calls use 0 for success and -1 for failure, with normalized and native error details in common diagnostic state. Directory iteration has explicit entry / EOF / error results.
+- Defined opaque 64-bit handles, standard stream handles, UTF-8 string/path boundaries, the 64-byte FC_FILE_INFO layout, normalized error codes, open flags, file types, attributes, and optional capability bits.
+- Documented the native ABI adapters: Linux syscall ABI and Microsoft x64 ABI remain confined to their respective backends.
+- This stage defines the contract only. It does not yet replace or alter either existing executable implementation.
+
+**Runtime verification:** pending; Stage 1 is a specification-only change. Validate the include syntax during Stage 2 when both new build entry points consume it.
 
 ## Stage 2 — Establish the new source layout and build selection
 

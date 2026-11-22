@@ -627,15 +627,26 @@ first_argument:
     test dl, dl
     jz .arg_finish
     cmp dl, ' '
-    je .arg_finish
+    je .arg_delimiter
     cmp dl, 9
-    je .arg_finish
+    je .arg_delimiter
     mov [r9], dl
     inc r8
     inc r9
     jmp .arg_plain
+.arg_delimiter:
+    inc r8
 .arg_finish:
     mov byte [r9], 0
+.arg_skip_next:
+    cmp byte [r8], ' '
+    je .arg_skip_next_one
+    cmp byte [r8], 9
+    jne .arg_return
+.arg_skip_next_one:
+    inc r8
+    jmp .arg_skip_next
+.arg_return:
     mov rsi, r8
     ret
 .arg_missing:

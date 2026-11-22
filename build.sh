@@ -48,3 +48,16 @@ printf 'Try: %s/flatcore help\n' "$BUILD_DIR"
 if (( RUN_TESTS )); then
     "$ROOT_DIR/tests/smoke.sh" "$BUILD_DIR"
 fi
+
+if (( DO_INSTALL )); then
+    PREFIX="${PREFIX:-/usr/local}"
+    DESTDIR="${DESTDIR:-}"
+    INSTALL_BIN="${DESTDIR}${PREFIX}/bin"
+    mkdir -p "$INSTALL_BIN"
+    cp "$BUILD_DIR/flatcore" "$INSTALL_BIN/flatcore"
+    chmod 755 "$INSTALL_BIN/flatcore"
+    for command_name in "${commands[@]}"; do
+        ln -sfn flatcore "$INSTALL_BIN/$command_name"
+    done
+    printf 'Installed Flatcore into: %s\\n' "$INSTALL_BIN"
+fi

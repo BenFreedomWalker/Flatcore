@@ -30,8 +30,8 @@ set "TEST_DIR=%TEMP%\flatcore smoke-%RANDOM%"
 "%BIN%" mkdir "%TEST_DIR%"
 if errorlevel 1 goto failed
 echo alpha> "%TEST_DIR%\sample.txt"
-"%BIN%" head "%TEST_DIR%\sample.txt" >nul
-if errorlevel 1 goto failed
+for /f "delims=" %%A in ('"%BIN%" head "%TEST_DIR%\sample.txt"') do set "HEAD_RESULT=%%A"
+if not "%HEAD_RESULT%"=="alpha" goto failed
 "%BIN%" ls "%TEST_DIR%" >nul
 if errorlevel 1 goto failed
 "%BIN%" cp "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt"

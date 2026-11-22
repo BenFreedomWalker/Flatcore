@@ -165,7 +165,6 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 - [x] Implement a backend-neutral complete-write loop and NUL-terminated string output helper.
 - [x] Implement shared normalized-error-to-message mapping.
 - [x] Implement the shared table-driven dispatcher and define its command registry/handler layout.
-- [x] Implement shared explicit-command and multicall argv normalization, including basename handling for symlink invocation.
 - [ ] Define and implement multicall invocation behavior (dispatch by executable name where supported).
 - [x] Define the shared command-handler exit-status contract; migrate command bodies in the later command-port stage.
 - [ ] Make each native entry point perform the final OS-specific process exit.

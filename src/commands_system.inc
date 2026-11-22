@@ -35,7 +35,7 @@ command_uptime:
     syscall
     test rax, rax
     js .uptime_error
-    mov rax, [sysinfo_buffer]
+    mov rax, qword [sysinfo_buffer]
     call write_number
     mov rsi, uptime_suffix
     call write_out

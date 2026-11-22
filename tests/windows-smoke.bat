@@ -38,6 +38,8 @@ if errorlevel 1 goto failed
 if errorlevel 1 goto failed
 "%BIN%" mv "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
+"%BIN%" cat "%TEST_DIR%\moved.txt" >nul
+if errorlevel 1 goto failed
 for /f "delims=" %%A in ('"%BIN%" basename "%TEST_DIR%\sample.txt"') do set "BASE_RESULT=%%A"
 if not "%BASE_RESULT%"=="sample.txt" goto failed
 for /f "delims=" %%A in ('"%BIN%" dirname "%TEST_DIR%\sample.txt"') do set "DIR_RESULT=%%A"

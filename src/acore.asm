@@ -54,13 +54,14 @@ _start:
 
 .basename_ready:
     mov rdi, rsi
+    mov rbx, rsi                  ; preserve basename across comparison
     mov rsi, applet_acore
     call streq
     test eax, eax
     jnz .dispatch_argument
 
     ; Invoked through an applet symlink: argv[0] is the command.
-    mov rdi, rsi
+    mov rdi, rbx
     mov r14, 1
     jmp .dispatch
 
@@ -71,6 +72,7 @@ _start:
     mov r14, 2
 
 .dispatch:
+    mov rbx, rdi                  ; command name survives string comparisons
     mov rsi, applet_echo
     call command_is
     test eax, eax
@@ -162,7 +164,7 @@ _start:
 
 ; Compare command name in RDI with applet name in RSI.
 command_is:
-    mov rsi, rsi
+    mov rdi, rbx
     jmp streq
 
 ; ------------------------------------------------------------
@@ -222,11 +224,11 @@ cmd_pwd:
 cmd_cat:
     cmp r14, r12
     jae .stdin
-    mov r15, r14
+    mov r14, r14
 .next_file:
-    cmp r15, r12
+    cmp r14, r12
     jae .done
-    mov rdi, [r13 + r15 * 8]
+    mov rdi, [r13 + r14 * 8]
     xor esi, esi
     xor edx, edx
     mov eax, SYS_open
@@ -241,7 +243,7 @@ cmd_cat:
     syscall
     test rax, rax
     js command_error
-    inc r15
+    inc r14
     jmp .next_file
 .stdin:
     xor edi, edi

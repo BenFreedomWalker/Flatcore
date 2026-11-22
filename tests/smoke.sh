@@ -44,6 +44,14 @@ actual="$("$BIN" dirname '/tmp/flatcore-test/file.txt')"
     "$BIN" ln -s input.txt input-link
     [[ "$("$BIN" readlink input-link)" == 'input.txt' ]]
 
+    "$BIN" touch mode.txt
+    "$BIN" chmod 600 mode.txt
+    [[ "$(stat -c '%a' mode.txt)" == '600' ]]
+    "$BIN" sync
+    id_output="$("$BIN" id)"
+    [[ "$id_output" == uid=* ]]
+    [[ "$id_output" == *' gid='* ]]
+
     printf 'a b\nc\n' > wc.txt
     [[ "$("$BIN" wc wc.txt)" == '2 3 6' ]]
 
@@ -59,7 +67,7 @@ actual="$("$BIN" dirname '/tmp/flatcore-test/file.txt')"
     [[ "$("$BIN" echo symlink-dispatch)" == 'symlink-dispatch' ]]
     [[ "$("$BIN_LINKS/echo" symlink-dispatch)" == 'symlink-dispatch' ]]
 
-    "$BIN" rm sample.txt input.txt moved.txt input-link wc.txt
+    "$BIN" rm sample.txt input.txt moved.txt input-link mode.txt wc.txt
 )
 
 printf 'Flatcore smoke tests passed.\n'

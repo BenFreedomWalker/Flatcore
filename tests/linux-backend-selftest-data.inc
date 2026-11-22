@@ -7,3 +7,6 @@ linux_test_cwd rb 4096
 align 8
 linux_test_handle dq 0
 linux_test_length dq 0
+
+align 8
+linux_test_info rb 64

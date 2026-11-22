@@ -3,6 +3,7 @@
 
 ; os_open(path_utf8, flags, mode, out_handle)
 os_open:
+    mov r9, rcx
     mov r10, rdx
     xor eax, eax
     test esi, FC_OPEN_READ or FC_OPEN_WRITE
@@ -46,7 +47,7 @@ os_open:
     syscall
     test rax, rax
     js .open_error
-    mov [rcx], rax
+    mov [r9], rax
     xor eax, eax
     ret
 .open_bad_flags:
@@ -106,6 +107,7 @@ os_rename:
 
 ; os_getcwd(buffer, capacity, out_length)
 os_getcwd:
+    mov r8, rcx
     mov rdx, rsi
     mov eax, 79
     syscall
@@ -113,7 +115,7 @@ os_getcwd:
     js .getcwd_error
     ; Linux getcwd returns the byte count including the NUL terminator.
     dec rax
-    mov [rcx], rax
+    mov [r8], rax
     xor eax, eax
     ret
 .getcwd_error:

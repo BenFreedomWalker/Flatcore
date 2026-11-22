@@ -176,14 +176,14 @@ Added platform-neutral FC64 modules under src/common/:
 
 - memory.inc: byte-copy and byte-fill primitives.
 - strings.inc: UTF-8 byte length, equality, bounded copy, and substring search.
-- arguments.inc: a bounded Windows-style UTF-8 command-line tokenizer with quote/backslash handling. utf.inc: strict UTF-16LE-to-UTF-8 conversion with surrogate-pair validation. startup.inc: common explicit-command versus multicall argv normalization. errors.inc: normalized error-code descriptions. These helpers are compiled into both targets; replacing the legacy native startup/dispatch paths and wiring the Windows Unicode APIs remain pending.
+- arguments.inc: a bounded Windows-style UTF-8 command-line tokenizer with quote/backslash handling. utf.inc: strict UTF-16LE-to-UTF-8 conversion with surrogate-pair validation. startup.inc: common explicit-command versus multicall argv normalization. errors.inc/errors_data.inc: normalized error-code mapping code and separate static message data, placed in executable/read-only sections as appropriate. These helpers are compiled into both targets; replacing the legacy native startup/dispatch paths and wiring the Windows Unicode APIs remain pending.
 - formatting.inc: checked unsigned decimal parsing and decimal formatting.
 - output.inc: complete-write loop routed through a backend callback, plus NUL-terminated string output.
 - dispatcher.inc: one registry-driven dispatcher. Registry entries are pairs of command-name and handler pointers; handlers receive argc/argv and return the process status in RAX.
 
 Both existing native source files include and assemble these same common modules. The legacy command dispatchers remain active for now; the new shared startup selector and dispatcher are compiled but not yet used by the executable entry paths. Windows still uses its ANSI command-line API; Unicode startup integration is pending. No existing command implementation has been removed.
 
-**Runtime verification: passed for the first common-module integration checkpoint (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 and `build-windows.bat test` under Windows with FASM 1.73.35. Both targets assembled the shared modules and both existing smoke suites passed. The Linux `flatcore: operation failed` line is the expected negative/error-path case. The newly added startup-selection and error-description helpers now also compile into both targets; the legacy smoke suites still do not exercise these routines directly, so dedicated helper tests remain required.
+**Runtime verification: passed for the first common-module integration checkpoint (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 and `build-windows.bat test` under Windows with FASM 1.73.35. Both targets assembled the shared modules and both existing smoke suites passed. The Linux `flatcore: operation failed` line is the expected negative/error-path case. The newly added startup-selection and error-description helpers now also compile into both targets, with code and static strings placed in their correct executable/read-only sections; the legacy smoke suites still do not exercise these routines directly, so dedicated helper tests remain required.
 
 ## Stage 4 — Implement the filesystem and I/O backends
 

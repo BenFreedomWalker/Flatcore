@@ -126,7 +126,6 @@ fc_linux_set_error:
     ret
 
 ; Backend diagnostic state and standard descriptors.
-section readable writeable
 align 8
 os_stdin dq 0
 os_stdout dq 1

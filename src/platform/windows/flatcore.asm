@@ -100,6 +100,18 @@ start:
     test eax, eax
     jnz .echo
 
+    mov rdi, r13
+    mov rsi, pwd_name
+    call string_equal
+    test eax, eax
+    jnz .pwd
+
+    mov rdi, r13
+    mov rsi, hostname_name
+    call string_equal
+    test eax, eax
+    jnz .hostname
+
     mov rsi, unknown_text
     call write_stdout
     mov ecx, 127
@@ -109,6 +121,41 @@ start:
     mov rsi, help_text
     call write_stdout
     jmp .success
+
+.pwd:
+    mov ecx, 4096
+    mov rdx, cwd_buffer
+    call [GetCurrentDirectoryA]
+    test eax, eax
+    jz .api_error
+    mov edx, eax
+    mov rsi, cwd_buffer
+    call write_stdout_n
+    mov rsi, newline_text
+    mov edx, 2
+    call write_stdout_n
+    jmp .success
+
+.hostname:
+    mov dword [computer_name_length], 256
+    mov rcx, computer_name_length
+    mov rdx, computer_name_buffer
+    call [GetComputerNameA]
+    test eax, eax
+    jz .api_error
+    mov edx, [computer_name_length]
+    mov rsi, computer_name_buffer
+    call write_stdout_n
+    mov rsi, newline_text
+    mov edx, 2
+    call write_stdout_n
+    jmp .success
+
+.api_error:
+    mov rsi, error_text
+    call write_stdout
+    mov ecx, 1
+    jmp .exit
 
 .echo:
     ; Write the remaining raw command-line text, followed by a newline.
@@ -198,9 +245,15 @@ help_name db 'help', 0
 echo_name db 'echo', 0
 true_name db 'true', 0
 false_name db 'false', 0
+pwd_name db 'pwd', 0
+hostname_name db 'hostname', 0
+cwd_buffer rb 4096
+computer_name_buffer rb 256
+computer_name_length dd 256
 help_text db 'Flatcore - native Windows x86-64 multicall userspace', 13, 10
           db 'Usage: flatcore.exe COMMAND [ARGUMENTS...]', 13, 10
-          db 'Initial Windows commands: help, echo, true, false', 13, 10, 0
+          db 'Windows commands: help, echo, true, false, pwd, hostname', 13, 10, 0
+error_text db 'flatcore: Windows API operation failed', 13, 10, 0
 unknown_text db 'flatcore: unknown command in this Windows build', 13, 10, 0
 newline_text db 13, 10
 
@@ -210,6 +263,8 @@ library kernel32, 'KERNEL32.DLL'
 
 import kernel32, \
     GetCommandLineA, 'GetCommandLineA', \
+    GetCurrentDirectoryA, 'GetCurrentDirectoryA', \
+    GetComputerNameA, 'GetComputerNameA', \
     GetStdHandle, 'GetStdHandle', \
     WriteFile, 'WriteFile', \
     ExitProcess, 'ExitProcess'

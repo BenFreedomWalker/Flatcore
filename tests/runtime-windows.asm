@@ -3,6 +3,7 @@ include 'src/include/flatcore.inc'
 include 'win64a.inc'
 format PE64 console
 entry start
+
 section '.text' code readable executable
 include 'src/common/memory.inc'
 include 'src/common/strings.inc'
@@ -20,8 +21,9 @@ start:
     mov ecx, eax
     call [ExitProcess]
 
-section '.rdata' data readable
+section '.data' data readable writeable
 include 'src/common/errors_data.inc'
+include 'tests/runtime-selftest-data.inc'
 
 section '.idata' import data readable writeable
 library kernel32, 'KERNEL32.DLL'

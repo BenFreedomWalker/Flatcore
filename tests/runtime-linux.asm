@@ -15,7 +15,7 @@ include 'src/common/errors.inc'
 include 'tests/runtime-selftest.inc'
 
 _start:
-    sub rsp, 8
+    ; Linux enters _start with RSP 16-byte aligned; CALL establishes FC64 entry alignment.
     call fc_runtime_selftest
     mov edi, eax
     mov eax, 60

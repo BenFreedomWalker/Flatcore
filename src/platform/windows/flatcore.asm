@@ -477,6 +477,9 @@ import kernel32, \
     CloseHandle, 'CloseHandle', \
     GetSystemTimeAsFileTime, 'GetSystemTimeAsFileTime', \
     SetFileTime, 'SetFileTime', \
+    FindFirstFileA, 'FindFirstFileA', \
+    FindNextFileA, 'FindNextFileA', \
+    FindClose, 'FindClose', \
     GetStdHandle, 'GetStdHandle', \
     WriteFile, 'WriteFile', \
     ExitProcess, 'ExitProcess'

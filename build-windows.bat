@@ -40,6 +40,7 @@ if /i "%~1"=="test" (
     )
     echo Flatcore shared runtime helper tests passed.
     call "%ROOT%tests\windows-smoke.bat"
-    exit /b %errorlevel%
+    if errorlevel 1 exit /b 1
+    exit /b 0
 )
 exit /b 0

@@ -33,29 +33,36 @@ fc_streq:
 ; fc_strcopy(destination, source, capacity) -> RAX=bytes copied, or -1.
 ; Capacity includes space for the terminating NUL. No partial copy is made.
 fc_strcopy:
+    push r12
+    push r13
+    push r14
     test rdx, rdx
     jz .too_small
-    mov r8, rdi
-    mov r9, rsi
-    mov r10, rdx
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, rdx
     xor ecx, ecx
 .measure:
-    cmp byte [r9 + rcx], 0
+    cmp byte [r13 + rcx], 0
     je .measured
     inc rcx
-    cmp rcx, r10
+    cmp rcx, r14
     jae .too_small
     jmp .measure
 .measured:
     mov rdx, rcx
-    mov rdi, r8
-    mov rsi, r9
+    mov rdi, r12
+    mov rsi, r13
     call fc_memcpy
-    mov byte [r8 + rdx], 0
+    mov byte [r12 + rdx], 0
     mov rax, rdx
-    ret
+    jmp .return
 .too_small:
     mov rax, -1
+.return:
+    pop r14
+    pop r13
+    pop r12
     ret
 
 ; fc_strfind(haystack, needle) -> RAX=pointer to first match, or 0.

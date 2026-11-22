@@ -191,7 +191,7 @@ Both existing native source files include and assemble these same common modules
 - `tests/runtime-linux.asm` and `tests/runtime-windows.asm` provide native test entry points while executing the same shared test routine.
 - Both `build.sh test` and `build-windows.bat test` now assemble and run the helper harness before the existing smoke suite.
 - The multicall normalizer rewrites only the argv[0] pointer to its basename; argument strings remain unchanged. This is required for registry lookup when launched through a path such as `/usr/bin/echo`.
-- These new tests have not yet been run by the user. Do not mark direct runtime verification complete until both platform test commands pass.
+- The first user run assembled both harnesses but both executables returned failure. Inspection found an incorrect multicall assertion: it compared the argv-vector pointer with the command-name pointer. The assertion now dereferences the vector and compares argv[0] correctly (commit `d641b15`). Direct runtime verification remains pending; do not mark complete until both platform test commands pass.
 
 ## Stage 4 — Implement the filesystem and I/O backends
 

@@ -57,7 +57,7 @@ commands=(
     help echo true false pwd cat ls
     mkdir rmdir rm touch cp mv clear uname
     basename dirname head wc ln readlink
-    chmod kill sync id
+    chmod kill sync id hostname uptime sleep
 )
 
 for command_name in "${commands[@]}"; do

@@ -750,9 +750,11 @@ include 'src/common/arguments.inc'
 include 'src/common/utf.inc'
 include 'src/common/formatting.inc'
 include 'src/common/output.inc'
+include 'src/common/startup.inc'
 include 'src/common/dispatcher.inc'
 
 section '.rdata' data readable
+include 'src/common/errors.inc'
 
 help_name db 'help', 0
 echo_name db 'echo', 0

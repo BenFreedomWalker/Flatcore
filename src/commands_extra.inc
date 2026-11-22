@@ -383,3 +383,127 @@ write_number:
     call write_all
     pop rbx
     ret
+
+
+; chmod OCTAL_MODE PATH
+command_chmod:
+    mov r12, [argc]
+    mov r13, [argv]
+    lea rax, [r14 + 2]
+    cmp r12, rax
+    jne command_usage
+
+    mov rsi, [r13 + r14 * 8]
+    xor ebx, ebx
+    xor r15d, r15d
+.chmod_parse:
+    movzx eax, byte [rsi]
+    test al, al
+    jz .chmod_parsed
+    cmp al, '0'
+    jb .chmod_invalid
+    cmp al, '7'
+    ja .chmod_invalid
+    sub eax, '0'
+    shl ebx, 3
+    or ebx, eax
+    inc r15
+    inc rsi
+    jmp .chmod_parse
+.chmod_parsed:
+    test r15, r15
+    jz .chmod_invalid
+    mov eax, 90                 ; SYS_chmod
+    mov rdi, [r13 + r14 * 8 + 8]
+    mov esi, ebx
+    syscall
+    test rax, rax
+    js .chmod_error
+    xor edi, edi
+    jmp process_exit
+.chmod_invalid:
+    mov rsi, usage_text
+    call write_err
+    mov edi, 2
+    jmp process_exit
+.chmod_error:
+    mov rsi, operation_error
+    call write_err
+    mov edi, 1
+    jmp process_exit
+
+; kill PID - send SIGTERM to a positive decimal PID.
+command_kill:
+    mov r12, [argc]
+    mov r13, [argv]
+    lea rax, [r14 + 1]
+    cmp r12, rax
+    jne command_usage
+    mov rsi, [r13 + r14 * 8]
+    xor ebx, ebx
+    xor r15d, r15d
+.kill_parse:
+    movzx eax, byte [rsi]
+    test al, al
+    jz .kill_parsed
+    cmp al, '0'
+    jb .kill_invalid
+    cmp al, '9'
+    ja .kill_invalid
+    imul ebx, ebx, 10
+    sub eax, '0'
+    add ebx, eax
+    inc r15
+    inc rsi
+    jmp .kill_parse
+.kill_parsed:
+    test r15, r15
+    jz .kill_invalid
+    test ebx, ebx
+    jz .kill_invalid
+    mov eax, 62                 ; SYS_kill
+    mov edi, ebx
+    mov esi, 15                 ; SIGTERM
+    syscall
+    test rax, rax
+    js .kill_error
+    xor edi, edi
+    jmp process_exit
+.kill_invalid:
+    mov rsi, usage_text
+    call write_err
+    mov edi, 2
+    jmp process_exit
+.kill_error:
+    mov rsi, operation_error
+    call write_err
+    mov edi, 1
+    jmp process_exit
+
+; sync - flush filesystem buffers.
+command_sync:
+    mov eax, 162                ; SYS_sync
+    syscall
+    xor edi, edi
+    jmp process_exit
+
+; id - report numeric real UID and GID.
+command_id:
+    mov eax, 102                ; SYS_getuid
+    syscall
+    mov r12, rax
+    mov eax, 104                ; SYS_getgid
+    syscall
+    mov r13, rax
+    mov rsi, uid_text
+    call write_out
+    mov rax, r12
+    call write_number
+    mov rsi, gid_text
+    call write_out
+    mov rax, r13
+    call write_number
+    mov rsi, newline_text
+    call write_out
+    xor edi, edi
+    jmp process_exit

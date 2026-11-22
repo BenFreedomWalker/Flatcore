@@ -323,3 +323,10 @@ Both existing native source files include and assemble these same common modules
 
 - The backend reports the complete POSIX `st_mode` value in `FC_FILE_INFO.mode`, as specified by the API contract. The test incorrectly expected permission bits alone (`0600`) and therefore returned status 41. Updated the expected regular-file mode to `0100600` and split metadata assertions into distinct failure codes (41=size, 42=file type, 43=mode) for clearer diagnosis.
 - Awaiting rerun of the Linux and Windows test suites.
+
+
+**Linux `os_stat` verification passed (2026-11-23)**
+
+- User reran both `./build.sh test` and `build-windows.bat test`; both returned exit status 0.
+- Linux backend tests now verify `os_stat` size, regular-file type, and full POSIX mode, in addition to getcwd/open/write/read/close/unlink.
+- The Linux backend test checkpoint is green. Directory iteration, timestamps, Windows Unicode backend, and capability/symlink semantics remain outstanding in Stage 4.

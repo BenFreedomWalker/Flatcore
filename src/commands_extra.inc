@@ -33,6 +33,13 @@ command_basename:
     jne .basename_find_loop
     lea r14, [rax + 1]
 .basename_write:
+    test r15, r15
+    jnz .basename_nonempty
+    mov rsi, newline_text
+    call write_out
+    xor edi, edi
+    jmp process_exit
+.basename_nonempty:
     mov rsi, rbx
     add rsi, r14
     mov rdx, r15

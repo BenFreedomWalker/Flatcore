@@ -57,3 +57,33 @@ fc_strcopy:
 .too_small:
     mov rax, -1
     ret
+
+; fc_strfind(haystack, needle) -> RAX=pointer to first match, or 0.
+; An empty needle matches at the beginning of the haystack.
+fc_strfind:
+    mov r8, rdi
+    cmp byte [rsi], 0
+    je .match
+.scan:
+    cmp byte [r8], 0
+    je .not_found
+    mov r9, r8
+    mov r10, rsi
+.compare:
+    mov al, [r10]
+    test al, al
+    jz .match
+    cmp al, [r9]
+    jne .next
+    inc r9
+    inc r10
+    jmp .compare
+.next:
+    inc r8
+    jmp .scan
+.match:
+    mov rax, r8
+    ret
+.not_found:
+    xor eax, eax
+    ret

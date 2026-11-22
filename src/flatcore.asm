@@ -173,6 +173,30 @@ dispatch:
     test eax, eax
     jnz command_readlink
 
+    mov rsi, rbx
+    mov rdi, name_chmod
+    call streq
+    test eax, eax
+    jnz command_chmod
+
+    mov rsi, rbx
+    mov rdi, name_kill
+    call streq
+    test eax, eax
+    jnz command_kill
+
+    mov rsi, rbx
+    mov rdi, name_sync
+    call streq
+    test eax, eax
+    jnz command_sync
+
+    mov rsi, rbx
+    mov rdi, name_id
+    call streq
+    test eax, eax
+    jnz command_id
+
     mov rsi, unknown_message
     call write_err
     mov edi, 127

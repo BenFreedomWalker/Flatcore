@@ -35,6 +35,7 @@ _start:
     mov r14, 1
 .startup_ready:
     mov rsi, [rax]
+    jmp dispatch
 
 .invalid_startup:
     mov edi, 2

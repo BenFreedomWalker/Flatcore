@@ -110,12 +110,9 @@ fc_runtime_selftest:
     jnz .failed
     cmp qword [test_normalized_argc], 2
     jne .failed
-    mov rax, [test_normalized_argv]
+    mov rax, [test_normalized_argv] ; normalized argv vector
+    mov rax, [rax]                  ; argv[0] command-name pointer
     mov rdx, test_multicall_command
-    cmp rax, rdx
-    jne .failed
-    mov rax, [test_normalized_argv]
-    mov rax, [rax]
     cmp rax, rdx
     jne .failed
 

@@ -30,8 +30,14 @@ name_head     db 'head', 0
 name_wc       db 'wc', 0
 name_ln       db 'ln', 0
 name_readlink db 'readlink', 0
+name_chmod    db 'chmod', 0
+name_kill     db 'kill', 0
+name_sync     db 'sync', 0
+name_id       db 'id', 0
 
 symlink_option db '-s', 0
+uid_text       db 'uid=', 0
+gid_text       db ' gid=', 0
 slash_text     db '/', 0
 
 dot_text        db '.', 0
@@ -49,5 +55,5 @@ help_text db 'Flatcore - native Linux x86-64 userspace', 10
           db '  mkdir  rmdir  rm  touch  cp  mv', 10
           db '  clear  uname  help', 10
           db '  basename  dirname  head  wc', 10
-          db '  ln  readlink', 10
+          db '  ln  readlink  chmod  kill  sync  id', 10
           db 'Commands can also be invoked through symlinks.', 10, 0

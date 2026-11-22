@@ -106,7 +106,7 @@ os_rename:
 
 ; os_getcwd(buffer, capacity, out_length)
 os_getcwd:
-    mov r8, rcx
+    mov r8, rdx
     mov rdx, rsi
     mov eax, 79
     syscall

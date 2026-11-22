@@ -25,13 +25,7 @@ fc_u64toa:
     mov [r8 + rcx], dl
     inc rcx
     mov rax, rdi
-    ; Preserve the quotient across the next iteration without using a
-    ; callee-saved register: the quotient is stored in R11.
-    mov r11, rax
-    ; Recompute quotient from the original value held in RDI below.
-    mov rax, rdi
-    xor edx, edx
-    div r10
+    ; Advance to the quotient for the next digit.
     mov rdi, rax
     cmp rdi, 0
     jne .convert

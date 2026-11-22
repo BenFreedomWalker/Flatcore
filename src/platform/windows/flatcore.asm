@@ -226,9 +226,23 @@ start:
     call [CreateFileA]
     cmp rax, -1
     je .api_error
-    mov rcx, rax
+    mov r15, rax
+    lea rcx, [current_file_time]
+    call [GetSystemTimeAsFileTime]
+    mov rcx, r15
+    xor edx, edx
+    xor r8d, r8d
+    lea r9, [current_file_time]
+    call [SetFileTime]
+    test eax, eax
+    jz .touch_close_error
+    mov rcx, r15
     call [CloseHandle]
     jmp .success
+.touch_close_error:
+    mov rcx, r15
+    call [CloseHandle]
+    jmp .api_error
 
 .cat:
     call first_argument
@@ -389,6 +403,7 @@ section '.data' data readable writeable
 cwd_buffer rb 4096
 computer_name_buffer rb 256
 computer_name_length dd 256
+current_file_time dq 0
 io_buffer rb 4096
 
 section '.idata' import data readable writeable
@@ -405,6 +420,8 @@ import kernel32, \
     CreateFileA, 'CreateFileA', \
     ReadFile, 'ReadFile', \
     CloseHandle, 'CloseHandle', \
+    GetSystemTimeAsFileTime, 'GetSystemTimeAsFileTime', \
+    SetFileTime, 'SetFileTime', \
     GetStdHandle, 'GetStdHandle', \
     WriteFile, 'WriteFile', \
     ExitProcess, 'ExitProcess'\n

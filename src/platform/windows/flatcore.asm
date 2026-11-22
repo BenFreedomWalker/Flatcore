@@ -713,7 +713,8 @@ write_stdout:
 
 ; Write RDX bytes from RSI to standard output.
 write_stdout_n:
-    sub rsp, 56
+    ; Keep the WriteFile byte-count output outside the Win64 shadow space.
+    sub rsp, 72
     mov [rsp + 40], rsi
     mov [rsp + 48], rdx
     mov ecx, -11                 ; STD_OUTPUT_HANDLE
@@ -721,11 +722,11 @@ write_stdout_n:
     mov rcx, rax
     mov rdx, [rsp + 40]
     mov r8, [rsp + 48]
-    lea r9, [rsp + 16]
-    mov qword [rsp + 16], 0
+    lea r9, [rsp + 56]
+    mov qword [rsp + 56], 0
     mov qword [rsp + 32], 0      ; lpOverlapped = NULL
     call [WriteFile]
-    add rsp, 56
+    add rsp, 72
     ret
 
 section '.rdata' data readable

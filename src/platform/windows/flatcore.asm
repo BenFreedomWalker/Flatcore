@@ -23,9 +23,12 @@ start:
     cmp byte [rsi], 0
     je .no_command
     cmp byte [rsi], '"'
-    je .after_exe
+    je .quoted_exe_end
     inc rsi
     jmp .skip_quoted_exe
+.quoted_exe_end:
+    inc rsi
+    jmp .after_exe
 .skip_unquoted_exe:
     cmp byte [rsi], 0
     je .no_command

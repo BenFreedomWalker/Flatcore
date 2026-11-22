@@ -11,8 +11,7 @@ if errorlevel 1 (
     exit /b 127
 )
 
-rem FASM searches the INCLUDE environment variable for win64a.inc.
-rem Discover the compiler's installation directory and add its include folder.
+rem FASM searches INCLUDE for win64a.inc.
 set "FASM_PATH="
 for /f "delims=" %%I in ('where "%FASM%" 2^>nul') do if not defined FASM_PATH set "FASM_PATH=%%I"
 for %%I in ("%FASM_PATH%") do set "FASM_DIR=%%~dpI"
@@ -23,5 +22,8 @@ if not exist "%ROOT%build\windows" mkdir "%ROOT%build\windows"
 if errorlevel 1 exit /b %errorlevel%
 
 echo Built: %ROOT%build\windows\flatcore.exe
-if /i "%~1"=="test" call "%ROOT%tests\windows-smoke.bat"
-exit /b %errorlevel%
+if /i "%~1"=="test" (
+    call "%ROOT%tests\windows-smoke.bat"
+    exit /b %errorlevel%
+)
+exit /b 0

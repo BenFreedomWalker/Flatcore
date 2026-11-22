@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd -- "$(dirname -- "\${BASH_SOURCE[0]}")/.." && pwd)"
-BUILD_DIR="\${1:-"$ROOT_DIR/build"}"
+ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+BUILD_DIR="${1:-"$ROOT_DIR/build"}"
+case "$BUILD_DIR" in
+    /*) ;;
+    *) BUILD_DIR="$ROOT_DIR/$BUILD_DIR" ;;
+esac
 BIN="$BUILD_DIR/flatcore"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT

@@ -151,7 +151,7 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 - Kept the existing Linux and Windows output locations separate.
 - The legacy entry points and command implementations are intentionally still active. Switching both executables to the new shared runtime is a later migration step, not something to fake with empty stubs.
 
-**Runtime verification:** pending; assemble both targets and run their existing smoke suites to verify the new shared include is accepted without changing current behavior.
+**Runtime verification: passed (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 and `build-windows.bat test` under Windows with FASM 1.73.35. Both targets assembled successfully and both existing smoke suites passed. The Linux `flatcore: operation failed` line is emitted by an expected negative/error-path test; the suite completed successfully.
 
 ## Stage 3 — Implement the common runtime
 

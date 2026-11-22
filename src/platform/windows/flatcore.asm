@@ -441,6 +441,7 @@ true_name db 'true', 0
 false_name db 'false', 0
 pwd_name db 'pwd', 0
 hostname_name db 'hostname', 0
+ls_name db 'ls', 0
 mkdir_name db 'mkdir', 0
 rmdir_name db 'rmdir', 0
 rm_name db 'rm', 0
@@ -458,6 +459,8 @@ section '.data' data readable writeable
 cwd_buffer rb 4096
 computer_name_buffer rb 256
 computer_name_length dd 256
+ls_pattern rb 4096
+find_data rb 592
 current_file_time dq 0
 io_buffer rb 4096
 

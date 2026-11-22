@@ -1,7 +1,7 @@
 @echo off
 setlocal
-set "ROOT=%~dp0"
-set "BIN=%ROOT%build\windows\flatcore.exe"
+set "ROOT=%~dp0.."
+set "BIN=%ROOT%\build\windows\flatcore.exe"
 
 if not exist "%BIN%" (
     echo error: build Flatcore first with build-windows.bat
@@ -17,21 +17,27 @@ if errorlevel 1 goto failed
 "%BIN%" false
 if not errorlevel 1 goto failed
 
+set "ECHO_RESULT="
 for /f "delims=" %%A in ('"%BIN%" echo Flatcore-Windows-smoke') do set "ECHO_RESULT=%%A"
 if not "%ECHO_RESULT%"=="Flatcore-Windows-smoke" goto failed
 
+set "PWD_RESULT="
 for /f "delims=" %%A in ('"%BIN%" pwd') do set "PWD_RESULT=%%A"
 if not defined PWD_RESULT goto failed
 
+set "HOST_RESULT="
 for /f "delims=" %%A in ('"%BIN%" hostname') do set "HOST_RESULT=%%A"
 if not defined HOST_RESULT goto failed
 
-set "TEST_DIR=%TEMP%\flatcore smoke-%RANDOM%"
+set "TEST_DIR=%TEMP%\flatcore-smoke-%RANDOM%-%RANDOM%"
 "%BIN%" mkdir "%TEST_DIR%"
 if errorlevel 1 goto failed
-echo alpha> "%TEST_DIR%\sample.txt"
+
+> "%TEST_DIR%\sample.txt" echo alpha
+set "HEAD_RESULT="
 for /f "delims=" %%A in ('"%BIN%" head "%TEST_DIR%\sample.txt"') do set "HEAD_RESULT=%%A"
 if not "%HEAD_RESULT%"=="alpha" goto failed
+
 "%BIN%" ls "%TEST_DIR%" >nul
 if errorlevel 1 goto failed
 "%BIN%" cp "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt"
@@ -40,12 +46,14 @@ if errorlevel 1 goto failed
 if errorlevel 1 goto failed
 "%BIN%" cat "%TEST_DIR%\moved.txt" >nul
 if errorlevel 1 goto failed
+
+set "BASE_RESULT="
 for /f "delims=" %%A in ('"%BIN%" basename "%TEST_DIR%\sample.txt"') do set "BASE_RESULT=%%A"
 if not "%BASE_RESULT%"=="sample.txt" goto failed
+set "DIR_RESULT="
 for /f "delims=" %%A in ('"%BIN%" dirname "%TEST_DIR%\sample.txt"') do set "DIR_RESULT=%%A"
 if not "%DIR_RESULT%"=="%TEST_DIR%" goto failed
-"%BIN%" cat "%TEST_DIR%\sample.txt" >nul
-if errorlevel 1 goto failed
+
 "%BIN%" rm "%TEST_DIR%\sample.txt"
 if errorlevel 1 goto failed
 "%BIN%" rm "%TEST_DIR%\moved.txt"

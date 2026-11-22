@@ -1,3 +1,5 @@
+include 'src/include/flatcore.inc'
+
 include 'win64a.inc'
 
 format PE64 console

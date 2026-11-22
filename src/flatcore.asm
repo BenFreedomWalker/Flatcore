@@ -221,6 +221,7 @@ dispatch:
     jmp process_exit
 
 include 'src/commands.inc'
+include 'src/commands_ls.inc'
 include 'src/commands_extra.inc'
 include 'src/commands_system.inc'
 include 'src/runtime.inc'

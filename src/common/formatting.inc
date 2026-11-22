@@ -51,3 +51,35 @@ fc_u64toa:
 .too_small:
     mov rax, -1
     ret
+
+; fc_atou64(string) -> RAX=value, RDX=1 on success; RDX=0 on invalid input
+; or overflow. Only unsigned base-10 digits are accepted; empty input fails.
+fc_atou64:
+    xor eax, eax
+    xor r8d, r8d
+    mov r10d, 10
+    cmp byte [rdi], 0
+    je .invalid
+.parse:
+    movzx r9d, byte [rdi]
+    test r9b, r9b
+    jz .valid
+    cmp r9b, '0'
+    jb .invalid
+    cmp r9b, '9'
+    ja .invalid
+    sub r9b, '0'
+    mul r10
+    test rdx, rdx
+    jnz .invalid
+    add rax, r9
+    jc .invalid
+    inc rdi
+    jmp .parse
+.valid:
+    mov edx, 1
+    ret
+.invalid:
+    xor eax, eax
+    xor edx, edx
+    ret

@@ -5,15 +5,14 @@
 os_open:
     mov r9, rcx
     mov r10, rdx
-    xor eax, eax
-    test esi, FC_OPEN_READ or FC_OPEN_WRITE
-    jz .open_bad_flags
+    mov r11d, esi
+    and r11d, FC_OPEN_READ or FC_OPEN_WRITE
     mov eax, 2
-    cmp esi, FC_OPEN_READ
+    cmp r11d, FC_OPEN_READ
     je .access_ready
-    cmp esi, FC_OPEN_WRITE
+    cmp r11d, FC_OPEN_WRITE
     je .write_only
-    cmp esi, FC_OPEN_READ or FC_OPEN_WRITE
+    cmp r11d, FC_OPEN_READ or FC_OPEN_WRITE
     je .read_write
     jmp .open_bad_flags
 .write_only:

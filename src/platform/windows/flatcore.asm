@@ -586,9 +586,22 @@ start:
     ; Write the remaining raw command-line text, followed by a newline.
     mov rdi, rsi
     call string_length
-    test rax, rax
+    mov r8, rax
+.echo_trim_trailing:
+    test r8, r8
     jz .echo_newline
-    mov rdx, rax
+    mov al, [rsi + r8 - 1]
+    cmp al, ' '
+    je .echo_trim_one
+    cmp al, 9
+    jne .echo_write
+.echo_trim_one:
+    dec r8
+    jmp .echo_trim_trailing
+.echo_write:
+    test r8, r8
+    jz .echo_newline
+    mov rdx, r8
     call write_stdout_n
 .echo_newline:
     mov rsi, newline_text

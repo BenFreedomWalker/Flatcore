@@ -157,7 +157,7 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 
 - [x] Implement the shared command-selection/argv-normalization helper for explicit and multicall invocation.
 - [x] Integrate the UTF-8 command-line tokenizer and UTF-16 conversion into the Windows native startup capture path; legacy command handlers still consume their original command-line tail during migration.
-- [x] Use the Linux process-provided argc/argv and normalize them through the shared startup helper (runtime smoke verification pending after dispatcher handoff fix).
+- [x] Use the Linux process-provided argc/argv and normalize them through the shared startup helper.
 - [x] Implement shared string length, comparison, copy, and search primitives.
 - [x] Implement shared memory/buffer helpers required by commands.
 - [x] Implement shared unsigned integer parsing and decimal formatting.
@@ -199,6 +199,14 @@ Both existing native source files include and assemble these same common modules
 - Inspection found a control-flow omission in `src/flatcore.asm`: successful startup normalization fell directly into the invalid-startup exit block instead of jumping to the legacy dispatcher.
 - Added the missing `jmp dispatch` after selecting the normalized command pointer (commit `75b11d1`). Invalid startup still exits with status 2.
 - Rerun both platform suites; Windows should remain unchanged and Linux should now reach its command dispatcher and complete the smoke tests.
+
+**Native startup integration — runtime verification passed (2026-11-23).**
+
+- The user rebuilt both targets after the dispatcher handoff correction. Windows shared runtime helper tests and smoke tests passed; Linux shared runtime helper tests and smoke tests passed. Both returned exit status 0.
+- The Linux `flatcore: operation failed` line is expected output from a negative/error-path smoke case; the suite then reports success.
+- The Windows startup path captures and validates the Unicode command line through the shared UTF-16 conversion, tokenizer, and command-normalization helpers. Legacy command handlers still use their original ANSI argument path pending command migration.
+- The Linux native entry captures kernel argc/argv, normalizes command selection through the shared helper, and now explicitly jumps into the existing dispatcher after successful normalization.
+- Native startup integration is verified. The shared dispatcher is helper-tested but is not yet the production command dispatcher; activation is deferred until shared commands and their registry are ready.
 
 ## Stage 4 — Implement the filesystem and I/O backends
 

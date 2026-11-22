@@ -43,6 +43,8 @@ actual="$("$BIN" dirname '/tmp/flatcore-test/file.txt')"
 
     "$BIN" ln -s input.txt input-link
     [[ "$("$BIN" readlink input-link)" == 'input.txt' ]]
+    "$BIN" ln input.txt hard-link
+    cmp input.txt hard-link
 
     "$BIN" touch mode.txt
     "$BIN" chmod 600 mode.txt

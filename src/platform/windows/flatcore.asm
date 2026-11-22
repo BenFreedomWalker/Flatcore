@@ -58,8 +58,13 @@ start:
     jmp .command_scan
 .command_end:
     mov r14, rcx
+    cmp byte [r13 + r14], 0
+    je .args_at_end
     mov byte [r13 + r14], 0
     lea rsi, [r13 + r14 + 1]
+    jmp .args_space
+.args_at_end:
+    lea rsi, [r13 + r14]
     ; Skip whitespace before command arguments.
 .args_space:
     cmp byte [rsi], ' '
@@ -163,10 +168,12 @@ string_length:
 
 ; Write a zero-terminated string in RSI to standard output.
 write_stdout:
+    sub rsp, 40
     mov rdi, rsi
     call string_length
     mov rdx, rax
     mov rsi, rdi
+    add rsp, 40
     jmp write_stdout_n
 
 ; Write RDX bytes from RSI to standard output.

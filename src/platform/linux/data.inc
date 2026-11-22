@@ -7,3 +7,6 @@ os_stderr dq 2
 os_error_code dd FC_ERR_NONE
 os_error_domain dd FC_ERROR_DOMAIN_NONE
 os_native_error dq 0
+
+align 16
+linux_stat_buffer rb 144

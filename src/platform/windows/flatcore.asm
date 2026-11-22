@@ -142,6 +142,12 @@ start:
     test eax, eax
     jnz .cat
 
+    mov rdi, r13
+    mov rsi, ls_name
+    call string_equal
+    test eax, eax
+    jnz .ls
+
     mov rsi, unknown_text
     call write_stdout
     mov ecx, 127
@@ -179,6 +185,55 @@ start:
     mov rsi, newline_text
     mov edx, 2
     call write_stdout_n
+    jmp .success
+
+.ls:
+    call first_argument
+    test rax, rax
+    jnz .ls_copy_path
+    mov rax, dot_path
+.ls_copy_path:
+    mov rsi, rax
+    mov rdi, ls_pattern
+.ls_copy_loop:
+    mov al, [rsi]
+    test al, al
+    jz .ls_pattern_end
+    mov [rdi], al
+    inc rsi
+    inc rdi
+    jmp .ls_copy_loop
+.ls_pattern_end:
+    mov byte [rdi], '\\'
+    inc rdi
+    mov byte [rdi], '*'
+    inc rdi
+    mov byte [rdi], 0
+    mov rcx, ls_pattern
+    mov rdx, find_data
+    call [FindFirstFileA]
+    cmp rax, -1
+    je .api_error
+    mov r15, rax
+.ls_entry:
+    lea rdi, [find_data + 44]
+    call string_length
+    test rax, rax
+    jz .ls_next
+    mov rsi, find_data + 44
+    mov rdx, rax
+    call write_stdout_n
+    mov rsi, newline_text
+    mov edx, 2
+    call write_stdout_n
+.ls_next:
+    mov rcx, r15
+    mov rdx, find_data
+    call [FindNextFileA]
+    test eax, eax
+    jnz .ls_entry
+    mov rcx, r15
+    call [FindClose]
     jmp .success
 
 .mkdir:
@@ -393,7 +448,7 @@ touch_name db 'touch', 0
 cat_name db 'cat', 0
 help_text db 'Flatcore - native Windows x86-64 multicall userspace', 13, 10
           db 'Usage: flatcore.exe COMMAND [ARGUMENTS...]', 13, 10
-          db 'Windows commands: help, echo, true, false, pwd, hostname, mkdir, rmdir, rm, touch, cat', 13, 10, 0
+          db 'Windows commands: help, echo, true, false, pwd, hostname, ls, mkdir, rmdir, rm, touch, cat', 13, 10, 0
 error_text db 'flatcore: Windows API operation failed', 13, 10, 0
 usage_error_text db 'flatcore: command requires a path argument', 13, 10, 0
 unknown_text db 'flatcore: unknown command in this Windows build', 13, 10, 0

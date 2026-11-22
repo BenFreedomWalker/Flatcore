@@ -69,6 +69,12 @@ printf 'Created %d command links in: %s\n' "${#commands[@]}" "$BIN_DIR"
 printf 'Try: %s/flatcore help\n' "$BUILD_DIR"
 
 if [[ "$ACTION" == test ]]; then
+    (
+        cd "$ROOT_DIR"
+        "$FASM_BIN" tests/runtime-linux.asm "$BUILD_DIR/runtime-selftest"
+    )
+    "$BUILD_DIR/runtime-selftest"
+    printf 'Flatcore shared runtime helper tests passed.\\n'
     "$ROOT_DIR/tests/smoke.sh" "$BUILD_DIR"
 fi
 

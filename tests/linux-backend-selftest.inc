@@ -38,6 +38,20 @@ fc_linux_backend_selftest:
     test eax, eax
     jnz .fail4
 
+
+    ; Stat must report the file size, type, and POSIX mode.
+    mov rdi, linux_test_path
+    mov rsi, linux_test_info
+    call os_stat
+    test eax, eax
+    jnz .fail10
+    cmp qword [linux_test_info], 2
+    jne .fail11
+    cmp dword [linux_test_info + 36], FC_TYPE_REGULAR
+    jne .fail11
+    cmp dword [linux_test_info + 40], 600o
+    jne .fail11
+
     ; Reopen and read back the exact payload.
     mov rdi, linux_test_path
     mov esi, FC_OPEN_READ
@@ -97,6 +111,10 @@ fc_linux_backend_selftest:
 .fail8: mov eax, 38
     jmp .done
 .fail9: mov eax, 39
+    jmp .done
+.fail10: mov eax, 40
+    jmp .done
+.fail11: mov eax, 41
 .done:
     add rsp, 16
     pop r13

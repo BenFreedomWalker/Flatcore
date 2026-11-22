@@ -2,6 +2,8 @@
 setlocal
 set "ROOT=%~dp0.."
 set "BIN=%ROOT%\build\windows\flatcore.exe"
+set "OUT=%TEMP%\flatcore-output-%RANDOM%-%RANDOM%.txt"
+set "EXPECTED=%TEMP%\flatcore-expected-%RANDOM%-%RANDOM%.txt"
 
 if not exist "%BIN%" (
     echo error: build Flatcore first with build-windows.bat
@@ -20,59 +22,87 @@ set "STEP=false exit status"
 "%BIN%" false
 if not errorlevel 1 goto failed
 
-set "ECHO_RESULT="
 set "STEP=echo output"
-for /f "delims=" %%A in ('"%BIN%" echo Flatcore-Windows-smoke') do set "ECHO_RESULT=%%A"
-if not "%ECHO_RESULT%"=="Flatcore-Windows-smoke" goto failed
+"%BIN%" echo Flatcore-Windows-smoke > "%OUT%"
+> "%EXPECTED%" echo Flatcore-Windows-smoke
+fc /b "%OUT%" "%EXPECTED%" >nul
+if errorlevel 1 goto failed
 
-set "PWD_RESULT="
 set "STEP=pwd output"
-for /f "delims=" %%A in ('"%BIN%" pwd') do set "PWD_RESULT=%%A"
-if not defined PWD_RESULT goto failed
+"%BIN%" pwd > "%OUT%"
+if errorlevel 1 goto failed
+for %%A in ("%OUT%") do if "%%~zA"=="0" goto failed
 
-set "HOST_RESULT="
 set "STEP=hostname output"
-for /f "delims=" %%A in ('"%BIN%" hostname') do set "HOST_RESULT=%%A"
-if not defined HOST_RESULT goto failed
+"%BIN%" hostname > "%OUT%"
+if errorlevel 1 goto failed
+for %%A in ("%OUT%") do if "%%~zA"=="0" goto failed
 
 set "TEST_DIR=%TEMP%\flatcore-smoke-%RANDOM%-%RANDOM%"
 set "STEP=mkdir path with spaces"
 "%BIN%" mkdir "%TEST_DIR%"
 if errorlevel 1 goto failed
 
+set "STEP=create sample file"
 > "%TEST_DIR%\sample.txt" echo alpha
-set "HEAD_RESULT="
-for /f "delims=" %%A in ('"%BIN%" head "%TEST_DIR%\sample.txt"') do set "HEAD_RESULT=%%A"
-if not "%HEAD_RESULT%"=="alpha" goto failed
+if not exist "%TEST_DIR%\sample.txt" goto failed
+
+set "STEP=head output"
+"%BIN%" head "%TEST_DIR%\sample.txt" > "%OUT%"
+if errorlevel 1 goto failed
+> "%EXPECTED%" echo alpha
+fc /b "%OUT%" "%EXPECTED%" >nul
+if errorlevel 1 goto failed
 
 set "STEP=ls directory"
 "%BIN%" ls "%TEST_DIR%" >nul
 if errorlevel 1 goto failed
+
+set "STEP=copy file"
 "%BIN%" cp "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt"
 if errorlevel 1 goto failed
+
+set "STEP=move file"
 "%BIN%" mv "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
+
+set "STEP=cat file"
 "%BIN%" cat "%TEST_DIR%\moved.txt" >nul
 if errorlevel 1 goto failed
 
-set "BASE_RESULT="
-for /f "delims=" %%A in ('"%BIN%" basename "%TEST_DIR%\sample.txt"') do set "BASE_RESULT=%%A"
-if not "%BASE_RESULT%"=="sample.txt" goto failed
-set "DIR_RESULT="
-for /f "delims=" %%A in ('"%BIN%" dirname "%TEST_DIR%\sample.txt"') do set "DIR_RESULT=%%A"
-if not "%DIR_RESULT%"=="%TEST_DIR%" goto failed
+set "STEP=basename output"
+"%BIN%" basename "%TEST_DIR%\sample.txt" > "%OUT%"
+> "%EXPECTED%" echo sample.txt
+fc /b "%OUT%" "%EXPECTED%" >nul
+if errorlevel 1 goto failed
 
+set "STEP=dirname output"
+"%BIN%" dirname "%TEST_DIR%\sample.txt" > "%OUT%"
+> "%EXPECTED%" echo %TEST_DIR%
+fc /b "%OUT%" "%EXPECTED%" >nul
+if errorlevel 1 goto failed
+
+set "STEP=remove sample file"
 "%BIN%" rm "%TEST_DIR%\sample.txt"
 if errorlevel 1 goto failed
+
+set "STEP=remove moved file"
 "%BIN%" rm "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
+
 set "STEP=rmdir test directory"
 "%BIN%" rmdir "%TEST_DIR%"
 if errorlevel 1 goto failed
 
+del "%OUT%" "%EXPECTED%" >nul 2>nul
 echo Flatcore Windows smoke tests passed.
 exit /b 0
 
- :failed
+:failed
 echo Flatcore Windows smoke test failed at: %STEP%
+if defined TEST_DIR (
+    del "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt" >nul 2>nul
+    rmdir "%TEST_DIR%" >nul 2>nul
+)
+del "%OUT%" "%EXPECTED%" >nul 2>nul
 exit /b 1

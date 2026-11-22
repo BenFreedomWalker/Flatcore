@@ -112,6 +112,36 @@ start:
     test eax, eax
     jnz .hostname
 
+    mov rdi, r13
+    mov rsi, mkdir_name
+    call string_equal
+    test eax, eax
+    jnz .mkdir
+
+    mov rdi, r13
+    mov rsi, rmdir_name
+    call string_equal
+    test eax, eax
+    jnz .rmdir
+
+    mov rdi, r13
+    mov rsi, rm_name
+    call string_equal
+    test eax, eax
+    jnz .rm
+
+    mov rdi, r13
+    mov rsi, touch_name
+    call string_equal
+    test eax, eax
+    jnz .touch
+
+    mov rdi, r13
+    mov rsi, cat_name
+    call string_equal
+    test eax, eax
+    jnz .cat
+
     mov rsi, unknown_text
     call write_stdout
     mov ecx, 127
@@ -150,6 +180,100 @@ start:
     mov edx, 2
     call write_stdout_n
     jmp .success
+
+.mkdir:
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rcx, rax
+    xor edx, edx
+    call [CreateDirectoryA]
+    test eax, eax
+    jz .api_error
+    jmp .success
+
+.rmdir:
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rcx, rax
+    call [RemoveDirectoryA]
+    test eax, eax
+    jz .api_error
+    jmp .success
+
+.rm:
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rcx, rax
+    call [DeleteFileA]
+    test eax, eax
+    jz .api_error
+    jmp .success
+
+.touch:
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rcx, rax
+    mov edx, 40000000h           ; GENERIC_WRITE
+    xor r8d, r8d                 ; no sharing
+    xor r9d, r9d                 ; default security
+    mov qword [rsp + 32], 2      ; CREATE_ALWAYS
+    mov qword [rsp + 40], 80h    ; FILE_ATTRIBUTE_NORMAL
+    mov qword [rsp + 48], 0
+    call [CreateFileA]
+    cmp rax, -1
+    je .api_error
+    mov rcx, rax
+    call [CloseHandle]
+    jmp .success
+
+.cat:
+    call first_argument
+    test rax, rax
+    jz .usage_error
+    mov rcx, rax
+    mov edx, 80000000h           ; GENERIC_READ
+    mov r8d, 1                   ; FILE_SHARE_READ
+    xor r9d, r9d
+    mov qword [rsp + 32], 3      ; OPEN_EXISTING
+    mov qword [rsp + 40], 80h
+    mov qword [rsp + 48], 0
+    call [CreateFileA]
+    cmp rax, -1
+    je .api_error
+    mov r15, rax
+.cat_read:
+    mov rcx, r15
+    mov rdx, io_buffer
+    mov r8d, 4096
+    lea r9, [rsp + 32]
+    mov qword [rsp + 32], 0
+    call [ReadFile]
+    test eax, eax
+    jz .cat_close_error
+    mov edx, [rsp + 32]
+    test edx, edx
+    jz .cat_close
+    mov rsi, io_buffer
+    call write_stdout_n
+    jmp .cat_read
+.cat_close_error:
+    mov rcx, r15
+    call [CloseHandle]
+    jmp .api_error
+.cat_close:
+    mov rcx, r15
+    call [CloseHandle]
+    jmp .success
+
+.usage_error:
+    mov rsi, usage_error_text
+    call write_stdout
+    mov ecx, 2
+    jmp .exit
 
 .api_error:
     mov rsi, error_text
@@ -247,10 +371,16 @@ true_name db 'true', 0
 false_name db 'false', 0
 pwd_name db 'pwd', 0
 hostname_name db 'hostname', 0
+mkdir_name db 'mkdir', 0
+rmdir_name db 'rmdir', 0
+rm_name db 'rm', 0
+touch_name db 'touch', 0
+cat_name db 'cat', 0
 help_text db 'Flatcore - native Windows x86-64 multicall userspace', 13, 10
           db 'Usage: flatcore.exe COMMAND [ARGUMENTS...]', 13, 10
-          db 'Windows commands: help, echo, true, false, pwd, hostname', 13, 10, 0
+          db 'Windows commands: help, echo, true, false, pwd, hostname, mkdir, rmdir, rm, touch, cat', 13, 10, 0
 error_text db 'flatcore: Windows API operation failed', 13, 10, 0
+usage_error_text db 'flatcore: command requires a path argument', 13, 10, 0
 unknown_text db 'flatcore: unknown command in this Windows build', 13, 10, 0
 newline_text db 13, 10
 
@@ -258,6 +388,7 @@ section '.data' data readable writeable
 cwd_buffer rb 4096
 computer_name_buffer rb 256
 computer_name_length dd 256
+io_buffer rb 4096
 
 section '.idata' import data readable writeable
 

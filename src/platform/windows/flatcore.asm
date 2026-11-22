@@ -215,7 +215,7 @@ start:
     test eax, eax
     jz .api_error
     mov edx, [computer_name_length]
-    mov r10, computer_name_buffer
+    mov rsi, computer_name_buffer
     call write_stdout_n
     mov rsi, newline_text
     mov edx, 2

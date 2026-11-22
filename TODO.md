@@ -214,15 +214,23 @@ Both existing native source files include and assemble these same common modules
 - [ ] Implement os_open, os_close, and file creation/truncation modes.
 - [ ] Implement os_stat using the shared metadata structure.
 - [ ] Implement os_dir_open, os_dir_next, and os_dir_close.
-- [ ] Implement os_mkdir, os_rmdir, os_unlink, and os_rename.
-- [ ] Implement os_getcwd and os_chdir.
+- [x] Implement os_mkdir, os_rmdir, os_unlink, and os_rename in the Linux backend.
+- [x] Implement os_getcwd and os_chdir in the Linux backend.
 - [ ] Implement file timestamps and the operations required by touch.
-- [ ] Implement Linux syscall-backed versions.
+- [ ] Complete Linux syscall-backed versions.
 - [ ] Implement Windows Unicode Win32-backed versions.
-- [ ] Normalize common filesystem errors without discarding useful native error information.
+- [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
 
-**Runtime verification:** pending; run the same filesystem test cases on Windows and Linux.
+**Stage 4 Linux backend source checkpoint (2026-11-23)**
+
+- Added `src/platform/linux/io.inc` with FC64 `os_read`, `os_write`, `os_close`, native process exit, and normalized Linux errno handling.
+- Added `src/platform/linux/filesystem.inc` with FC64 `os_open`, `os_mkdir`, `os_rmdir`, `os_unlink`, `os_rename`, `os_getcwd`, and `os_chdir`.
+- Added `src/platform/linux/data.inc` for standard descriptors and backend error state. The Linux runtime self-test target now assembles these backend modules as part of its build.
+- Preserved FC64 output pointers across the Linux `syscall` instruction, which clobbers RCX and R11. Open access-mode decoding masks the access bits so CREATE/TRUNCATE/APPEND flags do not invalidate the mode.
+- These routines are not yet wired into the production executable or covered by direct filesystem assertions. `os_stat`, directory iteration, timestamps, and the Windows Unicode backend remain outstanding.
+
+**Runtime verification:** pending; no Stage 4 backend test checkpoint has been requested yet.
 
 ## Stage 5 — Port shared commands
 

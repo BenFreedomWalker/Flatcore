@@ -310,7 +310,7 @@ start:
     cmp r8, 1
     jbe .basename_check_root
     mov al, [rdi + r8 - 1]
-    cmp al, '\\'
+    cmp al, '\'
     je .basename_trim_one
     cmp al, '/'
     jne .basename_check_root
@@ -321,7 +321,7 @@ start:
     cmp r8, 1
     jne .basename_terminate
     mov al, [rdi]
-    cmp al, '\\'
+    cmp al, '\'
     je .basename_root
     cmp al, '/'
     je .basename_root
@@ -333,7 +333,7 @@ start:
     jz .basename_output
     dec r9
     mov al, [rdi + r9]
-    cmp al, '\\'
+    cmp al, '\'
     je .basename_found
     cmp al, '/'
     jne .basename_scan
@@ -368,7 +368,7 @@ start:
     jz .dirname_none
     dec r9
     mov al, [rdi + r9]
-    cmp al, '\\'
+    cmp al, '\'
     je .dirname_found
     cmp al, '/'
     jne .dirname_scan

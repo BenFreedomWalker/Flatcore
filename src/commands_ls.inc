@@ -113,9 +113,10 @@ command_ls:
     xor edi, edi
     jmp process_exit
 .ls_bad_option:
+    mov rbx, [r13 + r8 * 8]
     mov rsi, ls_bad_option_prefix
     call write_err
-    mov rsi, [r13 + r8 * 8]
+    mov rsi, rbx
     call write_err
     mov rsi, newline_text
     call write_err
@@ -160,6 +161,7 @@ command_ls:
     mov rsi, newline_text
     call write_out
 .ls_next_operand:
+    mov r8, [ls_arg_index]
     inc r8
     jmp .ls_operand_loop
 .ls_success:

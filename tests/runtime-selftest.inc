@@ -109,7 +109,8 @@ fc_runtime_selftest:
     cmp qword [test_normalized_argc], 2
     jne .failed
     mov rax, [test_normalized_argv]
-    cmp rax, test_multicall_command
+    mov rdx, test_multicall_command
+    cmp rax, rdx
     jne .failed
 
     ; Table-driven dispatcher invokes the registered handler and returns status.

@@ -94,7 +94,15 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 | `build.sh`, `build-windows.bat` | Retain front-end scripts, make both assemble the same common source set with one selected backend |
 | `tests/smoke.sh`, `tests/windows-smoke.bat` | Shared behavioral test cases with thin Linux/Windows runners |
 
-**Runtime verification:** pending; the user must run the baseline build and smoke tests on both targets before migration is considered safe.
+**Runtime verification:** pending; the first user run exposed test-runner defects before the suites could execute. The defects have been repaired on `main`; rerun both commands below to establish the baseline.
+
+**Test-runner repairs (2026-11-23)**
+
+- Normalized `build.sh` to Unix LF line endings so its Bash shebang works under WSL.
+- Rebuilt `tests/smoke.sh` as a clean, valid script; the previous file contained duplicated/truncated trailing content.
+- Corrected the Windows smoke test root path: it now resolves the executable from the repository root rather than looking under `tests/build/`.
+- Made `build-windows.bat test` propagate the smoke-test exit status and stop on assembler failure.
+- No command implementation or platform architecture code was changed.
 
 ## Stage 1 — Define the shared ABI and OS backend contract
 

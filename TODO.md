@@ -317,3 +317,9 @@ Both existing native source files include and assemble these same common modules
 **Linux `os_stat` assembler correction (2026-11-23)**
 
 - The first build after adding `os_stat` stopped in FASM at direct memory references to the stat scratch buffer. Changed the implementation to retain the buffer address in a register and access fields through that register. The `os_stat` runtime assertions remain pending; rerun both platform test commands at the next checkpoint.
+
+
+**Linux `os_stat` assertion correction (2026-11-23)**
+
+- The backend reports the complete POSIX `st_mode` value in `FC_FILE_INFO.mode`, as specified by the API contract. The test incorrectly expected permission bits alone (`0600`) and therefore returned status 41. Updated the expected regular-file mode to `0100600` and split metadata assertions into distinct failure codes (41=size, 42=file type, 43=mode) for clearer diagnosis.
+- Awaiting rerun of the Linux and Windows test suites.

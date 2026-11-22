@@ -65,3 +65,27 @@ help_text db 'Flatcore - native Linux x86-64 userspace', 10
           db '  ln  readlink  chmod  kill  sync  id', 10
           db '  hostname  uptime  sleep', 10
           db 'Commands can also be invoked through symlinks.', 10, 0
+
+; ls implementation state and Linux stat layout.
+ls_flags       rd 1
+ls_name_ptr    rq 1
+ls_stat        rb 144
+ls_mode_text   rb 11
+ls_perm_bits   dw 256,128,64,32,16,8,4,2,1
+ls_perm_chars  db 'rwxrwxrwx'
+ls_arg_index rq 1
+ls_opt_all db '--all',0
+ls_opt_almost db '--almost-all',0
+ls_opt_directory db '--directory',0
+ls_opt_help db '--help',0
+ls_opt_version db '--version',0
+ls_bad_option_prefix db 'ls: invalid option: ',0
+ls_help_text db 'Usage: ls [OPTION]... [FILE]...',10
+             db '  -a, --all             do not ignore entries starting with .',10
+             db '  -A, --almost-all      do not list implied . and ..',10
+             db '  -l                    use a long listing format',10
+             db '  -d, --directory       list directories themselves',10
+             db '  -1                    list one file per line',10
+             db '      --help            display this help and exit',10
+             db '      --version         output version information and exit',10,0
+ls_version_text db 'Flatcore ls 0.1',10,0

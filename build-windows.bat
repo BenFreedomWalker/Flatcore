@@ -18,8 +18,11 @@ for %%I in ("%FASM_PATH%") do set "FASM_DIR=%%~dpI"
 if exist "%FASM_DIR%include\win64a.inc" set "INCLUDE=%FASM_DIR%include;%INCLUDE%"
 
 if not exist "%ROOT%build\windows" mkdir "%ROOT%build\windows"
-"%FASM%" "%ROOT%src\platform\windows\flatcore.asm" "%ROOT%build\windows\flatcore.exe"
-if errorlevel 1 exit /b %errorlevel%
+pushd "%ROOT%"
+"%FASM%" "src\platform\windows\flatcore.asm" "build\windows\flatcore.exe"
+set "BUILD_STATUS=%errorlevel%"
+popd
+if not "%BUILD_STATUS%"=="0" exit /b %BUILD_STATUS%
 
 echo Built: %ROOT%build\windows\flatcore.exe
 if /i "%~1"=="test" (

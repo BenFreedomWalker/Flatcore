@@ -1,5 +1,6 @@
 ; Flatcore shared command selection and argv normalization (FC64).
-; All strings are UTF-8. The input argv vector is not modified.
+; All strings are UTF-8. For multicall invocation, argv[0] is normalized to point
+; at its basename; the argument strings themselves are never modified.
 ;
 ; fc_prepare_command(argc, argv, executable_name, out_argc, out_argv)
 ;   -> RAX=0 on success, 1 when no explicit command was supplied, -1 invalid.
@@ -66,6 +67,7 @@ fc_prepare_command:
     jmp .return
 
 .multicall_name:
+    mov [r13], rdi             ; normalize argv[0] to the executable basename
     mov [rbx], r13
     mov [r15], r12
     xor eax, eax

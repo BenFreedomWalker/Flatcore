@@ -112,10 +112,11 @@ fc_runtime_selftest:
     cmp qword [test_normalized_argc], 2
     jne .fail16
     mov rax, [test_normalized_argv] ; normalized argv vector
-    mov rax, [rax]                  ; argv[0] command-name pointer
-    mov rdx, test_multicall_command
-    cmp rax, rdx
-    jne .fail17
+    mov rdi, [rax]                  ; argv[0] points inside the original path
+    mov rsi, test_multicall_command
+    call fc_streq
+    test eax, eax
+    jz .fail17
 
     ; Table-driven dispatcher invokes the registered handler and returns status.
     mov rax, test_dispatch_name

@@ -11,6 +11,13 @@ if errorlevel 1 (
     exit /b 127
 )
 
+rem FASM searches the INCLUDE environment variable for win64a.inc.
+rem Discover the compiler's installation directory and add its include folder.
+set "FASM_PATH="
+for /f "delims=" %%I in ('where "%FASM%" 2^>nul') do if not defined FASM_PATH set "FASM_PATH=%%I"
+for %%I in ("%FASM_PATH%") do set "FASM_DIR=%%~dpI"
+if exist "%FASM_DIR%include\win64a.inc" set "INCLUDE=%FASM_DIR%include;%INCLUDE%"
+
 if not exist "%ROOT%build\windows" mkdir "%ROOT%build\windows"
 "%FASM%" "%ROOT%src\platform\windows\flatcore.asm" "%ROOT%build\windows\flatcore.exe"
 if errorlevel 1 exit /b %errorlevel%

@@ -114,6 +114,10 @@ fc_runtime_selftest:
     mov rdx, test_multicall_command
     cmp rax, rdx
     jne .failed
+    mov rax, [test_normalized_argv]
+    mov rax, [rax]
+    cmp rax, rdx
+    jne .failed
 
     ; Table-driven dispatcher invokes the registered handler and returns status.
     mov rax, test_dispatch_name

@@ -155,7 +155,7 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 
 ## Stage 3 — Implement the common runtime
 
-- [ ] Implement shared process startup state and argument-vector representation.
+- [x] Implement the shared command-selection/argv-normalization helper for explicit and multicall invocation.
 - [ ] Integrate the UTF-8 command-line tokenizer and UTF-16 conversion into the new Windows native startup path (the reusable parser/converter are implemented).
 - [ ] Use the Linux process-provided argc/argv and normalize them to the same shared representation.
 - [x] Implement shared string length, comparison, copy, and search primitives.
@@ -163,7 +163,7 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 - [x] Implement shared unsigned integer parsing and decimal formatting.
 - [x] Implement strict UTF-16LE-to-UTF-8 conversion with surrogate validation.
 - [x] Implement a backend-neutral complete-write loop and NUL-terminated string output helper.
-- [ ] Implement shared error-message formatting.
+- [x] Implement shared normalized-error-to-message mapping.
 - [x] Implement the shared table-driven dispatcher and define its command registry/handler layout.
 - [ ] Support invocation as flatcore COMMAND ...
 - [ ] Define and implement multicall invocation behavior (dispatch by executable name where supported).
@@ -176,14 +176,14 @@ Added platform-neutral FC64 modules under src/common/:
 
 - memory.inc: byte-copy and byte-fill primitives.
 - strings.inc: UTF-8 byte length, equality, bounded copy, and substring search.
-- arguments.inc: a bounded Windows-style UTF-8 command-line tokenizer with quote/backslash handling. utf.inc: strict UTF-16LE-to-UTF-8 conversion with surrogate-pair validation. Wiring these into the replacement Windows startup path remains pending.
+- arguments.inc: a bounded Windows-style UTF-8 command-line tokenizer with quote/backslash handling. utf.inc: strict UTF-16LE-to-UTF-8 conversion with surrogate-pair validation. startup.inc: common explicit-command versus multicall argv normalization. errors.inc: normalized error-code descriptions. These helpers are compiled into both targets; replacing the legacy native startup/dispatch paths and wiring the Windows Unicode APIs remain pending.
 - formatting.inc: checked unsigned decimal parsing and decimal formatting.
 - output.inc: complete-write loop routed through a backend callback, plus NUL-terminated string output.
 - dispatcher.inc: one registry-driven dispatcher. Registry entries are pairs of command-name and handler pointers; handlers receive argc/argv and return the process status in RAX.
 
-Both existing native source files include and assemble these same common modules. The legacy command dispatchers remain active for now; they will be replaced only after the new platform startup/backend path is ready. No existing command implementation has been removed.
+Both existing native source files include and assemble these same common modules. The legacy command dispatchers remain active for now; the new shared startup selector and dispatcher are compiled but not yet used by the executable entry paths. Windows still uses its ANSI command-line API; Unicode startup integration is pending. No existing command implementation has been removed.
 
-**Runtime verification: passed (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 and `build-windows.bat test` under Windows with FASM 1.73.35. Both targets assembled the shared modules and both existing smoke suites passed. The Linux `flatcore: operation failed` line is the expected negative/error-path case. These legacy smoke suites do not yet exercise the new common helper routines directly; dedicated tests remain required.
+**Runtime verification: passed for the first common-module integration checkpoint (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 and `build-windows.bat test` under Windows with FASM 1.73.35. Both targets assembled the shared modules and both existing smoke suites passed. The Linux `flatcore: operation failed` line is the expected negative/error-path case. The newly added startup-selection and error-description helpers now also compile into both targets; the legacy smoke suites still do not exercise these routines directly, so dedicated helper tests remain required.
 
 ## Stage 4 — Implement the filesystem and I/O backends
 

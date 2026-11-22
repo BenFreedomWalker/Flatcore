@@ -290,7 +290,7 @@ ls_one:
 ls_format_mode:
     push rbx
     push r12
-    mov eax, [ls_stat + 24]
+    mov eax, dword [ls_stat + 24] ; st_mode (32-bit)
     mov ebx, eax
     and eax, 0xF000
     mov byte [ls_mode_text], '-'

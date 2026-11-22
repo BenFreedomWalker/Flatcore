@@ -139,7 +139,8 @@ os_stat:
     mov r8, rsi
     mov rsi, rdi
     mov edi, -100
-    mov rdx, linux_stat_buffer
+    lea rdx, [linux_stat_buffer]
+    mov r9, rdx
     xor r10d, r10d
     mov eax, 262
     syscall
@@ -152,28 +153,28 @@ os_stat:
     mov ecx, 8
     rep stosq
 
-    mov rax, [linux_stat_buffer + 48]
+    mov rax, [r9 + 48]
     mov [r8], rax
 
     ; st_mtime seconds/nanoseconds -> Unix epoch nanoseconds.
-    mov rax, [linux_stat_buffer + 88]
+    mov rax, [r9 + 88]
     imul rax, 1000000000
-    add rax, [linux_stat_buffer + 96]
+    add rax, [r9 + 96]
     mov [r8 + 8], rax
 
     ; st_atime seconds/nanoseconds -> Unix epoch nanoseconds.
-    mov rax, [linux_stat_buffer + 72]
+    mov rax, [r9 + 72]
     imul rax, 1000000000
-    add rax, [linux_stat_buffer + 80]
+    add rax, [r9 + 80]
     mov [r8 + 24], rax
 
-    mov eax, [linux_stat_buffer + 24]
+    mov eax, [r9 + 24]
     mov [r8 + 40], eax
-    mov eax, [linux_stat_buffer + 16]
+    mov eax, [r9 + 16]
     mov [r8 + 44], eax
 
     ; Translate the POSIX file type from st_mode.
-    mov eax, [linux_stat_buffer + 24]
+    mov eax, [r9 + 24]
     and eax, 170000o
     cmp eax, 100000o
     je .stat_regular
@@ -213,7 +214,7 @@ os_stat:
     jne .stat_readonly
     or dword [r8 + 32], FC_ATTR_HIDDEN
 .stat_readonly:
-    mov eax, [linux_stat_buffer + 24]
+    mov eax, [r9 + 24]
     test eax, 0222o
     jnz .stat_done
     or dword [r8 + 32], FC_ATTR_READ_ONLY

@@ -165,10 +165,11 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 - [x] Implement a backend-neutral complete-write loop and NUL-terminated string output helper.
 - [x] Implement shared normalized-error-to-message mapping.
 - [x] Implement the shared table-driven dispatcher and define its command registry/handler layout.
-- [ ] Support invocation as flatcore COMMAND ...
+- [x] Implement shared explicit-command and multicall argv normalization, including basename handling for symlink invocation.
 - [ ] Define and implement multicall invocation behavior (dispatch by executable name where supported).
 - [x] Define the shared command-handler exit-status contract; migrate command bodies in the later command-port stage.
 - [ ] Make each native entry point perform the final OS-specific process exit.
+- [ ] Add direct runtime tests for the shared helpers and run them on both platforms.
 
 **Stage 3 implementation checkpoint (2026-11-23)**
 
@@ -184,6 +185,14 @@ Added platform-neutral FC64 modules under src/common/:
 Both existing native source files include and assemble these same common modules. The legacy command dispatchers remain active for now; the new shared startup selector and dispatcher are compiled but not yet used by the executable entry paths. Windows still uses its ANSI command-line API; Unicode startup integration is pending. No existing command implementation has been removed.
 
 **Runtime verification: passed for the first common-module integration checkpoint (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 and `build-windows.bat test` under Windows with FASM 1.73.35. Both targets assembled the shared modules and both existing smoke suites passed. The Linux `flatcore: operation failed` line is the expected negative/error-path case. The newly added startup-selection and error-description helpers now also compile into both targets, with code and static strings placed in their correct executable/read-only sections; the legacy smoke suites still do not exercise these routines directly, so dedicated helper tests remain required. A subsequent user checkpoint on 2026-11-23 again passed both builds and smoke suites after adding startup normalization and error mapping.
+
+**Shared helper test harness added (2026-11-23; awaiting user execution).**
+
+- `tests/runtime-selftest.inc` exercises string comparison/copy, UINT64_MAX formatting and parsing, UTF-16-to-UTF-8 conversion (including a surrogate pair), Windows-style quoted argument parsing, explicit and multicall argv normalization, table-driven dispatch, and normalized error messages.
+- `tests/runtime-linux.asm` and `tests/runtime-windows.asm` provide native test entry points while executing the same shared test routine.
+- Both `build.sh test` and `build-windows.bat test` now assemble and run the helper harness before the existing smoke suite.
+- The multicall normalizer rewrites only the argv[0] pointer to its basename; argument strings remain unchanged. This is required for registry lookup when launched through a path such as `/usr/bin/echo`.
+- These new tests have not yet been run by the user. Do not mark direct runtime verification complete until both platform test commands pass.
 
 ## Stage 4 — Implement the filesystem and I/O backends
 

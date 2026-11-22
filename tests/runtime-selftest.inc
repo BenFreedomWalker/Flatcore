@@ -91,7 +91,8 @@ fc_runtime_selftest:
     jnz .fail20
     cmp qword [test_normalized_argc], 3
     jne .fail14
-    mov rax, [test_normalized_argv]
+    mov rax, [test_normalized_argv] ; normalized argv vector
+    mov rax, [rax]                  ; normalized argv[0]
     cmp rax, [test_argv + 8]
     jne .fail15
 

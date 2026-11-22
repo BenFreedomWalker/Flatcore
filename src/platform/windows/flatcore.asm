@@ -1,3 +1,5 @@
+include 'win64a.inc'
+
 format PE64 console
 entry start
 

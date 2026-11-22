@@ -204,7 +204,7 @@ start:
     inc rdi
     jmp .ls_copy_loop
 .ls_pattern_end:
-    mov byte [rdi], '\\'
+    mov byte [rdi], '\'
     inc rdi
     mov byte [rdi], '*'
     inc rdi

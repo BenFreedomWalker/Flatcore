@@ -183,7 +183,7 @@ Added platform-neutral FC64 modules under src/common/:
 
 Both existing native source files include and assemble these same common modules. The legacy command dispatchers remain active for now; they will be replaced only after the new platform startup/backend path is ready. No existing command implementation has been removed.
 
-**Runtime verification:** pending; first compile both targets and rerun the existing smoke suites to catch integration/assembly regressions. These legacy smoke suites do not yet exercise the new common helper routines directly.
+**Runtime verification: passed (2026-11-23).** The user ran `./build.sh test` under WSL with FASM 1.73.32 and `build-windows.bat test` under Windows with FASM 1.73.35. Both targets assembled the shared modules and both existing smoke suites passed. The Linux `flatcore: operation failed` line is the expected negative/error-path case. These legacy smoke suites do not yet exercise the new common helper routines directly; dedicated tests remain required.
 
 ## Stage 4 — Implement the filesystem and I/O backends
 

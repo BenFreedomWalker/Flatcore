@@ -130,18 +130,28 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 
 ## Stage 2 — Establish the new source layout and build selection
 
-- [ ] Create the src/common/ shared runtime area.
-- [ ] Create the src/commands/ shared command area.
-- [ ] Create src/platform/linux/ for Linux entry and backend code.
-- [ ] Create src/platform/windows/ for Windows entry and backend code.
-- [ ] Create shared API, constants, and structure include files.
-- [ ] Make the Linux build include the shared sources plus only the Linux entry/backend.
-- [ ] Make the Windows build include the same shared sources plus only the Windows entry/backend.
+- [x] Create the src/common/ shared runtime area.
+- [x] Create the src/commands/ shared command area.
+- [x] Create src/platform/linux/ for Linux entry and backend code.
+- [x] Create src/platform/windows/ for Windows entry and backend code.
+- [x] Create a shared include umbrella at src/include/flatcore.inc.
+- [ ] Split the API contract into dedicated constants and structure include files (deferred until implementation needs require it).
+- [ ] Make the Linux build include the shared runtime/command sources plus only the Linux entry/backend.
+- [ ] Make the Windows build include the same shared runtime/command sources plus only the Windows entry/backend.
 - [ ] Ensure switching build targets requires only selecting the build target, not editing command source.
-- [ ] Keep output paths separate so one target cannot overwrite the other.
-- [ ] Ensure both builds continue using FASM only.
+- [x] Keep output paths separate so one target cannot overwrite the other.
+- [x] Ensure both builds continue using FASM only.
 
-**Runtime verification:** pending; both targets must produce their native executable formats.
+**Stage 2 source work completed so far (2026-11-23)**
+
+- Created the shared runtime, command, and per-platform source areas without deleting or moving the proven legacy implementation.
+- Added src/include/flatcore.inc as the single shared include entry point; it currently imports the FC64 API contract.
+- Both existing native entry files now include the shared umbrella, so both assemblers validate the same contract.
+- Made the Windows build run from the repository root so shared include paths resolve consistently regardless of the caller's working directory.
+- Kept the existing Linux and Windows output locations separate.
+- The legacy entry points and command implementations are intentionally still active. Switching both executables to the new shared runtime is a later migration step, not something to fake with empty stubs.
+
+**Runtime verification:** pending; assemble both targets and run their existing smoke suites to verify the new shared include is accepted without changing current behavior.
 
 ## Stage 3 — Implement the common runtime
 

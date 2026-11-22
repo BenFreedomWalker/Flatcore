@@ -197,6 +197,24 @@ dispatch:
     test eax, eax
     jnz command_id
 
+    mov rsi, rbx
+    mov rdi, name_hostname
+    call streq
+    test eax, eax
+    jnz command_hostname
+
+    mov rsi, rbx
+    mov rdi, name_uptime
+    call streq
+    test eax, eax
+    jnz command_uptime
+
+    mov rsi, rbx
+    mov rdi, name_sleep
+    call streq
+    test eax, eax
+    jnz command_sleep
+
     mov rsi, unknown_message
     call write_err
     mov edi, 127
@@ -204,5 +222,6 @@ dispatch:
 
 include 'src/commands.inc'
 include 'src/commands_extra.inc'
+include 'src/commands_system.inc'
 include 'src/runtime.inc'
 include 'src/data.inc'

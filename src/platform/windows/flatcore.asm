@@ -249,12 +249,13 @@ start:
     mov rcx, r15
     mov rdx, io_buffer
     mov r8d, 4096
-    lea r9, [rsp + 32]
+    lea r9, [rsp + 56]
     mov qword [rsp + 32], 0
+    mov dword [rsp + 56], 0
     call [ReadFile]
     test eax, eax
     jz .cat_close_error
-    mov edx, [rsp + 32]
+    mov edx, [rsp + 56]
     test edx, edx
     jz .cat_close
     mov rsi, io_buffer

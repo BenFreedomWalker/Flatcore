@@ -1,5 +1,5 @@
 ; Linux backend process state.
-section readable writeable
+segment readable writeable
 align 8
 os_stdin dq 0
 os_stdout dq 1

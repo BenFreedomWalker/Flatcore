@@ -708,18 +708,19 @@ write_stdout:
 
 ; Write RDX bytes from RSI to standard output.
 write_stdout_n:
-    sub rsp, 40
-    mov [rsp + 32], rsi
-    mov [rsp + 24], rdx
+    sub rsp, 56
+    mov [rsp + 40], rsi
+    mov [rsp + 48], rdx
     mov ecx, -11                 ; STD_OUTPUT_HANDLE
     call [GetStdHandle]
     mov rcx, rax
-    mov rdx, [rsp + 32]
-    mov r8, [rsp + 24]
+    mov rdx, [rsp + 40]
+    mov r8, [rsp + 48]
     lea r9, [rsp + 16]
     mov qword [rsp + 16], 0
+    mov qword [rsp + 32], 0      ; lpOverlapped = NULL
     call [WriteFile]
-    add rsp, 40
+    add rsp, 56
     ret
 
 section '.rdata' data readable

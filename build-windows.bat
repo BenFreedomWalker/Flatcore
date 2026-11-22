@@ -26,6 +26,17 @@ if not "%BUILD_STATUS%"=="0" exit /b %BUILD_STATUS%
 
 echo Built: %ROOT%build\windows\flatcore.exe
 if /i "%~1"=="test" (
+    pushd "%ROOT%"
+    "%FASM%" "tests\runtime-windows.asm" "build\windows\runtime-selftest.exe"
+    set "TEST_BUILD_STATUS=%errorlevel%"
+    popd
+    if not "%TEST_BUILD_STATUS%"=="0" exit /b %TEST_BUILD_STATUS%
+    "%ROOT%build\windows\runtime-selftest.exe"
+    if errorlevel 1 (
+        echo Flatcore shared runtime helper tests failed.
+        exit /b 1
+    )
+    echo Flatcore shared runtime helper tests passed.
     call "%ROOT%tests\windows-smoke.bat"
     exit /b %errorlevel%
 )

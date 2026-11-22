@@ -228,7 +228,8 @@ Both existing native source files include and assemble these same common modules
 - Added `src/platform/linux/filesystem.inc` with FC64 `os_open`, `os_mkdir`, `os_rmdir`, `os_unlink`, `os_rename`, `os_getcwd`, and `os_chdir`.
 - Added `src/platform/linux/data.inc` for standard descriptors and backend error state. The Linux runtime self-test target now assembles these backend modules as part of its build.
 - Preserved FC64 output pointers across the Linux `syscall` instruction, which clobbers RCX and R11. Open access-mode decoding masks the access bits so CREATE/TRUNCATE/APPEND flags do not invalidate the mode.
-- These routines are not yet wired into the production executable or covered by direct filesystem assertions. `os_stat`, directory iteration, timestamps, and the Windows Unicode backend remain outstanding.
+- Added a Linux backend integration harness to `tests/runtime-linux.asm`. It exercises `os_getcwd`, create/truncate open, write, close, read-back, close, and unlink against a temporary file. The harness is built by `build.sh test`.
+- These routines are not yet wired into the production executable. `os_stat`, directory iteration, timestamps, and the Windows Unicode backend remain outstanding; the new integration assertions are awaiting the user's Linux test run.
 
 **Runtime verification:** pending; no Stage 4 backend test checkpoint has been requested yet.
 

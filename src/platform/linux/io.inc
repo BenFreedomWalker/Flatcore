@@ -3,11 +3,12 @@
 
 ; os_read(handle, buffer, byte_count, out_bytes_read)
 os_read:
+    mov r8, rcx
     mov eax, 0
     syscall
     test rax, rax
     js .read_error
-    mov [rcx], rax
+    mov [r8], rax
     xor eax, eax
     ret
 .read_error:
@@ -16,11 +17,12 @@ os_read:
 
 ; os_write(handle, buffer, byte_count, out_bytes_written)
 os_write:
+    mov r8, rcx
     mov eax, 1
     syscall
     test rax, rax
     js .write_error
-    mov [rcx], rax
+    mov [r8], rax
     xor eax, eax
     ret
 .write_error:

@@ -69,7 +69,16 @@ actual="$("$BIN" dirname '/tmp/flatcore-test/file.txt')"
     [[ "$("$BIN" echo symlink-dispatch)" == 'symlink-dispatch' ]]
     [[ "$("$BIN_LINKS/echo" symlink-dispatch)" == 'symlink-dispatch' ]]
 
-    "$BIN" rm sample.txt input.txt moved.txt input-link mode.txt wc.txt
+    "$BIN" rm sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt
+
+    if "$BIN" rm missing-file; then
+        printf 'rm succeeded for a missing file\\n' >&2
+        exit 1
+    fi
+    if "$BIN" cat missing-file >/dev/null 2>&1; then
+        printf 'cat succeeded for a missing file\\n' >&2
+        exit 1
+    fi
 )
 
 sleep 30 &

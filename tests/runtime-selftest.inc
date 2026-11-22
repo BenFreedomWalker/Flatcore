@@ -96,8 +96,10 @@ fc_runtime_selftest:
     jne .failed
 
     ; Multicall invocation uses argv[0] as the command.
-    mov qword [test_argv], test_multicall_path
-    mov qword [test_argv + 8], test_text_hello
+    mov rax, test_multicall_path
+    mov [test_argv], rax
+    mov rax, test_text_hello
+    mov [test_argv + 8], rax
     mov edi, 2
     mov rsi, test_argv
     mov rdx, test_executable_name
@@ -114,7 +116,8 @@ fc_runtime_selftest:
     jne .failed
 
     ; Table-driven dispatcher invokes the registered handler and returns status.
-    mov qword [test_dispatch_argv], test_dispatch_name
+    mov rax, test_dispatch_name
+    mov [test_dispatch_argv], rax
     mov edi, 1
     mov rsi, test_dispatch_argv
     mov rdx, test_registry

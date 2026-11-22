@@ -16,3 +16,5 @@ if not exist "%ROOT%build\windows" mkdir "%ROOT%build\windows"
 if errorlevel 1 exit /b %errorlevel%
 
 echo Built: %ROOT%build\windows\flatcore.exe
+if /i "%~1"=="test" call "%ROOT%tests\windows-smoke.bat"
+exit /b %errorlevel%

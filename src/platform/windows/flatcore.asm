@@ -7,7 +7,7 @@ section '.text' code readable executable
 ; This bootstrap deliberately uses Win32 APIs rather than Linux syscalls.
 
 start:
-    sub rsp, 40
+    sub rsp, 72
 
     call [GetCommandLineA]
     mov r12, rax
@@ -220,7 +220,7 @@ start:
     mov edx, 40000000h           ; GENERIC_WRITE
     xor r8d, r8d                 ; no sharing
     xor r9d, r9d                 ; default security
-    mov qword [rsp + 32], 2      ; CREATE_ALWAYS
+    mov qword [rsp + 32], 4      ; OPEN_ALWAYS
     mov qword [rsp + 40], 80h    ; FILE_ATTRIBUTE_NORMAL
     mov qword [rsp + 48], 0
     call [CreateFileA]

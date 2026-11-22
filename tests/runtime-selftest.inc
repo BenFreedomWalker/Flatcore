@@ -11,12 +11,12 @@ fc_runtime_selftest:
     mov rdi, test_text_hello
     call fc_strlen
     cmp rax, 5
-    jne .failed
+    jne .fail1
     mov rdi, test_text_hello
     mov rsi, test_text_hello_copy
     call fc_streq
     test eax, eax
-    jz .failed
+    jz .fail2
 
     ; Bounded string copy.
     mov rdi, test_copy_buffer
@@ -24,12 +24,12 @@ fc_runtime_selftest:
     mov edx, 16
     call fc_strcopy
     cmp rax, 5
-    jne .failed
+    jne .fail3
     mov rdi, test_copy_buffer
     mov rsi, test_text_hello
     call fc_streq
     test eax, eax
-    jz .failed
+    jz .fail4
 
     ; Unsigned 64-bit decimal conversion, including UINT64_MAX.
     mov rdi, 0FFFFFFFFFFFFFFFFh
@@ -37,18 +37,18 @@ fc_runtime_selftest:
     mov edx, 21
     call fc_u64toa
     cmp rax, 20
-    jne .failed
+    jne .fail5
     mov rdi, test_number_buffer
     mov rsi, test_uint64_max
     call fc_streq
     test eax, eax
-    jz .failed
+    jz .fail6
     mov rdi, test_uint64_max
     call fc_atou64
     test rdx, rdx
-    jz .failed
+    jz .fail7
     cmp rax, 0FFFFFFFFFFFFFFFFh
-    jne .failed
+    jne .fail8
 
     ; UTF-16 -> UTF-8: ASCII, 2-byte, 3-byte and surrogate-pair code points.
     mov rdi, test_utf16
@@ -56,12 +56,12 @@ fc_runtime_selftest:
     mov edx, 16
     call fc_utf16_to_utf8
     cmp rax, 10
-    jne .failed
+    jne .fail9
     mov rdi, test_utf8_buffer
     mov rsi, test_utf8_expected
     call fc_streq
     test eax, eax
-    jz .failed
+    jz .fail10
 
     ; Windows-style command-line tokenization with a quoted argument.
     mov rdi, test_command_line
@@ -71,14 +71,14 @@ fc_runtime_selftest:
     mov r8d, 128
     call fc_parse_argv
     cmp rax, 4
-    jne .failed
+    jne .fail11
     mov rdi, [test_argv + 16]
     mov rsi, test_quoted_argument
     call fc_streq
     test eax, eax
-    jz .failed
+    jz .fail12
     cmp qword [test_argv + 32], 0
-    jne .failed
+    jne .fail13
 
     ; Explicit flatcore COMMAND form normalizes argv to COMMAND.
     mov edi, 4
@@ -90,10 +90,10 @@ fc_runtime_selftest:
     test eax, eax
     jnz .failed
     cmp qword [test_normalized_argc], 3
-    jne .failed
+    jne .fail14
     mov rax, [test_normalized_argv]
     cmp rax, [test_argv + 8]
-    jne .failed
+    jne .fail15
 
     ; Multicall invocation uses argv[0] as the command.
     mov rax, test_multicall_path
@@ -109,12 +109,12 @@ fc_runtime_selftest:
     test eax, eax
     jnz .failed
     cmp qword [test_normalized_argc], 2
-    jne .failed
+    jne .fail16
     mov rax, [test_normalized_argv] ; normalized argv vector
     mov rax, [rax]                  ; argv[0] command-name pointer
     mov rdx, test_multicall_command
     cmp rax, rdx
-    jne .failed
+    jne .fail17
 
     ; Table-driven dispatcher invokes the registered handler and returns status.
     mov rax, test_dispatch_name
@@ -125,7 +125,7 @@ fc_runtime_selftest:
     mov ecx, 1
     call fc_dispatch
     cmp rax, 42
-    jne .failed
+    jne .fail18
 
     ; Normalized error code maps to a stable message.
     mov edi, FC_ERR_ACCESS
@@ -134,9 +134,66 @@ fc_runtime_selftest:
     mov rsi, test_error_access
     call fc_streq
     test eax, eax
-    jz .failed
+    jz .fail19
 
     xor eax, eax
+    jmp .return
+.fail1:
+    mov eax, 1
+    jmp .return
+.fail2:
+    mov eax, 2
+    jmp .return
+.fail3:
+    mov eax, 3
+    jmp .return
+.fail4:
+    mov eax, 4
+    jmp .return
+.fail5:
+    mov eax, 5
+    jmp .return
+.fail6:
+    mov eax, 6
+    jmp .return
+.fail7:
+    mov eax, 7
+    jmp .return
+.fail8:
+    mov eax, 8
+    jmp .return
+.fail9:
+    mov eax, 9
+    jmp .return
+.fail10:
+    mov eax, 10
+    jmp .return
+.fail11:
+    mov eax, 11
+    jmp .return
+.fail12:
+    mov eax, 12
+    jmp .return
+.fail13:
+    mov eax, 13
+    jmp .return
+.fail14:
+    mov eax, 14
+    jmp .return
+.fail15:
+    mov eax, 15
+    jmp .return
+.fail16:
+    mov eax, 16
+    jmp .return
+.fail17:
+    mov eax, 17
+    jmp .return
+.fail18:
+    mov eax, 18
+    jmp .return
+.fail19:
+    mov eax, 19
     jmp .return
 .failed:
     mov eax, 1

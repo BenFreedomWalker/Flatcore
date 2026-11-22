@@ -8,43 +8,37 @@ segment readable executable
 ; Flatcore: native Linux x86-64 multicall userspace.
 
 _start:
+    ; Capture the kernel-provided process arguments and normalize them through
+    ; the shared FC64 startup helper before entering the legacy command table.
     mov rax, [rsp]
     mov [argc], rax
     lea rax, [rsp + 8]
     mov [argv], rax
 
-    ; Resolve argv[0] basename.
-    mov rsi, [rax]
-    mov rbx, rsi
-.basename:
-    mov al, [rsi]
-    test al, al
-    jz .basename_done
-    cmp al, '/'
-    jne .basename_next
-    lea rbx, [rsi + 1]
-.basename_next:
-    inc rsi
-    jmp .basename
-.basename_done:
+    mov rdi, [argc]
+    mov rsi, [argv]
+    mov rdx, binary_name
+    mov rcx, normalized_argc
+    mov r8, normalized_argv
+    call fc_prepare_command
+    cmp rax, 1
+    je command_help
+    test rax, rax
+    jnz .invalid_startup
 
-    ; "flatcore COMMAND ..." or symlink invocation such as "ls ...".
-    mov rsi, rbx
-    mov rdi, binary_name
-    call streq
-    test eax, eax
-    jnz .explicit_command
-    mov r14, 1
-    mov rsi, rbx
-    jmp dispatch
-
-.explicit_command:
-    mov rax, [argc]
-    cmp rax, 2
-    jb command_help
+    mov rax, [normalized_argv]
+    cmp rax, [argv]
+    je .multicall_startup
     mov r14, 2
-    mov rax, [argv]
-    mov rsi, [rax + 8]
+    jmp .startup_ready
+.multicall_startup:
+    mov r14, 1
+.startup_ready:
+    mov rsi, [rax]
+
+.invalid_startup:
+    mov edi, 2
+    jmp process_exit
 
 dispatch:
     mov rbx, rsi

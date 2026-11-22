@@ -156,11 +156,12 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 ## Stage 3 — Implement the common runtime
 
 - [ ] Implement shared process startup state and argument-vector representation.
-- [ ] Implement Windows command-line parsing with correct quoting and escaping, converting arguments to UTF-8.
+- [ ] Integrate the UTF-8 command-line tokenizer and UTF-16 conversion into the new Windows native startup path (the reusable parser/converter are implemented).
 - [ ] Use the Linux process-provided argc/argv and normalize them to the same shared representation.
 - [x] Implement shared string length, comparison, copy, and search primitives.
 - [x] Implement shared memory/buffer helpers required by commands.
 - [x] Implement shared unsigned integer parsing and decimal formatting.
+- [x] Implement strict UTF-16LE-to-UTF-8 conversion with surrogate validation.
 - [x] Implement a backend-neutral complete-write loop and NUL-terminated string output helper.
 - [ ] Implement shared error-message formatting.
 - [x] Implement the shared table-driven dispatcher and define its command registry/handler layout.
@@ -175,7 +176,7 @@ Added platform-neutral FC64 modules under src/common/:
 
 - memory.inc: byte-copy and byte-fill primitives.
 - strings.inc: UTF-8 byte length, equality, bounded copy, and substring search.
-- arguments.inc: a bounded Windows-style UTF-8 command-line tokenizer with quote/backslash handling. Windows UTF-16-to-UTF-8 conversion and native entry-point integration remain pending.
+- arguments.inc: a bounded Windows-style UTF-8 command-line tokenizer with quote/backslash handling. utf.inc: strict UTF-16LE-to-UTF-8 conversion with surrogate-pair validation. Wiring these into the replacement Windows startup path remains pending.
 - formatting.inc: checked unsigned decimal parsing and decimal formatting.
 - output.inc: complete-write loop routed through a backend callback, plus NUL-terminated string output.
 - dispatcher.inc: one registry-driven dispatcher. Registry entries are pairs of command-name and handler pointers; handlers receive argc/argv and return the process status in RAX.

@@ -157,7 +157,7 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 
 - [x] Implement the shared command-selection/argv-normalization helper for explicit and multicall invocation.
 - [x] Integrate the UTF-8 command-line tokenizer and UTF-16 conversion into the Windows native startup capture path; legacy command handlers still consume their original command-line tail during migration.
-- [x] Use the Linux process-provided argc/argv and normalize them through the shared startup helper.
+- [x] Use the Linux process-provided argc/argv and normalize them through the shared startup helper (runtime smoke verification pending after dispatcher handoff fix).
 - [x] Implement shared string length, comparison, copy, and search primitives.
 - [x] Implement shared memory/buffer helpers required by commands.
 - [x] Implement shared unsigned integer parsing and decimal formatting.
@@ -192,6 +192,13 @@ Both existing native source files include and assemble these same common modules
 - Both `build.sh test` and `build-windows.bat test` now assemble and run the helper harness before the existing smoke suite.
 - The multicall normalizer rewrites only the argv[0] pointer to its basename; argument strings remain unchanged. This is required for registry lookup when launched through a path such as `/usr/bin/echo`.
 - Initial test runs exposed three faulty test assertions, not runtime defects: the explicit-command test compared the argv-vector pointer instead of `argv[0]`; the multicall test compared pointers rather than basename contents; and two failure paths initially shared a generic status. These were corrected in commits `60f7390`, `8108199`, and `9077ff8` (with earlier diagnostic work in `493de5f`).
+
+**Linux startup test correction (2026-11-23; awaiting user verification)**
+
+- The first dual-platform run after native startup integration passed Windows completely. Linux's shared helper harness passed, but the smoke suite exited with status 2.
+- Inspection found a control-flow omission in `src/flatcore.asm`: successful startup normalization fell directly into the invalid-startup exit block instead of jumping to the legacy dispatcher.
+- Added the missing `jmp dispatch` after selecting the normalized command pointer (commit `75b11d1`). Invalid startup still exits with status 2.
+- Rerun both platform suites; Windows should remain unchanged and Linux should now reach its command dispatcher and complete the smoke tests.
 
 ## Stage 4 — Implement the filesystem and I/O backends
 

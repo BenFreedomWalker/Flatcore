@@ -717,6 +717,11 @@ false_name db 'false', 0
 pwd_name db 'pwd', 0
 hostname_name db 'hostname', 0
 ls_name db 'ls', 0
+cp_name db 'cp', 0
+mv_name db 'mv', 0
+basename_name db 'basename', 0
+dirname_name db 'dirname', 0
+head_name db 'head', 0
 mkdir_name db 'mkdir', 0
 rmdir_name db 'rmdir', 0
 rm_name db 'rm', 0
@@ -759,6 +764,8 @@ import kernel32, \
     FindFirstFileA, 'FindFirstFileA', \
     FindNextFileA, 'FindNextFileA', \
     FindClose, 'FindClose', \
+    CopyFileA, 'CopyFileA', \
+    MoveFileA, 'MoveFileA', \
     GetStdHandle, 'GetStdHandle', \
     WriteFile, 'WriteFile', \
     ExitProcess, 'ExitProcess'

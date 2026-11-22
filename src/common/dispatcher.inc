@@ -13,8 +13,6 @@ fc_dispatch:
     push r13
     push r14
     push r15
-    sub rsp, 8
-
     mov r15, rdi                ; argc
     mov rbx, rsi                ; argv
     mov r12, rdx                ; registry
@@ -52,7 +50,6 @@ fc_dispatch:
     mov eax, 127
 
 .return:
-    add rsp, 8
     pop r15
     pop r14
     pop r13

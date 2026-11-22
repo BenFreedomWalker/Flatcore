@@ -77,23 +77,33 @@ command_cat:
     mov rdi, rbx
     mov esi, 1
     call copy_fd
+    test eax, eax
+    jnz .cat_copy_error
     mov eax, 3                  ; SYS_close
     mov edi, ebx
     syscall
     inc r15
     jmp .cat_next
+.cat_copy_error:
+    mov eax, 3                  ; SYS_close
+    mov edi, ebx
+    syscall
+    jmp .cat_error
 .cat_stdin:
     xor edi, edi
     mov esi, 1
     call copy_fd
+    test eax, eax
+    jnz .cat_error
 .cat_done:
     xor edi, edi
     jmp process_exit
 .cat_open_error:
+.cat_error:
     mov rsi, operation_error
     call write_err
-    inc r15
-    jmp .cat_next
+    mov edi, 1
+    jmp process_exit
 
 command_ls:
     mov r12, [argc]
@@ -102,6 +112,8 @@ command_ls:
     jne .ls_arguments
     mov rdi, dot_text
     call ls_one
+    test eax, eax
+    js .ls_error
     xor edi, edi
     jmp process_exit
 .ls_arguments:
@@ -111,10 +123,15 @@ command_ls:
     jae .ls_done
     mov rdi, [r13 + r15 * 8]
     call ls_one
+    test eax, eax
+    js .ls_error
     inc r15
     jmp .ls_loop
 .ls_done:
     xor edi, edi
+    jmp process_exit
+.ls_error:
+    mov edi, 1
     jmp process_exit
 
 ; List one directory. Input: RDI = path.
@@ -122,6 +139,7 @@ ls_one:
     push r12
     push r13
     push r14
+    push r15
     push rbx
     mov eax, 2                  ; SYS_open
     mov esi, 65536              ; O_DIRECTORY
@@ -138,7 +156,7 @@ ls_one:
     syscall
     test rax, rax
     jz .ls_close
-    js .ls_close
+    js .ls_read_error
     mov r13, rax
     mov r14, io_buffer
 .ls_entry:
@@ -154,6 +172,12 @@ ls_one:
     add r14, rbx
     sub r13, rbx
     jmp .ls_entry
+.ls_read_error:
+    mov eax, 3                  ; SYS_close
+    mov edi, r12d
+    syscall
+    mov eax, -1
+    jmp .ls_return
 .ls_close:
     mov eax, 3                  ; SYS_close
     mov edi, r12d
@@ -162,8 +186,10 @@ ls_one:
 .ls_open_error:
     mov rsi, operation_error
     call write_err
+    mov eax, -1
 .ls_return:
     pop rbx
+    pop r15
     pop r14
     pop r13
     pop r12
@@ -189,8 +215,8 @@ command_mkdir:
 .mkdir_error:
     mov rsi, operation_error
     call write_err
-    inc r15
-    jmp .mkdir_loop
+    mov edi, 1
+    jmp process_exit
 .mkdir_done:
     xor edi, edi
     jmp process_exit
@@ -214,8 +240,8 @@ command_rmdir:
 .rmdir_error:
     mov rsi, operation_error
     call write_err
-    inc r15
-    jmp .rmdir_loop
+    mov edi, 1
+    jmp process_exit
 .rmdir_done:
     xor edi, edi
     jmp process_exit
@@ -239,8 +265,8 @@ command_rm:
 .rm_error:
     mov rsi, operation_error
     call write_err
-    inc r15
-    jmp .rm_loop
+    mov edi, 1
+    jmp process_exit
 .rm_done:
     xor edi, edi
     jmp process_exit
@@ -280,8 +306,8 @@ command_touch:
 .touch_error:
     mov rsi, operation_error
     call write_err
-    inc r15
-    jmp .touch_loop
+    mov edi, 1
+    jmp process_exit
 .touch_done:
     xor edi, edi
     jmp process_exit

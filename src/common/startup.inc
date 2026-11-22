@@ -51,8 +51,13 @@ fc_prepare_command:
     inc rsi
     jmp .find_basename
 .basename_ready:
+    ; Preserve the basename pointer across the FC64 comparison call.
+    push rdi
+    sub rsp, 8
     mov rsi, r14
     call fc_streq
+    add rsp, 8
+    pop rdi
     test eax, eax
     jz .multicall_name
 

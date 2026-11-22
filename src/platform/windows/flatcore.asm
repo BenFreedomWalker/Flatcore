@@ -316,6 +316,16 @@ start:
     dec r8
     jmp .basename_trim
 .basename_scan_start:
+    mov byte [rdi + r8], 0
+    cmp r8, 1
+    jne .basename_scan_start
+    mov al, [rdi]
+    cmp al, '\\'
+    je .basename_root
+    cmp al, '/'
+    je .basename_root
+.basename_scan_start:
+    mov byte [rdi + r8], 0
     mov r9, r8
 .basename_scan:
     test r9, r9
@@ -326,6 +336,9 @@ start:
     je .basename_found
     cmp al, '/'
     jne .basename_scan
+.basename_root:
+    mov rsi, rdi
+    jmp .basename_print
 .basename_found:
     lea rsi, [rdi + r9 + 1]
     jmp .basename_print

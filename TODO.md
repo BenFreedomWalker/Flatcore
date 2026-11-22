@@ -312,3 +312,8 @@ Both existing native source files include and assemble these same common modules
 
 - User reran `./build.sh test` after the `os_getcwd` pointer correction. Shared runtime tests and Linux smoke tests passed; fish exit status was 0. Windows shared runtime tests and smoke tests also passed; CMD exit status was 0.
 - The getcwd correction is verified. The new `os_stat` implementation and its additional assertions were added after this successful run and are awaiting the next test checkpoint.
+
+
+**Linux `os_stat` assembler correction (2026-11-23)**
+
+- The first build after adding `os_stat` stopped in FASM at direct memory references to the stat scratch buffer. Changed the implementation to retain the buffer address in a register and access fields through that register. The `os_stat` runtime assertions remain pending; rerun both platform test commands at the next checkpoint.

@@ -6,6 +6,9 @@ io_buffer    rb 4096
 cwd_buffer   rb 4096
 uname_buffer rb 390
 num_buffer   rb 32
+sysinfo_buffer rb 112
+sleep_request rq 2
+sleep_remaining rq 2
 
 binary_name db 'flatcore', 0
 
@@ -34,10 +37,14 @@ name_chmod    db 'chmod', 0
 name_kill     db 'kill', 0
 name_sync     db 'sync', 0
 name_id       db 'id', 0
+name_hostname db 'hostname', 0
+name_uptime   db 'uptime', 0
+name_sleep    db 'sleep', 0
 
 symlink_option db '-s', 0
 uid_text       db 'uid=', 0
 gid_text       db ' gid=', 0
+uptime_suffix  db ' seconds', 10, 0
 slash_text     db '/', 0
 
 dot_text        db '.', 0

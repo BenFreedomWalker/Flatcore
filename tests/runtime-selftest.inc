@@ -196,6 +196,12 @@ fc_runtime_selftest:
 .fail19:
     mov eax, 19
     jmp .return
+.fail20:
+    mov eax, 20
+    jmp .return
+.fail21:
+    mov eax, 21
+    jmp .return
 .failed:
     mov eax, 1
 .return:

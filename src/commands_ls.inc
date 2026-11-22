@@ -146,9 +146,11 @@ command_ls:
     cmp r8, r12
     jae .ls_success
     mov rdi, [r13 + r8 * 8]
+    mov [ls_arg_index], r8
     test qword [ls_flags], 8
     jnz .ls_print_operand
     call ls_one
+    mov r8, [ls_arg_index]
     test eax, eax
     js .ls_failed
     jmp .ls_next_operand

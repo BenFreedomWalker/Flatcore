@@ -82,103 +82,103 @@ start:
 
 .dispatch:
     mov rdi, r13
-    mov rsi, help_name
+    mov r10, help_name
     call string_equal
     test eax, eax
     jnz .help
 
     mov rdi, r13
-    mov rsi, true_name
+    mov r10, true_name
     call string_equal
     test eax, eax
     jnz .success
 
     mov rdi, r13
-    mov rsi, false_name
+    mov r10, false_name
     call string_equal
     test eax, eax
     jnz .failure
 
     mov rdi, r13
-    mov rsi, echo_name
+    mov r10, echo_name
     call string_equal
     test eax, eax
     jnz .echo
 
     mov rdi, r13
-    mov rsi, pwd_name
+    mov r10, pwd_name
     call string_equal
     test eax, eax
     jnz .pwd
 
     mov rdi, r13
-    mov rsi, hostname_name
+    mov r10, hostname_name
     call string_equal
     test eax, eax
     jnz .hostname
 
     mov rdi, r13
-    mov rsi, mkdir_name
+    mov r10, mkdir_name
     call string_equal
     test eax, eax
     jnz .mkdir
 
     mov rdi, r13
-    mov rsi, rmdir_name
+    mov r10, rmdir_name
     call string_equal
     test eax, eax
     jnz .rmdir
 
     mov rdi, r13
-    mov rsi, rm_name
+    mov r10, rm_name
     call string_equal
     test eax, eax
     jnz .rm
 
     mov rdi, r13
-    mov rsi, touch_name
+    mov r10, touch_name
     call string_equal
     test eax, eax
     jnz .touch
 
     mov rdi, r13
-    mov rsi, cat_name
+    mov r10, cat_name
     call string_equal
     test eax, eax
     jnz .cat
 
     mov rdi, r13
-    mov rsi, ls_name
+    mov r10, ls_name
     call string_equal
     test eax, eax
     jnz .ls
 
     mov rdi, r13
-    mov rsi, cp_name
+    mov r10, cp_name
     call string_equal
     test eax, eax
     jnz .cp
 
     mov rdi, r13
-    mov rsi, mv_name
+    mov r10, mv_name
     call string_equal
     test eax, eax
     jnz .mv
 
     mov rdi, r13
-    mov rsi, basename_name
+    mov r10, basename_name
     call string_equal
     test eax, eax
     jnz .basename
 
     mov rdi, r13
-    mov rsi, dirname_name
+    mov r10, dirname_name
     call string_equal
     test eax, eax
     jnz .dirname
 
     mov rdi, r13
-    mov rsi, head_name
+    mov r10, head_name
     call string_equal
     test eax, eax
     jnz .head
@@ -215,7 +215,7 @@ start:
     test eax, eax
     jz .api_error
     mov edx, [computer_name_length]
-    mov rsi, computer_name_buffer
+    mov r10, computer_name_buffer
     call write_stdout_n
     mov rsi, newline_text
     mov edx, 2
@@ -676,12 +676,12 @@ first_argument:
 string_equal:
 .loop:
     mov al, [rdi]
-    cmp al, [rsi]
+    cmp al, [r10]
     jne .no
     test al, al
     jz .yes
     inc rdi
-    inc rsi
+    inc r10
     jmp .loop
 .yes:
     mov eax, 1

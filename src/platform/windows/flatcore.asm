@@ -13,6 +13,38 @@ section '.text' code readable executable
 start:
     sub rsp, 72
 
+    ; Capture the native UTF-16 command line, convert it to the shared UTF-8
+    ; representation, tokenize it, and normalize explicit/multicall argv.
+    call [GetCommandLineW]
+    mov r12, rax
+    mov rdi, r12
+    mov rsi, windows_utf8_command_line
+    mov edx, 131072
+    call fc_utf16_to_utf8
+    cmp rax, -1
+    je .startup_error
+
+    mov rdi, windows_utf8_command_line
+    mov rsi, windows_argv
+    mov edx, 16384
+    mov rcx, windows_arg_storage
+    mov r8d, 131072
+    call fc_parse_argv
+    cmp rax, -1
+    je .startup_error
+    mov [windows_argc], rax
+
+    mov rdi, rax
+    mov rsi, windows_argv
+    mov rdx, windows_executable_name
+    mov rcx, windows_normalized_argc
+    mov r8, windows_normalized_argv
+    call fc_prepare_command
+    cmp rax, -1
+    je .startup_error
+
+    ; The legacy command bodies remain active during migration. They continue
+    ; consuming the original command-line tail until the shared commands land.
     call [GetCommandLineA]
     mov r12, rax
 
@@ -611,6 +643,12 @@ start:
     call write_stdout_n
     jmp .success
 
+.startup_error:
+    mov rsi, startup_error_text
+    call write_stdout
+    mov ecx, 2
+    jmp .exit
+
 .no_command:
     mov rsi, help_text
     call write_stdout
@@ -784,6 +822,15 @@ newline_text db 13, 10
 dot_path db '.', 0
 
 section '.data' data readable writeable
+windows_executable_name db 'flatcore.exe', 0
+windows_argc rq 1
+windows_normalized_argc rq 1
+windows_normalized_argv rq 1
+windows_utf8_command_line rb 131072
+windows_arg_storage rb 131072
+align 8
+windows_argv rq 16385
+startup_error_text db 'flatcore: invalid or oversized Windows command line', 13, 10, 0
 cwd_buffer rb 4096
 computer_name_buffer rb 256
 computer_name_length dd 256
@@ -798,6 +845,7 @@ library kernel32, 'KERNEL32.DLL'
 
 import kernel32, \
     GetCommandLineA, 'GetCommandLineA', \
+    GetCommandLineW, 'GetCommandLineW', \
     GetCurrentDirectoryA, 'GetCurrentDirectoryA', \
     GetComputerNameA, 'GetComputerNameA', \
     CreateDirectoryA, 'CreateDirectoryA', \

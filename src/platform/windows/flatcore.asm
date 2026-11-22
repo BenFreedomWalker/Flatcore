@@ -304,27 +304,28 @@ start:
     mov rdi, rax
     call string_length
     mov r8, rax
+    test r8, r8
+    jz .basename_output
 .basename_trim:
     cmp r8, 1
-    jbe .basename_scan_start
+    jbe .basename_check_root
     mov al, [rdi + r8 - 1]
     cmp al, '\\'
     je .basename_trim_one
     cmp al, '/'
-    jne .basename_scan_start
+    jne .basename_check_root
 .basename_trim_one:
     dec r8
     jmp .basename_trim
-.basename_scan_start:
-    mov byte [rdi + r8], 0
+.basename_check_root:
     cmp r8, 1
-    jne .basename_scan_start
+    jne .basename_terminate
     mov al, [rdi]
     cmp al, '\\'
     je .basename_root
     cmp al, '/'
     je .basename_root
-.basename_scan_start:
+.basename_terminate:
     mov byte [rdi + r8], 0
     mov r9, r8
 .basename_scan:

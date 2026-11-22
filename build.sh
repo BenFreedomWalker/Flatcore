@@ -74,7 +74,7 @@ if [[ "$ACTION" == test ]]; then
         "$FASM_BIN" tests/runtime-linux.asm "$BUILD_DIR/runtime-selftest"
     )
     "$BUILD_DIR/runtime-selftest"
-    printf 'Flatcore shared runtime helper tests passed.\\n'
+    printf 'Flatcore shared runtime helper tests passed.\n'
     "$ROOT_DIR/tests/smoke.sh" "$BUILD_DIR"
 fi
 

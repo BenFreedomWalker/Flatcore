@@ -729,6 +729,7 @@ error_text db 'flatcore: Windows API operation failed', 13, 10, 0
 usage_error_text db 'flatcore: command requires a path argument', 13, 10, 0
 unknown_text db 'flatcore: unknown command in this Windows build', 13, 10, 0
 newline_text db 13, 10
+dot_path db '.', 0
 
 section '.data' data readable writeable
 cwd_buffer rb 4096

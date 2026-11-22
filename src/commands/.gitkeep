@@ -1,0 +1,2 @@
+; Shared command implementations belong in this directory.
+; Commands are migrated here during Stage 5.

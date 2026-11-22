@@ -744,6 +744,11 @@ write_stdout_n:
     add rsp, 72
     ret
 
+include 'src/common/memory.inc'
+include 'src/common/strings.inc'
+include 'src/common/formatting.inc'
+include 'src/common/dispatcher.inc'
+
 section '.rdata' data readable
 
 help_name db 'help', 0

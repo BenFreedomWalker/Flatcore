@@ -67,7 +67,7 @@ help_text db 'Flatcore - native Linux x86-64 userspace', 10
           db 'Commands can also be invoked through symlinks.', 10, 0
 
 ; ls implementation state and Linux stat layout.
-ls_flags       rd 1
+ls_flags       rq 1
 ls_name_ptr    rq 1
 ls_stat        rb 144
 ls_mode_text   rb 11

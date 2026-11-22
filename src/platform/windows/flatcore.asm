@@ -138,8 +138,8 @@ start:
 
 .hostname:
     mov dword [computer_name_length], 256
-    mov rcx, computer_name_length
-    mov rdx, computer_name_buffer
+    mov rcx, computer_name_buffer
+    mov rdx, computer_name_length
     call [GetComputerNameA]
     test eax, eax
     jz .api_error
@@ -247,15 +247,17 @@ true_name db 'true', 0
 false_name db 'false', 0
 pwd_name db 'pwd', 0
 hostname_name db 'hostname', 0
-cwd_buffer rb 4096
-computer_name_buffer rb 256
-computer_name_length dd 256
 help_text db 'Flatcore - native Windows x86-64 multicall userspace', 13, 10
           db 'Usage: flatcore.exe COMMAND [ARGUMENTS...]', 13, 10
           db 'Windows commands: help, echo, true, false, pwd, hostname', 13, 10, 0
 error_text db 'flatcore: Windows API operation failed', 13, 10, 0
 unknown_text db 'flatcore: unknown command in this Windows build', 13, 10, 0
 newline_text db 13, 10
+
+section '.data' data readable writeable
+cwd_buffer rb 4096
+computer_name_buffer rb 256
+computer_name_length dd 256
 
 section '.idata' import data readable writeable
 

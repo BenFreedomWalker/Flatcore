@@ -22,6 +22,9 @@ fc_u64toa:
     mov r10d, 10
     div r10
     add dl, '0'
+    lea r11, [rcx + 1]
+    cmp r11, r9
+    jae .too_small
     mov [r8 + rcx], dl
     inc rcx
     ; RAX already contains the quotient for the next digit.

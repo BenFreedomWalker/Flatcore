@@ -50,12 +50,13 @@ fc_strcopy:
     jae .too_small
     jmp .measure
 .measured:
-    mov rdx, rcx
+    mov r14, rcx
+    mov rdx, r14
     mov rdi, r12
     mov rsi, r13
     call fc_memcpy
-    mov byte [r12 + rdx], 0
-    mov rax, rdx
+    mov byte [r12 + r14], 0
+    mov rax, r14
     jmp .return
 .too_small:
     mov rax, -1

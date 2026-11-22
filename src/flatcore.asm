@@ -1,3 +1,5 @@
+include 'src/include/flatcore.inc'
+
 format ELF64 executable 3
 entry _start
 

@@ -240,7 +240,7 @@ ls_one:
     call write_out
     mov rsi, space_text
     call write_out
-    mov rax, [ls_stat + 48]     ; st_size
+    mov rax, qword [ls_stat + 48] ; st_size (64-bit off_t)
     call write_number
     mov rsi, space_text
     call write_out

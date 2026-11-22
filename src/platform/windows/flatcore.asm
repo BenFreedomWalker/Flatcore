@@ -424,4 +424,4 @@ import kernel32, \
     SetFileTime, 'SetFileTime', \
     GetStdHandle, 'GetStdHandle', \
     WriteFile, 'WriteFile', \
-    ExitProcess, 'ExitProcess'\n
+    ExitProcess, 'ExitProcess'

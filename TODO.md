@@ -55,8 +55,8 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 
 **Command inventory**
 
-- Linux dispatcher currently exposes 30 commands: `help`, `echo`, `true`, `false`, `pwd`, `cat`, `ls`, `mkdir`, `rmdir`, `rm`, `touch`, `cp`, `mv`, `clear`, `uname`, `basename`, `dirname`, `head`, `wc`, `ln`, `readlink`, `chmod`, `kill`, `sync`, `id`, `hostname`, `uptime`, and `sleep`. (The dispatcher includes 28 named commands; the build script also creates links for `help` and the same command set.)
-- Windows currently implements 16 commands: `help`, `echo`, `true`, `false`, `pwd`, `hostname`, `mkdir`, `rmdir`, `rm`, `touch`, `cat`, `ls`, `cp`, `mv`, `basename`, `dirname`, and `head` (17 including the dispatcher/help entry; actual availability is determined by its dispatch table).
+- Linux dispatcher currently exposes 28 commands: `help`, `echo`, `true`, `false`, `pwd`, `cat`, `ls`, `mkdir`, `rmdir`, `rm`, `touch`, `cp`, `mv`, `clear`, `uname`, `basename`, `dirname`, `head`, `wc`, `ln`, `readlink`, `chmod`, `kill`, `sync`, `id`, `hostname`, `uptime`, and `sleep`. (The build script creates command-name symlinks for the dispatcher command set.)
+- Windows currently implements 17 commands: `help`, `echo`, `true`, `false`, `pwd`, `hostname`, `mkdir`, `rmdir`, `rm`, `touch`, `cat`, `ls`, `cp`, `mv`, `basename`, `dirname`, and `head` (including `help`; actual availability is determined by its dispatch table).
 - The two targets have separate dispatchers, parsers, data, output helpers, and command bodies. Their command coverage and semantics are not at parity.
 - Windows currently parses a raw `GetCommandLineA` string itself and uses ANSI (`A)-suffixed) Win32 APIs. It does not currently normalize a Windows argv vector or provide UTF-8/UTF-16 boundary handling.
 - Linux receives the kernel argc/argv stack directly and uses Linux x86-64 syscalls.

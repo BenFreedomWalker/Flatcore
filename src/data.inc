@@ -5,6 +5,7 @@ argv         rq 1
 io_buffer    rb 4096
 cwd_buffer   rb 4096
 uname_buffer rb 390
+num_buffer   rb 32
 
 binary_name db 'flatcore', 0
 
@@ -22,7 +23,16 @@ name_touch  db 'touch', 0
 name_cp     db 'cp', 0
 name_mv     db 'mv', 0
 name_clear  db 'clear', 0
-name_uname  db 'uname', 0
+name_uname    db 'uname', 0
+name_basename db 'basename', 0
+name_dirname  db 'dirname', 0
+name_head     db 'head', 0
+name_wc       db 'wc', 0
+name_ln       db 'ln', 0
+name_readlink db 'readlink', 0
+
+symlink_option db '-s', 0
+slash_text     db '/', 0
 
 dot_text        db '.', 0
 space_text      db ' ', 0
@@ -38,4 +48,6 @@ help_text db 'Flatcore - native Linux x86-64 userspace', 10
           db '  echo  true  false  pwd  cat  ls', 10
           db '  mkdir  rmdir  rm  touch  cp  mv', 10
           db '  clear  uname  help', 10
+          db '  basename  dirname  head  wc', 10
+          db '  ln  readlink', 10
           db 'Commands can also be invoked through symlinks.', 10, 0

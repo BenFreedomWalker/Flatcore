@@ -752,9 +752,10 @@ include 'src/common/formatting.inc'
 include 'src/common/output.inc'
 include 'src/common/startup.inc'
 include 'src/common/dispatcher.inc'
+include 'src/common/errors.inc'
 
 section '.rdata' data readable
-include 'src/common/errors.inc'
+include 'src/common/errors_data.inc'
 
 help_name db 'help', 0
 echo_name db 'echo', 0

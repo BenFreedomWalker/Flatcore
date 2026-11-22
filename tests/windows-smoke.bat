@@ -31,6 +31,8 @@ set "TEST_DIR=%TEMP%\flatcore-smoke-%RANDOM%"
 if errorlevel 1 goto failed
 "%BIN%" touch "%TEST_DIR%\sample.txt"
 if errorlevel 1 goto failed
+"%BIN%" ls "%TEST_DIR%" >nul
+if errorlevel 1 goto failed
 "%BIN%" cat "%TEST_DIR%\sample.txt" >nul
 if errorlevel 1 goto failed
 "%BIN%" rm "%TEST_DIR%\sample.txt"

@@ -88,7 +88,7 @@ fc_runtime_selftest:
     mov r8, test_normalized_argv
     call fc_prepare_command
     test eax, eax
-    jnz .failed
+    jnz .fail20
     cmp qword [test_normalized_argc], 3
     jne .fail14
     mov rax, [test_normalized_argv]
@@ -107,7 +107,7 @@ fc_runtime_selftest:
     mov r8, test_normalized_argv
     call fc_prepare_command
     test eax, eax
-    jnz .failed
+    jnz .fail21
     cmp qword [test_normalized_argc], 2
     jne .fail16
     mov rax, [test_normalized_argv] ; normalized argv vector

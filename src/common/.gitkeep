@@ -1,0 +1,2 @@
+; Shared Flatcore runtime source area.
+; Common runtime modules will be added here during Stage 3.

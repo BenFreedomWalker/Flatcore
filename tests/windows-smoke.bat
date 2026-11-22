@@ -26,6 +26,18 @@ if not defined PWD_RESULT goto failed
 for /f "delims=" %%A in ('"%BIN%" hostname') do set "HOST_RESULT=%%A"
 if not defined HOST_RESULT goto failed
 
+set "TEST_DIR=%TEMP%\flatcore-smoke-%RANDOM%"
+"%BIN%" mkdir "%TEST_DIR%"
+if errorlevel 1 goto failed
+"%BIN%" touch "%TEST_DIR%\sample.txt"
+if errorlevel 1 goto failed
+"%BIN%" cat "%TEST_DIR%\sample.txt" >nul
+if errorlevel 1 goto failed
+"%BIN%" rm "%TEST_DIR%\sample.txt"
+if errorlevel 1 goto failed
+"%BIN%" rmdir "%TEST_DIR%"
+if errorlevel 1 goto failed
+
 echo Flatcore Windows smoke tests passed.
 exit /b 0
 

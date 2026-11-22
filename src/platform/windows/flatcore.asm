@@ -398,6 +398,12 @@ import kernel32, \
     GetCommandLineA, 'GetCommandLineA', \
     GetCurrentDirectoryA, 'GetCurrentDirectoryA', \
     GetComputerNameA, 'GetComputerNameA', \
+    CreateDirectoryA, 'CreateDirectoryA', \
+    RemoveDirectoryA, 'RemoveDirectoryA', \
+    DeleteFileA, 'DeleteFileA', \
+    CreateFileA, 'CreateFileA', \
+    ReadFile, 'ReadFile', \
+    CloseHandle, 'CloseHandle', \
     GetStdHandle, 'GetStdHandle', \
     WriteFile, 'WriteFile', \
-    ExitProcess, 'ExitProcess'
+    ExitProcess, 'ExitProcess'\n

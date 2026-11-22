@@ -72,4 +72,9 @@ actual="$("$BIN" dirname '/tmp/flatcore-test/file.txt')"
     "$BIN" rm sample.txt input.txt moved.txt input-link mode.txt wc.txt
 )
 
+sleep 30 &
+child_pid=$!
+"$BIN" kill "$child_pid"
+wait "$child_pid" 2>/dev/null || true
+
 printf 'Flatcore smoke tests passed.\n'

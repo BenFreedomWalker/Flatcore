@@ -132,3 +132,95 @@ os_chdir:
 .chdir_error:
     neg eax
     jmp fc_linux_set_error
+
+; os_stat(path_utf8, out_fc_file_info)
+; Linux x86-64 struct stat is collected with newfstatat(AT_FDCWD, ...).
+os_stat:
+    mov r8, rsi
+    mov rsi, rdi
+    mov edi, -100
+    mov rdx, linux_stat_buffer
+    xor r10d, r10d
+    mov eax, 262
+    syscall
+    test rax, rax
+    js .stat_error
+
+    ; Clear the complete public structure before populating supported fields.
+    mov rdi, r8
+    xor eax, eax
+    mov ecx, 8
+    rep stosq
+
+    mov rax, [linux_stat_buffer + 48]
+    mov [r8], rax
+
+    ; st_mtime seconds/nanoseconds -> Unix epoch nanoseconds.
+    mov rax, [linux_stat_buffer + 88]
+    imul rax, 1000000000
+    add rax, [linux_stat_buffer + 96]
+    mov [r8 + 8], rax
+
+    ; st_atime seconds/nanoseconds -> Unix epoch nanoseconds.
+    mov rax, [linux_stat_buffer + 72]
+    imul rax, 1000000000
+    add rax, [linux_stat_buffer + 80]
+    mov [r8 + 24], rax
+
+    mov eax, [linux_stat_buffer + 24]
+    mov [r8 + 40], eax
+    mov eax, [linux_stat_buffer + 16]
+    mov [r8 + 44], eax
+
+    ; Translate the POSIX file type from st_mode.
+    mov eax, [linux_stat_buffer + 24]
+    and eax, 170000o
+    cmp eax, 100000o
+    je .stat_regular
+    cmp eax, 040000o
+    je .stat_directory
+    cmp eax, 120000o
+    je .stat_symlink
+    cmp eax, 010000o
+    je .stat_fifo
+    cmp eax, 140000o
+    je .stat_socket
+    cmp eax, 020000o
+    je .stat_device
+    cmp eax, 060000o
+    je .stat_device
+    jmp .stat_attributes
+.stat_regular:
+    mov dword [r8 + 36], FC_TYPE_REGULAR
+    jmp .stat_attributes
+.stat_directory:
+    mov dword [r8 + 36], FC_TYPE_DIRECTORY
+    jmp .stat_attributes
+.stat_symlink:
+    mov dword [r8 + 36], FC_TYPE_SYMLINK
+    jmp .stat_attributes
+.stat_fifo:
+    mov dword [r8 + 36], FC_TYPE_FIFO
+    jmp .stat_attributes
+.stat_socket:
+    mov dword [r8 + 36], FC_TYPE_SOCKET
+    jmp .stat_attributes
+.stat_device:
+    mov dword [r8 + 36], FC_TYPE_DEVICE
+.stat_attributes:
+    ; Hidden is a shared convention based on a leading dot in the basename.
+    cmp byte [rsi], '.'
+    jne .stat_readonly
+    or dword [r8 + 32], FC_ATTR_HIDDEN
+.stat_readonly:
+    mov eax, [linux_stat_buffer + 24]
+    test eax, 0222o
+    jnz .stat_done
+    or dword [r8 + 32], FC_ATTR_READ_ONLY
+.stat_done:
+    xor eax, eax
+    ret
+.stat_error:
+    neg eax
+    jmp fc_linux_set_error
+

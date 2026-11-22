@@ -33,15 +33,68 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 
 ## Stage 0 — Audit and freeze the current baseline
 
-- [ ] Inventory every existing source file, command, global datum, helper, syscall, and Win32 API use.
-- [ ] Record the current Windows and Linux command sets and their behavioral differences.
-- [ ] Identify register-clobber assumptions and current calling conventions in both implementations.
-- [ ] Inspect both build scripts and document their assembler/include requirements.
-- [ ] Inspect both smoke-test suites and record current coverage.
-- [ ] Define the migration map from existing files into the new source tree.
-- [ ] Preserve the current implementation as a recoverable baseline until the new architecture builds.
+- [x] Inventory every existing source file, command, global datum, helper, syscall, and Win32 API use.
+- [x] Record the current Windows and Linux command sets and their behavioral differences.
+- [x] Identify register-clobber assumptions and current calling conventions in both implementations.
+- [x] Inspect both build scripts and document their assembler/include requirements.
+- [x] Inspect both smoke-test suites and record current coverage.
+- [x] Define the migration map from existing files into the new source tree.
+- [x] Preserve the current implementation as a recoverable baseline until the new architecture builds.
 
-**Runtime verification:** pending; baseline build and smoke tests must be run on both targets before migration is considered safe.
+### Baseline inventory (2026-11-23)
+
+**Current source layout**
+
+- Linux entry/dispatcher: `src/flatcore.asm`.
+- Linux runtime helpers: `src/runtime.inc`.
+- Linux command implementations: `src/commands.inc`, `src/commands_extra.inc`, `src/commands_ls.inc`, and `src/commands_system.inc`.
+- Linux global data and command strings: `src/data.inc`.
+- Separate Windows implementation: `src/platform/windows/flatcore.asm`.
+- Linux build/test: `build.sh` and `tests/smoke.sh`.
+- Windows build/test: `build-windows.bat` and `tests/windows-smoke.bat`.
+
+**Command inventory**
+
+- Linux dispatcher currently exposes 30 commands: `help`, `echo`, `true`, `false`, `pwd`, `cat`, `ls`, `mkdir`, `rmdir`, `rm`, `touch`, `cp`, `mv`, `clear`, `uname`, `basename`, `dirname`, `head`, `wc`, `ln`, `readlink`, `chmod`, `kill`, `sync`, `id`, `hostname`, `uptime`, and `sleep`. (The dispatcher includes 28 named commands; the build script also creates links for `help` and the same command set.)
+- Windows currently implements 16 commands: `help`, `echo`, `true`, `false`, `pwd`, `hostname`, `mkdir`, `rmdir`, `rm`, `touch`, `cat`, `ls`, `cp`, `mv`, `basename`, `dirname`, and `head` (17 including the dispatcher/help entry; actual availability is determined by its dispatch table).
+- The two targets have separate dispatchers, parsers, data, output helpers, and command bodies. Their command coverage and semantics are not at parity.
+- Windows currently parses a raw `GetCommandLineA` string itself and uses ANSI (`A)-suffixed) Win32 APIs. It does not currently normalize a Windows argv vector or provide UTF-8/UTF-16 boundary handling.
+- Linux receives the kernel argc/argv stack directly and uses Linux x86-64 syscalls.
+
+**Linux native interface currently used**
+
+- Syscalls include `read` (0), `write` (1), `open` (2), `close` (3), `getcwd` (79), `rename` (82), `mkdir` (83), `rmdir` (84), `link` (86), `unlink` (87), `symlink` (88), `readlink` (89), `chmod` (90), `getuid` (102), `getgid` (104), `sysinfo` (99), `kill` (62), `uname` (63), `sync` (162), `getdents64` (217), `newfstatat` (262), `utimensat` (280), `nanosleep` (35), and `exit` (60).
+- Runtime helpers are Linux-specific: `write_all`, `copy_fd`, and `process_exit` issue syscalls directly. Commands also issue syscalls directly rather than using a backend interface.
+- The Linux syscall ABI is used directly (syscall number in RAX; arguments in RDI, RSI, RDX, R10, R8, R9). There is no documented shared internal calling convention yet.
+
+**Windows native interface currently used**
+
+- The Windows executable imports Kernel32 functions including `GetCommandLineA`, `GetCurrentDirectoryA`, `GetComputerNameA`, `CreateDirectoryA`, `RemoveDirectoryA`, `DeleteFileA`, `CreateFileA`, `ReadFile`, `CloseHandle`, `GetSystemTimeAsFileTime`, `SetFileTime`, `FindFirstFileA`, `FindNextFileA`, `FindClose`, `CopyFileA`, `MoveFileA`, `GetStdHandle`, `WriteFile`, and `ExitProcess`.
+- Windows code uses the Win64 ABI (RCX, RDX, R8, R9 plus stack arguments; 32-byte shadow space and 16-byte stack alignment at call boundaries). There is no common internal ABI shared with Linux.
+- Most Windows commands are implemented inline in the single Windows assembly file. Linux and Windows implementations have different feature sets and behavior.
+
+**Build and test baseline**
+
+- Linux: `build.sh` invokes FASM on `src/flatcore.asm`, creates symlinks for command invocation, and supports `build`, `test`, `install`, and `clean`.
+- Windows: `build-windows.bat` invokes FASM on `src/platform/windows/flatcore.asm`, locates the FASM include directory for `win64a.inc`, and optionally runs the Windows batch smoke test with the `test` argument.
+- Linux smoke coverage exercises basic command behavior, file operations, ls behavior, links, permissions, system utilities, and error cases.
+- Windows smoke coverage exercises basic startup, status codes, echo, pwd, hostname, basic directory/file operations, ls, cp/mv, cat/head, basename, and dirname.
+- The current test suites are not shared and do not compare equivalent cases across targets.
+- The current implementation is preserved in Git history on `main`. No old implementation files will be removed until the replacement builds and passes the baseline tests.
+
+**Migration map**
+
+| Existing source | Destination |
+|---|---|
+| `src/flatcore.asm` dispatcher/startup | `src/common/dispatcher.inc` plus `src/platform/linux/entry.asm` |
+| `src/runtime.inc` | Common string/output/memory helpers where portable; syscall operations move to `src/platform/linux/` |
+| `src/commands*.inc` | One implementation per command under `src/commands/`; OS operations replaced by backend calls |
+| `src/data.inc` | Common command data in `src/commands/` and runtime data in `src/common/`; Linux-only layouts move to Linux backend |
+| `src/platform/windows/flatcore.asm` | Windows entry/backend under `src/platform/windows/`; command bodies migrate into shared command files |
+| `build.sh`, `build-windows.bat` | Retain front-end scripts, make both assemble the same common source set with one selected backend |
+| `tests/smoke.sh`, `tests/windows-smoke.bat` | Shared behavioral test cases with thin Linux/Windows runners |
+
+**Runtime verification:** pending; the user must run the baseline build and smoke tests on both targets before migration is considered safe.
 
 ## Stage 1 — Define the shared ABI and OS backend contract
 

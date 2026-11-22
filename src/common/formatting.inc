@@ -24,8 +24,7 @@ fc_u64toa:
     add dl, '0'
     mov [r8 + rcx], dl
     inc rcx
-    mov rax, rdi
-    ; Advance to the quotient for the next digit.
+    ; RAX already contains the quotient for the next digit.
     mov rdi, rax
     cmp rdi, 0
     jne .convert

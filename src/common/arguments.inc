@@ -62,7 +62,7 @@ fc_parse_argv:
     je .end_arg
 
 .parse_special:
-    cmp al, '\\'
+    cmp al, '\'
     je .backslashes
     cmp al, '"'
     je .quote
@@ -71,7 +71,7 @@ fc_parse_argv:
 .backslashes:
     xor r8d, r8d
 .count_backslashes:
-    cmp byte [r12], '\\'
+    cmp byte [r12], '\'
     jne .backslashes_counted
     inc r8
     inc r12
@@ -86,7 +86,7 @@ fc_parse_argv:
     jz .backslashes_before_quote
     cmp r15, rbx
     jae .overflow
-    mov byte [r15], '\\'
+    mov byte [r15], '\'
     inc r15
     dec r9
     jmp .emit_half_backslashes
@@ -124,7 +124,7 @@ fc_parse_argv:
     jz .parse_arg
     cmp r15, rbx
     jae .overflow
-    mov byte [r15], '\\'
+    mov byte [r15], '\'
     inc r15
     dec r9
     jmp .emit_backslash_loop

@@ -26,16 +26,27 @@ if not defined PWD_RESULT goto failed
 for /f "delims=" %%A in ('"%BIN%" hostname') do set "HOST_RESULT=%%A"
 if not defined HOST_RESULT goto failed
 
-set "TEST_DIR=%TEMP%\flatcore-smoke-%RANDOM%"
+set "TEST_DIR=%TEMP%\flatcore smoke-%RANDOM%"
 "%BIN%" mkdir "%TEST_DIR%"
 if errorlevel 1 goto failed
-"%BIN%" touch "%TEST_DIR%\sample.txt"
+echo alpha> "%TEST_DIR%\sample.txt"
+"%BIN%" head "%TEST_DIR%\sample.txt" >nul
 if errorlevel 1 goto failed
 "%BIN%" ls "%TEST_DIR%" >nul
 if errorlevel 1 goto failed
+"%BIN%" cp "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt"
+if errorlevel 1 goto failed
+"%BIN%" mv "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt"
+if errorlevel 1 goto failed
+for /f "delims=" %%A in ('"%BIN%" basename "%TEST_DIR%\sample.txt"') do set "BASE_RESULT=%%A"
+if not "%BASE_RESULT%"=="sample.txt" goto failed
+for /f "delims=" %%A in ('"%BIN%" dirname "%TEST_DIR%\sample.txt"') do set "DIR_RESULT=%%A"
+if not "%DIR_RESULT%"=="%TEST_DIR%" goto failed
 "%BIN%" cat "%TEST_DIR%\sample.txt" >nul
 if errorlevel 1 goto failed
 "%BIN%" rm "%TEST_DIR%\sample.txt"
+if errorlevel 1 goto failed
+"%BIN%" rm "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
 "%BIN%" rmdir "%TEST_DIR%"
 if errorlevel 1 goto failed

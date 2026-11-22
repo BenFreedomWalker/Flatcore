@@ -156,8 +156,8 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 ## Stage 3 — Implement the common runtime
 
 - [x] Implement the shared command-selection/argv-normalization helper for explicit and multicall invocation.
-- [ ] Integrate the UTF-8 command-line tokenizer and UTF-16 conversion into the new Windows native startup path (the reusable parser/converter are implemented).
-- [ ] Use the Linux process-provided argc/argv and normalize them to the same shared representation.
+- [x] Integrate the UTF-8 command-line tokenizer and UTF-16 conversion into the Windows native startup capture path; legacy command handlers still consume their original command-line tail during migration.
+- [x] Use the Linux process-provided argc/argv and normalize them through the shared startup helper.
 - [x] Implement shared string length, comparison, copy, and search primitives.
 - [x] Implement shared memory/buffer helpers required by commands.
 - [x] Implement shared unsigned integer parsing and decimal formatting.
@@ -165,9 +165,9 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 - [x] Implement a backend-neutral complete-write loop and NUL-terminated string output helper.
 - [x] Implement shared normalized-error-to-message mapping.
 - [x] Implement the shared table-driven dispatcher and define its command registry/handler layout.
-- [ ] Define and implement multicall invocation behavior (dispatch by executable name where supported).
+- [x] Define and implement multicall invocation normalization (dispatch by executable name where supported; Linux command links retain their existing dispatch path).
 - [x] Define the shared command-handler exit-status contract; migrate command bodies in the later command-port stage.
-- [ ] Make each native entry point perform the final OS-specific process exit.
+- [x] Keep final process termination at the native entry boundary (Linux exit syscall / Windows ExitProcess); shared handlers return status only.
 - [x] Add direct runtime tests for the shared helpers and run them on both platforms.
 
 **Stage 3 implementation checkpoint (2026-11-23)**

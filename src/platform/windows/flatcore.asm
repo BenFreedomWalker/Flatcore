@@ -746,7 +746,9 @@ write_stdout_n:
 
 include 'src/common/memory.inc'
 include 'src/common/strings.inc'
+include 'src/common/arguments.inc'
 include 'src/common/formatting.inc'
+include 'src/common/output.inc'
 include 'src/common/dispatcher.inc'
 
 section '.rdata' data readable

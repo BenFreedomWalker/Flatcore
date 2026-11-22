@@ -300,3 +300,8 @@ Both existing native source files include and assemble these same common modules
 - [ ] Shared commands have matching documented behavior and option coverage.
 - [ ] Cross-platform tests pass, with intentional OS differences documented.
 - [ ] Linux retains a viable path to a pure-FASM PID 1 and complete userspace.
+
+
+**Linux backend test correction (2026-11-23)**
+
+- First integration run exposed a segmentation fault in the new `os_getcwd` test path. The backend saved the output-length pointer from RCX, but the FC64 API defines it as the third argument in RDX. Corrected `os_getcwd` to preserve RDX before preparing the native syscall arguments (commit 4fcdef1). Awaiting a repeat of both test suites.

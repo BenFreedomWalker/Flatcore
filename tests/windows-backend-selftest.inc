@@ -155,6 +155,7 @@ fc_windows_backend_selftest:
 .fail13: mov eax, 73
     jmp .done
 .fail14: mov eax, 74
+    jmp .done
 .fail15: mov eax, 75
     jmp .done
 .fail16: mov eax, 76

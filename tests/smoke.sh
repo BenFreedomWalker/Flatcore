@@ -142,6 +142,16 @@ fi
     "$BIN" rm --version > rm-version.txt
     grep -q 'Flatcore rm' rm-version.txt
     "$BIN" rm -f missing-rm-file
+    ln -s missing-rm-target rm-dangling-link
+    "$BIN" rm rm-dangling-link
+    [[ ! -L rm-dangling-link ]]
+    ln -s missing-rm-target rm-force-dangling-link
+    "$BIN" rm -f rm-force-dangling-link
+    [[ ! -L rm-force-dangling-link ]]
+    printf 'keep target\\n' > rm-link-target
+    ln -s rm-link-target rm-file-link
+    "$BIN" rm rm-file-link
+    [[ -f rm-link-target && ! -L rm-file-link ]]
     printf 'verbose removal\\n' > rm-verbose-file
     "$BIN" rm -v rm-verbose-file > rm-verbose.txt
     grep -q "removed 'rm-verbose-file'" rm-verbose.txt

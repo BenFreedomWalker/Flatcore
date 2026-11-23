@@ -45,6 +45,14 @@ fc_windows_backend_selftest:
     cmp qword [windows_test_length], 2
     jne .fail3
 
+    ; Set distinct access and modification timestamps at FILETIME precision.
+    mov rdi, windows_test_path
+    mov rsi, 1700000000234567800
+    mov rdx, 1700000000123456700
+    call os_set_times
+    test eax, eax
+    jnz .fail96
+
     ; Query metadata through the Unicode Win32 backend while the file exists.
     mov rdi, windows_test_path
     mov rsi, windows_test_info
@@ -58,6 +66,12 @@ fc_windows_backend_selftest:
     ; POSIX mode bits are not representable by this Windows metadata query.
     cmp dword [windows_test_info + 40], 0
     jne .fail18
+    mov rax, 1700000000123456700
+    cmp qword [windows_test_info + 8], rax
+    jne .fail97
+    mov rax, 1700000000234567800
+    cmp qword [windows_test_info + 24], rax
+    jne .fail98
 
     mov rdi, [windows_test_handle]
     call os_close
@@ -318,6 +332,12 @@ fc_windows_backend_selftest:
 .fail94: mov eax, 94
     jmp .done
 .fail95: mov eax, 95
+    jmp .done
+.fail96: mov eax, 96
+    jmp .done
+.fail97: mov eax, 97
+    jmp .done
+.fail98: mov eax, 98
 .done:
     add rsp, 16
     pop r13

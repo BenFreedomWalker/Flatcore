@@ -11,7 +11,7 @@ linux_test_length dq 0
 align 8
 linux_test_info rb 64
 
-linux_test_dir_path db '/tmp', 0
+linux_test_dir_path db '/tmp/flatcore-fc64-backend-dir', 0
 align 8
 linux_test_dir_handle dq 0
 linux_test_dir_handle2 dq 0

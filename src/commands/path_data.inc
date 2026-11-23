@@ -33,7 +33,6 @@ fc_cmd_dirname_usage_text db 'usage: dirname PATH', 10, 0
 fc_cmd_pwd_error db 'flatcore: pwd: cannot get current directory', 10
 fc_cmd_pwd_error_length = $ - fc_cmd_pwd_error
 
-fc_cmd_ls_name db 'ls', 0
 fc_cmd_ls_dot db '.', 0
 fc_cmd_ls_opt_all db '--all', 0
 fc_cmd_ls_opt_almost db '--almost-all', 0

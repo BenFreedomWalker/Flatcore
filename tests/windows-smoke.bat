@@ -92,6 +92,7 @@ if errorlevel 1 goto failed
 set "STEP=ls directory and option coverage"
 > "%TEST_DIR%\.hidden" echo hidden
 > "%TEST_DIR%\visible" echo visible
+set "STEP=ls default directory listing"
 "%BIN%" ls "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
 set "LS_MATCH="
@@ -100,36 +101,42 @@ if not defined LS_MATCH goto failed
 set "LS_MATCH="
 for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"==".hidden" set "LS_MATCH=1"
 if defined LS_MATCH goto failed
+set "STEP=ls almost-all option"
 "%BIN%" ls -A "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
 set "LS_MATCH="
 for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"==".hidden" set "LS_MATCH=1"
 if not defined LS_MATCH goto failed
+set "STEP=ls long and all options"
 "%BIN%" ls -la "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
 set "LS_MATCH="
 for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"==".hidden" set "LS_MATCH=1"
 if not defined LS_MATCH goto failed
+set "STEP=ls directory operand option"
 "%BIN%" ls -d "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
 set "LS_MATCH="
 for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="%TEST_DIR%" set "LS_MATCH=1"
 if not defined LS_MATCH goto failed
+set "STEP=ls multiple file operands"
 "%BIN%" ls "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" > "%OUT%"
 if errorlevel 1 goto failed
 set "LS_SAMPLE="
 set "LS_SECOND="
 for /f "usebackq delims=" %%A in ("%OUT%") do (
-    if "%%A"=="sample.txt" set "LS_SAMPLE=1"
-    if "%%A"=="second.txt" set "LS_SECOND=1"
+    if "%%A"=="%TEST_DIR%\sample.txt" set "LS_SAMPLE=1"
+    if "%%A"=="%TEST_DIR%\second.txt" set "LS_SECOND=1"
 )
 if not defined LS_SAMPLE goto failed
 if not defined LS_SECOND goto failed
+set "STEP=ls version option"
 "%BIN%" ls --version > "%OUT%"
 if errorlevel 1 goto failed
 set "LS_MATCH="
 for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="Flatcore ls 0.1" set "LS_MATCH=1"
 if not defined LS_MATCH goto failed
+set "STEP=ls invalid option"
 "%BIN%" ls --not-a-real-option >nul 2>nul
 if not errorlevel 1 goto failed
 

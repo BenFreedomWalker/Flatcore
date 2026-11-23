@@ -12,6 +12,7 @@ section '.text' code readable executable
 
 start:
     sub rsp, 72
+    call os_init
 
     ; Capture the native UTF-16 command line, convert it to the shared UTF-8
     ; representation, tokenize it, and normalize explicit/multicall argv.
@@ -791,6 +792,8 @@ include 'src/common/output.inc'
 include 'src/common/startup.inc'
 include 'src/common/dispatcher.inc'
 include 'src/common/errors.inc'
+include 'src/platform/windows/io.inc'
+include 'src/platform/windows/filesystem.inc'
 
 section '.rdata' data readable
 include 'src/common/errors_data.inc'
@@ -822,6 +825,7 @@ newline_text db 13, 10
 dot_path db '.', 0
 
 section '.data' data readable writeable
+include 'src/platform/windows/data.inc'
 windows_executable_name db 'flatcore.exe', 0
 windows_argc rq 1
 windows_normalized_argc rq 1
@@ -846,6 +850,14 @@ library kernel32, 'KERNEL32.DLL'
 import kernel32, \
     GetCommandLineA, 'GetCommandLineA', \
     GetCommandLineW, 'GetCommandLineW', \
+    GetLastError, 'GetLastError', \
+    CreateFileW, 'CreateFileW', \
+    CreateDirectoryW, 'CreateDirectoryW', \
+    RemoveDirectoryW, 'RemoveDirectoryW', \
+    DeleteFileW, 'DeleteFileW', \
+    MoveFileW, 'MoveFileW', \
+    GetCurrentDirectoryW, 'GetCurrentDirectoryW', \
+    SetCurrentDirectoryW, 'SetCurrentDirectoryW', \
     GetCurrentDirectoryA, 'GetCurrentDirectoryA', \
     GetComputerNameA, 'GetComputerNameA', \
     CreateDirectoryA, 'CreateDirectoryA', \

@@ -51,4 +51,5 @@ import kernel32, \
     DeleteFileW, 'DeleteFileW', \
     MoveFileW, 'MoveFileW', \
     GetCurrentDirectoryW, 'GetCurrentDirectoryW', \
+    GetFileAttributesExW, 'GetFileAttributesExW', \
     SetCurrentDirectoryW, 'SetCurrentDirectoryW'

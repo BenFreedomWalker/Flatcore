@@ -225,6 +225,43 @@ if errorlevel 1 goto failed
 
 del "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\visible" >nul 2>nul
 
+set "STEP=rmdir parents and verbose output"
+pushd "%TEST_DIR%"
+"%BIN%" mkdir -p rmdir-chain\one\two
+if errorlevel 1 goto failed
+"%BIN%" rmdir -pv rmdir-chain\one\two > "%OUT%"
+if errorlevel 1 goto failed
+set "RMDIR_VERBOSE_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="rmdir: removed 'rmdir-chain\one\two'" set "RMDIR_VERBOSE_MATCH=1"
+if not defined RMDIR_VERBOSE_MATCH goto failed
+if exist rmdir-chain goto failed
+popd
+
+set "STEP=rmdir help and version"
+"%BIN%" rmdir --help > "%OUT%"
+if errorlevel 1 goto failed
+set "RMDIR_HELP_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="Usage: rmdir [OPTION]... DIRECTORY..." set "RMDIR_HELP_MATCH=1"
+if not defined RMDIR_HELP_MATCH goto failed
+"%BIN%" rmdir --version > "%OUT%"
+if errorlevel 1 goto failed
+set "RMDIR_VERSION_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="Flatcore rmdir 0.1" set "RMDIR_VERSION_MATCH=1"
+if not defined RMDIR_VERSION_MATCH goto failed
+set "STEP=rmdir invalid option"
+"%BIN%" rmdir --not-a-real-option >nul 2>nul
+if not errorlevel 1 goto failed
+
+set "STEP=rmdir rejects non-empty directory"
+mkdir "%TEST_DIR%\rmdir-nonempty"
+> "%TEST_DIR%\rmdir-nonempty\file.txt" echo keep
+"%BIN%" rmdir "%TEST_DIR%\rmdir-nonempty" >nul 2>nul
+if not errorlevel 1 goto failed
+if not exist "%TEST_DIR%\rmdir-nonempty\file.txt" goto failed
+del "%TEST_DIR%\rmdir-nonempty\file.txt"
+"%BIN%" rmdir "%TEST_DIR%\rmdir-nonempty"
+if errorlevel 1 goto failed
+
 set "STEP=remove mkdir test tree"
 "%BIN%" rmdir "%TEST_DIR%\nested\one\two"
 if errorlevel 1 goto failed

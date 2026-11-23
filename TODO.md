@@ -493,4 +493,10 @@ Both existing native source files include and assemble these same common modules
 - Expanded the shared registry to six commands (`true`, `false`, `echo`, `pwd`, `basename`, `dirname`) and added common immutable command data in `src/commands/path_data.inc`.
 - Added per-platform writable scratch storage for the shared `pwd` buffer and length. Wired `path.inc` and `path_data.inc` into both production executables and both shared runtime test executables.
 - Expanded Linux and Windows smoke coverage for current-directory output, POSIX and Windows separators, root/drive-root handling, relative paths, and invalid `pwd` operands. Windows assertions extract LF-terminated output instead of comparing against CMD's CRLF `echo` output.
-- Source implementation and static integration are complete for this tranche. Runtime verification is pending; run both full test commands below before proceeding to `cat`.
+- Runtime verification passed (2026-11-23): the user ran `./build.sh test` under WSL and `build-windows.bat test` under Windows. Both shared runtime/backend suites and both smoke suites passed with exit status 0. `pwd`, `basename`, and `dirname` are verified on both targets.
+
+
+**Stage 5 path command verification (2026-11-23)**
+
+- Linux and Windows test runs both passed after the shared `pwd`, `basename`, and `dirname` migration. Linux printed the expected `flatcore: operation failed` diagnostic from its negative/error-path smoke case; the smoke suite completed successfully with status 0.
+- The path-command tranche is verified. The next implementation tranche is shared `cat`, including stdin and multiple file operands. Wait for the user's `ok` before starting it.

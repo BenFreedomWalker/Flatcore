@@ -216,8 +216,8 @@ Both existing native source files include and assemble these same common modules
 - [x] Implement and runtime-verify Linux os_dir_open, os_dir_next, and os_dir_close on both platform test checkpoints.
 - [x] Implement os_mkdir, os_rmdir, os_unlink, and os_rename in the Linux backend.
 - [x] Implement os_getcwd and os_chdir in the Linux backend.
-- [ ] Implement file timestamps and the operations required by touch.
-- [ ] Complete remaining Linux syscall-backed versions (timestamps remain).
+- [x] Implement Linux file timestamp updates with `utimensat`; verify nanosecond precision through `os_stat`.
+- [ ] Complete remaining Linux syscall-backed versions (Windows Unicode backend and capability semantics remain).
 - [ ] Implement Windows Unicode Win32-backed versions.
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
@@ -353,3 +353,12 @@ Both existing native source files include and assemble these same common modules
 - User reran `./build.sh test` under WSL and `build-windows.bat test` under Windows after correcting the Linux directory fixture path. Both returned exit status 0.
 - Linux backend tests now pass the dedicated-directory setup, simultaneous iterator handles, too-small-buffer retry, entry reads, EOF handling, iterator close, and fixture cleanup. The Windows helper and smoke suites also remain green.
 - Directory iteration is verified on Linux; Windows directory backend implementation remains outstanding.
+
+
+**Linux timestamp backend implementation (2026-11-23)**
+
+- Added FC64 `os_set_times(path_utf8, accessed_ns, modified_ns)` using Linux `utimensat(AT_FDCWD, ...)`.
+- Converts signed Unix-epoch nanoseconds into normalized `timespec` seconds/nanoseconds, including correct normalization for pre-epoch timestamps.
+- Added backend assertions that set distinct access and modification timestamps and verify the exact nanosecond values through `os_stat`.
+- Corrected `os_dir_next` and its test calls to use R8 for the fifth FC64 argument, matching the public ABI contract (RDI, RSI, RDX, RCX, R8, R9).
+- Runtime verification is pending. The Linux backend test now includes timestamp precision checks; Windows sources are unchanged.

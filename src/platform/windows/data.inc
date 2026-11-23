@@ -9,3 +9,6 @@ os_native_error dq 0
 align 16
 windows_path_buffer rb 65536
 windows_path_buffer2 rb 65536
+
+align 8
+windows_file_data rb 40

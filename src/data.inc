@@ -91,8 +91,3 @@ ls_help_text db 'Usage: ls [OPTION]... [FILE]...',10
              db '      --help            display this help and exit',10
              db '      --version         output version information and exit',10,0
 ls_version_text db 'Flatcore ls 0.1',10,0
-
-; Shared rm command state.
-align 16
-fc_cmd_rm_flags rq 1
-fc_cmd_rm_info rb 64

@@ -338,6 +338,10 @@ fc_cmd_mkdir:
     inc r14
     jmp .parse
 
+.short_done:
+    inc r14
+    jmp .parse
+
 .help:
     mov rdi, [os_stdout]
     mov rsi, fc_cmd_mkdir_help_text

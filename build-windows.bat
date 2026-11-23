@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableExtensions EnableDelayedExpansion
 
 set "ROOT=%~dp0"
 set "FASM=%FASM%"
@@ -38,8 +38,8 @@ if /i "%~1"=="test" (
     set "RUNTIME_STATUS=%errorlevel%"
     popd
     if not "%RUNTIME_STATUS%"=="0" (
-        echo Flatcore shared runtime and backend tests failed with status %RUNTIME_STATUS%.
-        exit /b %RUNTIME_STATUS%
+        echo Flatcore shared runtime and backend tests failed with status !RUNTIME_STATUS!.
+        exit /b !RUNTIME_STATUS!
     )
     echo Flatcore shared runtime and Windows backend tests passed.
     call "%ROOT%tests\windows-smoke.bat"

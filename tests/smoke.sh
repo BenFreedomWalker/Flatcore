@@ -145,6 +145,9 @@ fi
     "$BIN" mkdir -p rmdir-chain/one/two
     "$BIN" rmdir -p rmdir-chain/one/two
     [[ ! -e rmdir-chain ]]
+    "$BIN" mkdir -p rmdir-dot/a/b
+    "$BIN" rmdir -p ./rmdir-dot/a/b
+    [[ ! -e rmdir-dot ]]
     "$BIN" mkdir -p rmdir-verbose/a/b
     "$BIN" rmdir -pv rmdir-verbose/a/b > rmdir-verbose.txt
     grep -q "removed 'rmdir-verbose/a/b'" rmdir-verbose.txt

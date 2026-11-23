@@ -15,6 +15,7 @@ include 'src/common/dispatcher.inc'
 include 'src/common/errors.inc'
 include 'src/platform/windows/io.inc'
 include 'src/platform/windows/filesystem.inc'
+include 'tests/windows-backend-selftest.inc'
 include 'tests/runtime-selftest.inc'
 
 start:
@@ -33,6 +34,7 @@ section '.data' data readable writeable
 include 'src/platform/windows/data.inc'
 include 'src/common/errors_data.inc'
 include 'tests/runtime-selftest-data.inc'
+include 'tests/windows-backend-selftest-data.inc'
 
 section '.idata' import data readable writeable
 library kernel32, 'KERNEL32.DLL'

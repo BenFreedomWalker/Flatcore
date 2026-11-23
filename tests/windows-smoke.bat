@@ -192,7 +192,7 @@ for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="sample.txt" set "BASENA
 if not defined BASENAME_MATCH goto failed
 
 set "STEP=basename drive root"
-"%BIN%" basename "C:\" > "%OUT%"
+"%BIN%" basename "C:\\" > "%OUT%"
 set "BASENAME_ROOT_MATCH="
 for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="\" set "BASENAME_ROOT_MATCH=1"
 if not defined BASENAME_ROOT_MATCH goto failed

@@ -27,7 +27,7 @@ fc_linux_backend_selftest:
     jnz .fail29
     cmp dword [linux_test_info + 36], FC_TYPE_SYMLINK
     jne .fail30
-    mov eax, [linux_test_info + 40]
+    mov eax, dword [linux_test_info + 40]
     and eax, 170000o
     cmp eax, 120000o
     jne .fail31

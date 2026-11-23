@@ -172,7 +172,7 @@ os_unlink:
     cmp rax, -1
     je .unlink_file
     mov r13, rax
-    mov eax, [windows_stat_find_data]
+    mov eax, dword [windows_stat_find_data]
     and eax, 410h              ; REPARSE_POINT | DIRECTORY
     cmp eax, 410h
     jne .unlink_close_file

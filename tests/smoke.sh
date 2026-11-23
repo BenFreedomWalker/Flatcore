@@ -43,6 +43,23 @@ fi
     [[ "$("$BIN" pwd)" == "$TMP_DIR" ]]
     "$BIN" touch sample.txt
     "$BIN" echo 'assembly userspace' > input.txt
+    printf 'first\000chunk\n' > cat-first.bin
+    printf 'second\r\n' > cat-second.bin
+    : > cat-empty.bin
+    cat cat-first.bin cat-second.bin > cat-expected.bin
+    "$BIN" cat cat-first.bin cat-second.bin > cat-actual.bin
+    cmp cat-expected.bin cat-actual.bin
+    "$BIN" cat cat-empty.bin > cat-empty-output.bin
+    cmp cat-empty.bin cat-empty-output.bin
+    "$BIN" cat < cat-first.bin > cat-stdin-output.bin
+    cmp cat-first.bin cat-stdin-output.bin
+    "$BIN" cat - < cat-second.bin > cat-dash-output.bin
+    cmp cat-second.bin cat-dash-output.bin
+    if "$BIN" cat missing-cat-file cat-first.bin > cat-after-error.bin 2>/dev/null; then
+        printf 'cat succeeded despite a missing input file\n' >&2
+        exit 1
+    fi
+    cmp cat-first.bin cat-after-error.bin
     "$BIN" cp input.txt copied.txt
     cmp input.txt copied.txt
     "$BIN" mv copied.txt moved.txt

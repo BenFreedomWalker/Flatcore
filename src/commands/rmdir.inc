@@ -119,6 +119,22 @@ fc_cmd_rmdir_one:
 .parent_truncate:
     mov byte [fc_cmd_rmdir_work_path + r14], 0
     mov r13, r14
+    ; Do not attempt to remove a filesystem root or the caller's . / ...
+    cmp r13, 1
+    jne .parent_check_dotdot
+    mov al, [fc_cmd_rmdir_work_path]
+    cmp al, '/'
+    je .one_success
+    cmp al, '\\'
+    je .one_success
+    cmp al, '.'
+    je .one_success
+    jmp .remove_parent
+.parent_check_dotdot:
+    cmp r13, 2
+    jne .remove_parent
+    cmp word [fc_cmd_rmdir_work_path], '..'
+    je .one_success
     jmp .remove_parent
 .parent_root:
     jmp .one_success

@@ -47,22 +47,22 @@ set "STEP=mkdir path with spaces"
 if errorlevel 1 goto failed
 
 set "STEP=mkdir recursive parents"
-"%BIN%" mkdir -p "%TEST_DIR%\\nested\\one\\two"
+"%BIN%" mkdir -p "%TEST_DIR%\nested\one\two"
 if errorlevel 1 goto failed
-if not exist "%TEST_DIR%\\nested\\one\\two" goto failed
+if not exist "%TEST_DIR%\nested\one\two" goto failed
 set "STEP=mkdir parents already exist"
-"%BIN%" mkdir -p "%TEST_DIR%\\nested\\one\\two"
+"%BIN%" mkdir -p "%TEST_DIR%\nested\one\two"
 if errorlevel 1 goto failed
 set "STEP=mkdir verbose output"
-"%BIN%" mkdir -pv "%TEST_DIR%\\verbose\\deep" > "%OUT%"
+"%BIN%" mkdir -pv "%TEST_DIR%\verbose\deep" > "%OUT%"
 if errorlevel 1 goto failed
 findstr /c:"created directory" "%OUT%" >nul
 if errorlevel 1 goto failed
-if not exist "%TEST_DIR%\\verbose\\deep" goto failed
+if not exist "%TEST_DIR%\verbose\deep" goto failed
 set "STEP=mkdir mode option accepted"
-"%BIN%" mkdir --mode=700 "%TEST_DIR%\\mode-dir"
+"%BIN%" mkdir --mode=700 "%TEST_DIR%\mode-dir"
 if errorlevel 1 goto failed
-if not exist "%TEST_DIR%\\mode-dir" goto failed
+if not exist "%TEST_DIR%\mode-dir" goto failed
 set "STEP=mkdir help and version"
 "%BIN%" mkdir --help > "%OUT%"
 if errorlevel 1 goto failed
@@ -73,7 +73,7 @@ if errorlevel 1 goto failed
 findstr /c:"Flatcore mkdir" "%OUT%" >nul
 if errorlevel 1 goto failed
 set "STEP=mkdir invalid mode"
-"%BIN%" mkdir -m 888 "%TEST_DIR%\\bad-mode" >nul 2>nul
+"%BIN%" mkdir -m 888 "%TEST_DIR%\bad-mode" >nul 2>nul
 if not errorlevel 1 goto failed
 
 set "STEP=create sample file"
@@ -189,7 +189,7 @@ for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="sample.txt" set "BASENA
 if not defined BASENAME_MATCH goto failed
 
 set "STEP=basename drive root"
-"%BIN%" basename "C:\\" > "%OUT%"
+"%BIN%" basename "C:\" > "%OUT%"
 set "BASENAME_ROOT_MATCH="
 for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="\" set "BASENAME_ROOT_MATCH=1"
 if not defined BASENAME_ROOT_MATCH goto failed
@@ -223,17 +223,17 @@ if errorlevel 1 goto failed
 del "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\visible" >nul 2>nul
 
 set "STEP=remove mkdir test tree"
-"%BIN%" rmdir "%TEST_DIR%\\nested\\one\\two"
+"%BIN%" rmdir "%TEST_DIR%\nested\one\two"
 if errorlevel 1 goto failed
-"%BIN%" rmdir "%TEST_DIR%\\nested\\one"
+"%BIN%" rmdir "%TEST_DIR%\nested\one"
 if errorlevel 1 goto failed
-"%BIN%" rmdir "%TEST_DIR%\\nested"
+"%BIN%" rmdir "%TEST_DIR%\nested"
 if errorlevel 1 goto failed
-"%BIN%" rmdir "%TEST_DIR%\\verbose\\deep"
+"%BIN%" rmdir "%TEST_DIR%\verbose\deep"
 if errorlevel 1 goto failed
-"%BIN%" rmdir "%TEST_DIR%\\verbose"
+"%BIN%" rmdir "%TEST_DIR%\verbose"
 if errorlevel 1 goto failed
-"%BIN%" rmdir "%TEST_DIR%\\mode-dir"
+"%BIN%" rmdir "%TEST_DIR%\mode-dir"
 if errorlevel 1 goto failed
 
 set "STEP=rmdir test directory"
@@ -248,7 +248,7 @@ exit /b 0
 echo Flatcore Windows smoke test failed at: %STEP%
 if defined TEST_DIR (
     del "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\visible" >nul 2>nul
-    rmdir "%TEST_DIR%" >nul 2>nul
+    rmdir /s /q "%TEST_DIR%" >nul 2>nul
 )
 del "%OUT%" "%EXPECTED%" >nul 2>nul
 exit /b 1

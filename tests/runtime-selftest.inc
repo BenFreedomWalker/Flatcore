@@ -171,6 +171,14 @@ fc_runtime_selftest:
     cmp rax, -1
     jne .fail23
 
+    ; Truncated multibyte sequences must stop at the terminator safely.
+    mov rdi, test_utf8_truncated
+    mov rsi, test_utf16_roundtrip
+    mov edx, 16
+    call fc_utf8_to_utf16
+    cmp rax, -1
+    jne .fail24
+
     xor eax, eax
     jmp .return
 .fail1:
@@ -241,6 +249,9 @@ fc_runtime_selftest:
     jmp .return
 .fail23:
     mov eax, 23
+    jmp .return
+.fail24:
+    mov eax, 24
     jmp .return
 .failed:
     mov eax, 1

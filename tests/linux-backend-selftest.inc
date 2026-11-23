@@ -65,9 +65,11 @@ fc_linux_backend_selftest:
     call os_stat
     test eax, eax
     jnz .fail24
-    cmp qword [linux_test_info + 24], 1700000000123456789
+    mov rax, 1700000000123456789
+    cmp qword [linux_test_info + 24], rax
     jne .fail25
-    cmp qword [linux_test_info + 8], 1800000000987654321
+    mov rax, 1800000000987654321
+    cmp qword [linux_test_info + 8], rax
     jne .fail26
 
     ; Use a dedicated empty directory so entry/EOF behavior is deterministic.

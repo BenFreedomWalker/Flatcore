@@ -55,4 +55,5 @@ import kernel32, \
     FindFirstFileW, 'FindFirstFileW', \
     FindNextFileW, 'FindNextFileW', \
     FindClose, 'FindClose', \
-    SetCurrentDirectoryW, 'SetCurrentDirectoryW'
+    SetCurrentDirectoryW, 'SetCurrentDirectoryW', \
+    SetFileTime, 'SetFileTime'

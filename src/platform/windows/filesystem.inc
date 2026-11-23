@@ -150,8 +150,11 @@ os_rmdir:
     ret
 
 ; os_unlink(path_utf8)
+; Windows requires RemoveDirectoryW for directory symbolic links and
+; directory reparse points; DeleteFileW is used for file links and files.
 os_unlink:
     push r12
+    push r13
     sub rsp, 32
     mov r12, rdi
     mov rdi, r12
@@ -160,12 +163,40 @@ os_unlink:
     call fc_utf8_to_utf16
     cmp rax, -1
     je .unlink_encoding
+
+    ; Inspect the entry itself without traversing a reparse point. This also
+    ; prevents the directory fallback from ever targeting a normal directory.
+    mov rcx, windows_path_buffer
+    mov rdx, windows_stat_find_data
+    call [FindFirstFileW]
+    cmp rax, -1
+    je .unlink_file
+    mov r13, rax
+    mov eax, [windows_stat_find_data]
+    and eax, 410h              ; REPARSE_POINT | DIRECTORY
+    cmp eax, 410h
+    jne .unlink_close_file
+
+    mov rcx, r13
+    call [FindClose]
+    mov rcx, windows_path_buffer
+    call [RemoveDirectoryW]
+    test eax, eax
+    jz .unlink_error
+    xor eax, eax
+    jmp .unlink_done
+
+.unlink_close_file:
+    mov rcx, r13
+    call [FindClose]
+.unlink_file:
     mov rcx, windows_path_buffer
     call [DeleteFileW]
     test eax, eax
     jz .unlink_error
     xor eax, eax
     jmp .unlink_done
+
 .unlink_encoding:
     mov eax, FC_ERR_ENCODING
     call fc_windows_set_normalized_error
@@ -174,6 +205,7 @@ os_unlink:
     call fc_windows_set_error
 .unlink_done:
     add rsp, 32
+    pop r13
     pop r12
     ret
 

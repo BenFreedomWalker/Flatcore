@@ -442,8 +442,6 @@ fc_cmd_ls_process_operand:
     push r12
     push r13
     mov r12, rdi
-    test qword [fc_cmd_ls_flags], 8
-    jnz .print_operand
     mov rdi, r12
     mov rsi, fc_cmd_ls_info
     call os_stat
@@ -451,6 +449,8 @@ fc_cmd_ls_process_operand:
     jnz .operand_error
     cmp dword [fc_cmd_ls_info + 36], FC_TYPE_DIRECTORY
     jne .print_operand
+    test qword [fc_cmd_ls_flags], 8
+    jnz .print_operand
     mov rdi, r12
     call fc_cmd_ls_directory
     jmp .operand_done
@@ -458,6 +458,10 @@ fc_cmd_ls_process_operand:
     mov rdi, r12
     mov rsi, r12
     call fc_cmd_ls_emit
+    test rax, rax
+    jz .operand_done
+    call fc_cmd_ls_error
+    mov rax, -1
     jmp .operand_done
 .operand_error:
     call fc_cmd_ls_error

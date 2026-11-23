@@ -471,3 +471,9 @@ Both existing native source files include and assemble these same common modules
 - Windows reparse-tag classification is implemented in both `os_stat` and directory iteration. A dedicated Windows symlink fixture is intentionally omitted because symlink creation may require elevated privileges; the capability mask and remaining Windows integration suite passed.
 
 **Stage 4 complete (2026-11-23).** Linux and Windows backend filesystem/I/O operations, metadata, directory iteration, timestamps, capability reporting, and implemented symlink classification semantics have reached the runtime checkpoint. Stage 5 is now unblocked.
+
+**Stage 5 test-harness integration correction (2026-11-23)**
+
+- The first Stage 5 test run exposed that both runtime self-test assemblies included `basic.inc` without including its shared output dependency, `src/common/output.inc`. The production executables already included the output helpers; only the test harnesses were incomplete.
+- Added `src/common/output.inc` to both `tests/runtime-linux.asm` and `tests/runtime-windows.asm` before the shared command implementation.
+- Source correction is committed. Runtime verification is pending; rerun both test commands before migrating the next command tranche.

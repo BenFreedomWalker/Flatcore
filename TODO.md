@@ -271,7 +271,7 @@ Both existing native source files include and assemble these same common modules
 - Wired the same shared registry into Linux and Windows production entry points. A shared command is dispatched first; an unrecognized command falls back to the legacy dispatcher so the remaining commands continue working during migration.
 - Linked the Linux native backend into the production Linux build; Windows already had its Unicode I/O backend linked. Both runtime self-test executables also assemble the shared command module.
 - Extended smoke coverage for `echo -n` and made the Windows echo assertion independent of the platform's line-ending convention.
-- Source implementation and static integration are complete for this tranche. Runtime verification is pending; the next user checkpoint must run both full test commands. Do not mark the three commands verified or migrate the next group until both suites pass.
+- Runtime verification passed (2026-11-23): the user ran `build-windows.bat test` and `./build.sh test`; both shared runtime/backend suites and both smoke suites passed with exit status 0. The first three shared commands are verified on both targets.
 
 ## Stage 6 — Make the test suite cross-platform
 

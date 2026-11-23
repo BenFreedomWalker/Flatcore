@@ -11,6 +11,8 @@ os_native_error dq 0
 align 16
 fc_cmd_path_buffer rb 4096
 fc_cmd_path_length dq 0
+align 16
+fc_cmd_cat_buffer rb 4096
 
 align 16
 linux_stat_buffer rb 144

@@ -236,9 +236,14 @@ fc_cmd_dirname:
     jne .dirname_scan_start
     mov al, [rbx + 2]
     cmp al, '/'
-    je .dirname_root
+    je .dirname_drive_root_output
     cmp al, '\'
-    je .dirname_root
+    jne .dirname_scan_start
+.dirname_drive_root_output:
+    mov rdi, rbx
+    mov esi, 3
+    call fc_cmd_path_write
+    jmp .dirname_done
 
 .dirname_scan_start:
     mov r14, r13

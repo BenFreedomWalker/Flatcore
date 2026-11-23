@@ -56,8 +56,9 @@ if errorlevel 1 goto failed
 set "STEP=mkdir verbose output"
 "%BIN%" mkdir -pv "%TEST_DIR%\verbose\deep" > "%OUT%"
 if errorlevel 1 goto failed
-findstr /c:"created directory" "%OUT%" >nul
-if errorlevel 1 goto failed
+set "MKDIR_VERBOSE_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="mkdir: created directory '%TEST_DIR%\verbose'" set "MKDIR_VERBOSE_MATCH=1"
+if not defined MKDIR_VERBOSE_MATCH goto failed
 if not exist "%TEST_DIR%\verbose\deep" goto failed
 set "STEP=mkdir mode option accepted"
 "%BIN%" mkdir --mode=700 "%TEST_DIR%\mode-dir"
@@ -66,12 +67,14 @@ if not exist "%TEST_DIR%\mode-dir" goto failed
 set "STEP=mkdir help and version"
 "%BIN%" mkdir --help > "%OUT%"
 if errorlevel 1 goto failed
-findstr /c:"--parents" "%OUT%" >nul
-if errorlevel 1 goto failed
+set "MKDIR_HELP_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="  -p, --parents  create parent directories as needed" set "MKDIR_HELP_MATCH=1"
+if not defined MKDIR_HELP_MATCH goto failed
 "%BIN%" mkdir --version > "%OUT%"
 if errorlevel 1 goto failed
-findstr /c:"Flatcore mkdir" "%OUT%" >nul
-if errorlevel 1 goto failed
+set "MKDIR_VERSION_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="Flatcore mkdir 0.1" set "MKDIR_VERSION_MATCH=1"
+if not defined MKDIR_VERSION_MATCH goto failed
 set "STEP=mkdir invalid mode"
 "%BIN%" mkdir -m 888 "%TEST_DIR%\bad-mode" >nul 2>nul
 if not errorlevel 1 goto failed

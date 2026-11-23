@@ -42,6 +42,21 @@ fc_windows_backend_selftest:
     jnz .fail3
     cmp qword [windows_test_length], 2
     jne .fail3
+
+    ; Query metadata through the Unicode Win32 backend while the file exists.
+    mov rdi, windows_test_path
+    mov rsi, windows_test_info
+    call os_stat
+    test eax, eax
+    jnz .fail15
+    cmp qword [windows_test_info], 2
+    jne .fail16
+    cmp dword [windows_test_info + 36], FC_TYPE_REGULAR
+    jne .fail17
+    ; POSIX mode bits are not representable by this Windows metadata query.
+    cmp dword [windows_test_info + 40], 0
+    jne .fail18
+
     mov rdi, [windows_test_handle]
     call os_close
     test eax, eax
@@ -140,6 +155,13 @@ fc_windows_backend_selftest:
 .fail13: mov eax, 73
     jmp .done
 .fail14: mov eax, 74
+.fail15: mov eax, 75
+    jmp .done
+.fail16: mov eax, 76
+    jmp .done
+.fail17: mov eax, 77
+    jmp .done
+.fail18: mov eax, 78
 .done:
     add rsp, 16
     pop r13

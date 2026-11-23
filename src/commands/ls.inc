@@ -45,7 +45,7 @@ fc_cmd_ls_emit:
 
     ; File type character.
     mov al, '-'
-    mov ecx, [fc_cmd_ls_info + 36]
+    mov ecx, dword [fc_cmd_ls_info + 36]
     cmp ecx, FC_TYPE_DIRECTORY
     jne .type_link
     mov al, 'd'
@@ -74,7 +74,7 @@ fc_cmd_ls_emit:
 
     ; Nine POSIX permission bits. Backends with no POSIX mode support
     ; report mode=0, producing explicit dashes rather than invented modes.
-    mov ebx, [fc_cmd_ls_info + 40]
+    mov ebx, dword [fc_cmd_ls_info + 40]
     xor r14d, r14d
 .permission_loop:
     cmp r14d, 9

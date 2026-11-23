@@ -22,6 +22,7 @@ fi
 expected='Flatcore smoke test'
 actual="$("$BIN" echo "$expected")"
 [[ "$actual" == "$expected" ]]
+[[ "$("$BIN" echo -n "$expected")" == "$expected" ]]
 [[ "$("$BIN" basename '/tmp/flatcore-test/')" == 'flatcore-test' ]]
 [[ "$("$BIN" dirname '/tmp/flatcore-test/file.txt')" == '/tmp/flatcore-test' ]]
 

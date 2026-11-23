@@ -65,6 +65,19 @@ fc_linux_backend_selftest:
     test eax, eax
     jnz .fail15
 
+    ; A too-small name buffer must fail without consuming the current entry.
+    mov rdi, [linux_test_dir_handle]
+    mov rsi, linux_test_info
+    mov rdx, linux_test_name
+    xor ecx, ecx
+    mov r9, linux_test_name_length
+    call os_dir_next
+    cmp eax, -1
+    jne .fail16
+    cmp dword [os_error_code], FC_ERR_TOO_SMALL
+    jne .fail16
+
+    ; Retrying with sufficient capacity must return that same entry.
     mov rdi, [linux_test_dir_handle]
     mov rsi, linux_test_info
     mov rdx, linux_test_name
@@ -87,6 +100,23 @@ fc_linux_backend_selftest:
     cmp qword [linux_test_name_length2], 0
     je .fail19
 
+    ; Drain the first iterator and require an explicit EOF result.
+    mov ebx, 4096
+.drain_directory:
+    mov rdi, [linux_test_dir_handle]
+    mov rsi, linux_test_info
+    mov rdx, linux_test_name
+    mov ecx, 256
+    mov r9, linux_test_name_length
+    call os_dir_next
+    test eax, eax
+    jz .directory_eof
+    cmp eax, 1
+    jne .fail20
+    dec ebx
+    jnz .drain_directory
+    jmp .fail20
+.directory_eof:
     mov rdi, [linux_test_dir_handle]
     call os_dir_close
     test eax, eax

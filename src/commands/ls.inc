@@ -16,10 +16,12 @@ fc_cmd_ls_newline:
 
 ; fc_cmd_ls_error() writes a generic diagnostic and returns.
 fc_cmd_ls_error:
+    sub rsp, 8
     mov rdi, [os_stderr]
     mov rsi, fc_cmd_ls_error_text
     mov edx, fc_cmd_ls_error_length
     call fc_cmd_ls_write
+    add rsp, 8
     ret
 
 ; fc_cmd_ls_emit(name, full_path) -> RAX=0/-1.

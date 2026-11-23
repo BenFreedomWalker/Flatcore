@@ -44,6 +44,15 @@ start:
     cmp rax, -1
     je .startup_error
 
+    ; Route migrated commands through the same shared registry as Linux.
+    mov rdi, [windows_normalized_argc]
+    mov rsi, [windows_normalized_argv]
+    mov rdx, fc_basic_registry
+    mov rcx, fc_basic_registry_count
+    call fc_dispatch
+    cmp eax, 127
+    jne .shared_command_exit
+
     ; The legacy command bodies remain active during migration. They continue
     ; consuming the original command-line tail until the shared commands land.
     call [GetCommandLineA]
@@ -644,6 +653,10 @@ start:
     call write_stdout_n
     jmp .success
 
+.shared_command_exit:
+    mov ecx, eax
+    call [ExitProcess]
+
 .startup_error:
     mov rsi, startup_error_text
     call write_stdout
@@ -791,12 +804,14 @@ include 'src/common/formatting.inc'
 include 'src/common/output.inc'
 include 'src/common/startup.inc'
 include 'src/common/dispatcher.inc'
+include 'src/commands/basic.inc'
 include 'src/common/errors.inc'
 include 'src/platform/windows/io.inc'
 include 'src/platform/windows/filesystem.inc'
 
 section '.rdata' data readable
 include 'src/common/errors_data.inc'
+include 'src/commands/basic_data.inc'
 
 help_name db 'help', 0
 echo_name db 'echo', 0

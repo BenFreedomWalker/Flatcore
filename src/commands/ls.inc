@@ -279,6 +279,7 @@ fc_cmd_ls:
     mov r12, rdi                 ; argc
     mov r13, rsi                 ; argv
     mov r14, 1                   ; argument index
+    xor ebx, ebx               ; aggregate operand status
     mov qword [fc_cmd_ls_flags], 0
     xor r15d, r15d               ; options-ended flag
 

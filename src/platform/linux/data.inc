@@ -27,6 +27,9 @@ fc_cmd_mkdir_flags dq 0
 fc_cmd_mkdir_mode dq 0777o
 fc_cmd_mkdir_info rb 64
 fc_cmd_mkdir_work_path rb 8192
+align 16
+fc_cmd_rmdir_flags dq 0
+fc_cmd_rmdir_work_path rb 8192
 
 align 16
 linux_stat_buffer rb 144

@@ -41,7 +41,7 @@ set "STEP=hostname output"
 if errorlevel 1 goto failed
 for %%A in ("%OUT%") do if "%%~zA"=="0" goto failed
 
-set "TEST_DIR=%TEMP%\flatcore-smoke-%RANDOM%-%RANDOM%"
+set "TEST_DIR=%TEMP%\flatcore smoke %RANDOM%-%RANDOM%"
 set "STEP=mkdir path with spaces"
 "%BIN%" mkdir "%TEST_DIR%"
 if errorlevel 1 goto failed

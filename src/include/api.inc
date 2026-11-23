@@ -107,7 +107,13 @@
 ; os_getcwd(buffer, capacity, out_length)
 ; os_chdir(path_utf8)
 ; os_set_times(path_utf8, accessed_ns, modified_ns)
-; os_get_capabilities()
+; os_get_capabilities() returns FC_CAP_* flags. FC_CAP_SYMLINKS means
+; os_stat/os_dir_next can identify symbolic links without following them;
+; it does not promise link creation or readlink APIs. FC_CAP_HARDLINKS means
+; the backend exposes hard-link operations. FC_CAP_POSIX_MODES means mode
+; metadata is meaningful. FC_CAP_FILE_TIMES means os_set_times is supported.
+; FC_CAP_PROCESS_SIGNALS and FC_CAP_OWNER_IDS are reserved until corresponding
+; public backend operations/metadata are exposed.
 ; os_process_exit(exit_status) -- does not return.
 ;
 ; Error-domain and normalized error constants.

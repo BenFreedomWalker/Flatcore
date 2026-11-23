@@ -24,8 +24,9 @@ if not errorlevel 1 goto failed
 
 set "STEP=echo output"
 "%BIN%" echo Flatcore-Windows-smoke > "%OUT%"
-findstr /x /c:"Flatcore-Windows-smoke" "%OUT%" >nul
-if errorlevel 1 goto failed
+set "ECHO_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="Flatcore-Windows-smoke" set "ECHO_MATCH=1"
+if not defined ECHO_MATCH goto failed
 
 set "STEP=pwd output"
 "%BIN%" pwd > "%OUT%"

@@ -6,6 +6,11 @@ fc_windows_backend_selftest:
     push r13
     sub rsp, 16
 
+    ; Verify Windows advertises only implemented backend semantics.
+    call os_get_capabilities
+    cmp eax, FC_CAP_SYMLINKS or FC_CAP_FILE_TIMES
+    jne .fail99
+
     ; Remove leftovers from an interrupted earlier run; these failures are
     ; intentionally ignored so the fixture remains repeatable.
     mov rdi, windows_test_path
@@ -338,6 +343,8 @@ fc_windows_backend_selftest:
 .fail97: mov eax, 97
     jmp .done
 .fail98: mov eax, 98
+    jmp .done
+.fail99: mov eax, 99
 .done:
     add rsp, 16
     pop r13

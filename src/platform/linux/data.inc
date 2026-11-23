@@ -13,6 +13,15 @@ fc_cmd_path_buffer rb 4096
 fc_cmd_path_length dq 0
 align 16
 fc_cmd_cat_buffer rb 4096
+align 16
+fc_cmd_ls_flags dq 0
+fc_cmd_ls_dir_handle dq 0
+fc_cmd_ls_name_length dq 0
+fc_cmd_ls_info rb 64
+fc_cmd_ls_name rb 1024
+fc_cmd_ls_full_path rb 8192
+fc_cmd_ls_mode rb 10
+fc_cmd_ls_number rb 32
 
 align 16
 linux_stat_buffer rb 144

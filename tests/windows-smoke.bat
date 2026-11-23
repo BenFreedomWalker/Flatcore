@@ -68,7 +68,7 @@ set "STEP=mkdir help and version"
 "%BIN%" mkdir --help > "%OUT%"
 if errorlevel 1 goto failed
 set "MKDIR_HELP_MATCH="
-for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="  -p, --parents  create parent directories as needed" set "MKDIR_HELP_MATCH=1"
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="Usage: mkdir [OPTION]... DIRECTORY..." set "MKDIR_HELP_MATCH=1"
 if not defined MKDIR_HELP_MATCH goto failed
 "%BIN%" mkdir --version > "%OUT%"
 if errorlevel 1 goto failed

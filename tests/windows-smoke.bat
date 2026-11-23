@@ -227,14 +227,15 @@ del "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_D
 
 set "STEP=rmdir parents and verbose output"
 pushd "%TEST_DIR%"
+if errorlevel 1 goto failed
 "%BIN%" mkdir -p rmdir-chain\one\two
-if errorlevel 1 goto failed
+if errorlevel 1 goto rmdir_parent_failed
 "%BIN%" rmdir -pv rmdir-chain\one\two > "%OUT%"
-if errorlevel 1 goto failed
+if errorlevel 1 goto rmdir_parent_failed
 set "RMDIR_VERBOSE_MATCH="
 for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="rmdir: removed 'rmdir-chain\one\two'" set "RMDIR_VERBOSE_MATCH=1"
-if not defined RMDIR_VERBOSE_MATCH goto failed
-if exist rmdir-chain goto failed
+if not defined RMDIR_VERBOSE_MATCH goto rmdir_parent_failed
+if exist rmdir-chain goto rmdir_parent_failed
 popd
 
 set "STEP=rmdir help and version"
@@ -283,6 +284,10 @@ if errorlevel 1 goto failed
 del "%OUT%" "%EXPECTED%" >nul 2>nul
 echo Flatcore Windows smoke tests passed.
 exit /b 0
+
+:rmdir_parent_failed
+popd
+goto failed
 
 :failed
 echo Flatcore Windows smoke test failed at: %STEP%

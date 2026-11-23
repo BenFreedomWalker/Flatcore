@@ -220,7 +220,7 @@ Both existing native source files include and assemble these same common modules
 - [x] Implement Linux file timestamp updates with `utimensat`; verify nanosecond precision through `os_stat`.
 - [x] Complete the currently required Linux syscall-backed filesystem and I/O operations; Linux runtime tests cover read/write/open/close/stat/directory iteration/basic path operations/getcwd/chdir/timestamps.
 - [ ] Finish Linux/backend capability semantics and document cross-platform differences.
-- [ ] Complete Windows Unicode Win32-backed versions (initial I/O/basic filesystem, `os_stat`, and directory iteration are runtime-verified; `os_set_times` source and precision tests are implemented, awaiting user runtime verification).
+- [x] Complete Windows Unicode Win32-backed versions, including runtime-verified I/O/basic filesystem, `os_stat`, directory iteration, and `os_set_times`.
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
 - [x] Implement Windows `os_stat` with Unicode `GetFileAttributesExW`, 64-bit file sizes, DOS attribute translation, and FILETIME-to-Unix-nanosecond conversion.
@@ -439,3 +439,10 @@ Both existing native source files include and assemble these same common modules
 - Extended the Windows backend integration test to set distinct timestamps on the Unicode fixture and verify both exact values through `os_stat`. Test values are aligned to the Windows 100 ns precision; separate failure codes 96–98 identify the set/access/modified checks.
 - Added the `SetFileTime` import to the Windows backend test executable. The production executable already imports it.
 - Source implementation and static review are complete. Runtime verification is pending; run both platform test commands below. Do not proceed to capability and symlink/reparse semantics until the user reports the results.
+
+**Windows timestamp update verification passed (2026-11-23)**
+
+- User ran `build-windows.bat test`; shared runtime/backend integration tests and Windows smoke tests passed with CMD exit status 0.
+- User also ran `./build.sh test` under WSL; shared runtime helper tests and Linux smoke tests passed with fish exit status 0. The printed `flatcore: operation failed` is expected output from the existing negative/error-path smoke test.
+- Windows timestamp tests now verify that distinct access and modification timestamps can be set on a Unicode-named file and read back through `os_stat` at the native 100 ns FILETIME precision.
+- Stage 4's Linux and Windows filesystem/I/O operations implemented so far are runtime-verified. Remaining Stage 4 work is capability reporting and explicit symlink/reparse-point and unsupported-metadata semantics. Stage 5 remains blocked until those semantics are implemented and tested.

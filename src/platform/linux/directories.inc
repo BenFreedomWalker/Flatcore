@@ -10,6 +10,7 @@ LINUX_DIR_SLOT_SIZE = 16 + LINUX_DIR_BUFFER_SIZE
 os_dir_open:
     push r12
     push r13
+    sub rsp, 8
     mov r13, rsi
     lea r12, [linux_dir_slots]
     mov ecx, LINUX_DIR_SLOT_COUNT
@@ -34,7 +35,9 @@ os_dir_open:
     mov dword [r12 + 8], 0
     mov dword [r12 + 12], 0
     mov dword [r12], 1
-    lea rax, [r12 - linux_dir_slots]
+    mov rax, r12
+    lea rdx, [linux_dir_slots]
+    sub rax, rdx
     xor edx, edx
     mov ecx, LINUX_DIR_SLOT_SIZE
     div rcx
@@ -46,6 +49,7 @@ os_dir_open:
     neg eax
     call fc_linux_set_error
 .open_done:
+    add rsp, 8
     pop r13
     pop r12
     ret
@@ -105,6 +109,10 @@ os_dir_next:
     cmp ecx, 20
     jb .next_malformed
     mov r8d, ecx
+    mov eax, r10d
+    add eax, r8d
+    cmp eax, [r12 + 12]
+    ja .next_malformed
     sub r8d, 19
     lea rdx, [rsi + 19]
     xor eax, eax

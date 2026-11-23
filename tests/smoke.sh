@@ -105,7 +105,38 @@ fi
         exit 1
     fi
 
-    "$BIN" rm ls-dir/visible ls-dir/.hidden ls-file-one ls-file-two ./-ls-leading
+    # mkdir: recursive creation, existing parents, modes, verbose output.
+    "$BIN" mkdir -p mkdir-tree/one/two
+    [[ -d mkdir-tree/one/two ]]
+    "$BIN" mkdir -p mkdir-tree/one/two
+    "$BIN" mkdir -pv mkdir-verbose/a/b > mkdir-verbose.txt
+    [[ -d mkdir-verbose/a/b ]]
+    grep -q "created directory 'mkdir-verbose" mkdir-verbose.txt
+    "$BIN" mkdir -m 700 mkdir-mode
+    [[ "$(stat -c '%a' mkdir-mode)" == '700' ]]
+    "$BIN" mkdir --mode=755 mkdir-mode-long
+    [[ "$(stat -c '%a' mkdir-mode-long)" == '755' ]]
+    "$BIN" mkdir -- --mkdir-leading
+    [[ -d -- --mkdir-leading ]]
+    if "$BIN" mkdir mkdir-mode; then
+        printf 'mkdir succeeded for an existing directory without -p\n' >&2
+        exit 1
+    fi
+    if "$BIN" mkdir -m 888 mkdir-invalid-mode; then
+        printf 'mkdir accepted an invalid octal mode\n' >&2
+        exit 1
+    fi
+    printf 'not a directory\n' > mkdir-blocker
+    if "$BIN" mkdir -p mkdir-blocker/child; then
+        printf 'mkdir -p accepted a non-directory parent\n' >&2
+        exit 1
+    fi
+    "$BIN" mkdir --version > mkdir-version.txt
+    grep -q 'Flatcore mkdir' mkdir-version.txt
+    "$BIN" mkdir --help > mkdir-help.txt
+    grep -q -- '--parents' mkdir-help.txt
+
+    "$BIN" rm mkdir-blocker\n    "$BIN" rm ls-dir/visible ls-dir/.hidden ls-file-one ls-file-two ./-ls-leading
     "$BIN" rmdir ls-dir
     "$BIN" mkdir sample-dir
     "$BIN" rmdir sample-dir

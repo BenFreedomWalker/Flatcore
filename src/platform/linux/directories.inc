@@ -12,6 +12,8 @@ os_dir_open:
     push r13
     sub rsp, 8
     mov r13, rsi
+    test r13, r13
+    jz .open_invalid
     lea r12, [linux_dir_slots]
     mov ecx, LINUX_DIR_SLOT_COUNT
 .find_slot:
@@ -44,6 +46,10 @@ os_dir_open:
     inc rax
     mov [r13], rax
     xor eax, eax
+    jmp .open_done
+.open_invalid:
+    mov eax, 22
+    call fc_linux_set_error
     jmp .open_done
 .open_error:
     neg eax
@@ -108,6 +114,7 @@ os_dir_next:
     movzx ecx, word [rsi + 16]
     cmp ecx, 20
     jb .next_malformed
+    mov r11d, ecx
     mov r8d, ecx
     mov eax, r10d
     add eax, r8d
@@ -142,7 +149,7 @@ os_dir_next:
     mov [rbx], r10
 
     ; Consume the record only after the caller's buffer has accepted it.
-    add dword [r12 + 8], r8d
+    add dword [r12 + 8], r11d
 
     ; Clear FC_FILE_INFO; getdents64 does not provide size or timestamps.
     mov rdi, r13

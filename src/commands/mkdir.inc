@@ -8,19 +8,6 @@ fc_cmd_mkdir_write:
     mov rcx, os_write
     jmp fc_write_all
 
-; fc_cmd_mkdir_write_string(handle, string) -> RAX=0/-1.
-fc_cmd_mkdir_write_string:
-    push rbx
-    mov rbx, rdi
-    mov rdi, rsi
-    call fc_strlen
-    mov rdx, rax
-    mov rsi, rdi
-    mov rdi, rbx
-    call fc_cmd_mkdir_write
-    pop rbx
-    ret
-
 ; Parse an octal mode string. RDI=string; RAX=mode, RDX=1 if valid.
 fc_cmd_mkdir_parse_mode:
     xor eax, eax
@@ -37,7 +24,7 @@ fc_cmd_mkdir_parse_mode:
     sub edx, '0'
     or eax, edx
     inc ecx
-    cmp ecx, 4
+    cmp eax, 07777o
     ja .mode_invalid
     jmp .mode_loop
 .mode_done:

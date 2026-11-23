@@ -729,7 +729,12 @@ os_dir_next:
     or dword [r13 + 32], FC_ATTR_ARCHIVE
 .dir_next_type:
     test eax, 400h
-    jnz .dir_next_consume       ; preserve UNKNOWN for unclassified reparse tags
+    jz .dir_next_not_reparse
+    cmp dword [r11 + 36], 0A000000Ch ; IO_REPARSE_TAG_SYMLINK
+    jne .dir_next_consume
+    mov dword [r13 + 36], FC_TYPE_SYMLINK
+    jmp .dir_next_consume
+.dir_next_not_reparse:
     test eax, 10h
     jz .dir_next_regular
     mov dword [r13 + 36], FC_TYPE_DIRECTORY
@@ -796,11 +801,6 @@ os_dir_close:
 .dir_close_done:
     add rsp, 40
     pop r12
-    ret
-
-; Capability reporting remains conservative until the optional operations land.
-os_get_capabilities:
-    xor eax, eax
     ret
 
 ; Windows can identify symbolic links by their reparse tag and supports

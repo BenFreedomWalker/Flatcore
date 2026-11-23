@@ -243,7 +243,7 @@ Both existing native source files include and assemble these same common modules
 ## Stage 5 — Port shared commands
 
 - [x] Port true, false, and echo into `src/commands/basic.inc`; both native entry points now try the shared registry before falling back to unmigrated legacy commands.
-- [ ] Port pwd, basename, and dirname.
+- [x] Port pwd, basename, and dirname into the shared `src/commands/path.inc`; both production targets and both runtime test assemblies now compile the same handlers and registry.
 - [ ] Port cat, including standard input and multiple file operands.
 - [ ] Port ls, including common GNU-style options and multiple operands.
 - [ ] Port mkdir, including -p, -m, and -v where supported.
@@ -484,3 +484,13 @@ Both existing native source files include and assemble these same common modules
 - The shared echo contract intentionally emits LF (0x0A) on both platforms. The smoke runner used `findstr /x`, which assumes Windows text-line handling and is unsuitable for this LF-only output.
 - Replaced that assertion with CMD `for /f` line extraction and an exact string comparison, without changing the shared command's output bytes.
 - Source correction is committed; both platform test suites remain pending at this checkpoint.
+
+
+**Stage 5 second command tranche — source implementation checkpoint (2026-11-23)**
+
+- Added shared FC64 implementations of `pwd`, `basename`, and `dirname` in `src/commands/path.inc`. They use the common argument vector, shared string helpers, `os_getcwd`, and the backend-neutral output callback; no Linux syscalls or Win32 calls appear in the command source.
+- Both `/` and `\` are treated as path separators so the same command logic handles POSIX-style and Windows-style paths. `basename` trims trailing separators while preserving filesystem roots; `dirname` handles relative names, root paths, and drive roots such as `C:\`.
+- Expanded the shared registry to six commands (`true`, `false`, `echo`, `pwd`, `basename`, `dirname`) and added common immutable command data in `src/commands/path_data.inc`.
+- Added per-platform writable scratch storage for the shared `pwd` buffer and length. Wired `path.inc` and `path_data.inc` into both production executables and both shared runtime test executables.
+- Expanded Linux and Windows smoke coverage for current-directory output, POSIX and Windows separators, root/drive-root handling, relative paths, and invalid `pwd` operands. Windows assertions extract LF-terminated output instead of comparing against CMD's CRLF `echo` output.
+- Source implementation and static integration are complete for this tranche. Runtime verification is pending; run both full test commands below before proceeding to `cat`.

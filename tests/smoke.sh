@@ -139,9 +139,34 @@ fi
     "$BIN" rm mkdir-blocker
     "$BIN" rm ls-dir/visible ls-dir/.hidden ls-file-one ls-file-two ./-ls-leading
     "$BIN" rmdir ls-dir
-    "$BIN" rmdir mkdir-tree/one/two
-    "$BIN" rmdir mkdir-tree/one
-    "$BIN" rmdir mkdir-tree
+    "$BIN" rmdir -p mkdir-tree/one/two
+    [[ ! -e mkdir-tree ]]
+
+    "$BIN" mkdir -p rmdir-chain/one/two
+    "$BIN" rmdir -p rmdir-chain/one/two
+    [[ ! -e rmdir-chain ]]
+    "$BIN" mkdir -p rmdir-verbose/a/b
+    "$BIN" rmdir -pv rmdir-verbose/a/b > rmdir-verbose.txt
+    grep -q "removed 'rmdir-verbose/a/b'" rmdir-verbose.txt
+    grep -q "removed 'rmdir-verbose/a'" rmdir-verbose.txt
+    grep -q "removed 'rmdir-verbose'" rmdir-verbose.txt
+    "$BIN" rmdir --help > rmdir-help.txt
+    grep -q -- '--parents' rmdir-help.txt
+    "$BIN" rmdir --version > rmdir-version.txt
+    grep -q 'Flatcore rmdir' rmdir-version.txt
+    if "$BIN" rmdir --not-a-real-option >/dev/null 2>&1; then
+        printf 'rmdir accepted an unknown option\\n' >&2
+        exit 1
+    fi
+    "$BIN" mkdir rmdir-nonempty
+    printf 'keep\\n' > rmdir-nonempty/file
+    if "$BIN" rmdir rmdir-nonempty; then
+        printf 'rmdir removed a non-empty directory\\n' >&2
+        exit 1
+    fi
+    [[ -d rmdir-nonempty ]]
+    "$BIN" rm rmdir-nonempty/file
+    "$BIN" rmdir rmdir-nonempty
     "$BIN" rmdir mkdir-verbose/a/b
     "$BIN" rmdir mkdir-verbose/a
     "$BIN" rmdir mkdir-verbose

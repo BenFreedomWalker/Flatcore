@@ -218,8 +218,9 @@ Both existing native source files include and assemble these same common modules
 - [x] Implement os_mkdir, os_rmdir, os_unlink, and os_rename in the Linux backend.
 - [x] Implement os_getcwd and os_chdir in the Linux backend.
 - [x] Implement Linux file timestamp updates with `utimensat`; verify nanosecond precision through `os_stat`.
-- [ ] Complete remaining Linux syscall-backed versions (Windows Unicode backend and capability semantics remain).
-- [ ] Complete Windows Unicode Win32-backed versions (initial I/O and basic filesystem operations are implemented; metadata, directory iteration, and timestamp updates remain).
+- [x] Complete the currently required Linux syscall-backed filesystem and I/O operations; Linux runtime tests cover read/write/open/close/stat/directory iteration/basic path operations/getcwd/chdir/timestamps.
+- [ ] Finish Linux/backend capability semantics and document cross-platform differences.
+- [ ] Complete Windows Unicode Win32-backed versions (initial I/O and basic filesystem operations are implemented and runtime-verified; metadata, directory iteration, and timestamp updates remain).
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
 
@@ -233,7 +234,7 @@ Both existing native source files include and assemble these same common modules
 - These routines are not yet wired into the production executable. Directory iteration, timestamps, and the Windows Unicode backend remain outstanding.
 - Added Linux `os_stat` using `newfstatat`, populating file size, mtime/atime nanoseconds, POSIX mode, link count, file type, and read-only attribute. The Linux backend harness now checks a created regular file's size, type, and mode.
 
-**Runtime verification:** pending; no Stage 4 backend test checkpoint has been requested yet.
+**Runtime verification:** in progress; Linux backend components and the initial Windows Unicode I/O/filesystem slice have passed their user-run test checkpoints. Remaining Windows metadata, directory iteration, timestamps, and capability semantics are not yet verified.
 
 ## Stage 5 — Port shared commands
 
@@ -381,3 +382,12 @@ Both existing native source files include and assemble these same common modules
 - Added Windows backend state and conversion buffers in `src/platform/windows/data.inc`; wired the backend into the Windows executable and native test harness.
 - Added Windows integration tests using non-ASCII filenames and directory names. They cover cwd capture, create/write/close/read, rename/unlink, mkdir/chdir/restore/rmdir. Test execution is rooted at the repository directory so fixture paths are deterministic.
 - Runtime verification is pending. Run both `./build.sh test` and `build-windows.bat test`; the Linux run also validates the new shared UTF-8-to-UTF-16 helper. Windows backend metadata (`os_stat`), directory iteration, timestamp updates, and final capability semantics remain outstanding.
+
+
+**Windows Unicode I/O and basic filesystem verification passed (2026-11-23)**
+
+- The user ran `build-windows.bat test`; the shared runtime helper tests, Windows Unicode backend integration tests, and Windows smoke tests all passed with CMD exit status 0.
+- The Windows integration test exercises UTF-8 paths containing non-ASCII characters through CreateFileW, ReadFile/WriteFile, MoveFileW, DeleteFileW, CreateDirectoryW, SetCurrentDirectoryW, and RemoveDirectoryW.
+- The same user checkpoint reran `./build.sh test`; shared runtime helper tests and Linux smoke tests passed with fish exit status 0. The printed `flatcore: operation failed` is expected output from an existing negative/error-path smoke test.
+- Fixed the Windows test runner's delayed-expansion handling so it now reports and propagates the actual runtime test exit code. A diagnostic failure path was also added temporarily to expose native Win32 error codes; the successful run confirms the write path now passes.
+- Verified scope: shared UTF-8-to-UTF-16 conversion and the initial Windows I/O/basic filesystem slice are green. Windows `os_stat`, directory iteration, timestamp updates, and final capability/symlink-reparse semantics remain outstanding. Do not start Stage 5 until these Stage 4 items are implemented and tested.

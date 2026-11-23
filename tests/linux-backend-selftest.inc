@@ -6,6 +6,36 @@ fc_linux_backend_selftest:
     push r13
     sub rsp, 16
 
+    ; Verify the backend advertises only implemented metadata semantics.
+    call os_get_capabilities
+    cmp eax, FC_CAP_SYMLINKS or FC_CAP_POSIX_MODES or FC_CAP_FILE_TIMES
+    jne .fail27
+
+    ; Create a relative symbolic link and verify os_stat does not follow it.
+    mov rdi, linux_test_symlink_path
+    call os_unlink
+    mov rdi, linux_test_symlink_target
+    mov rsi, linux_test_symlink_path
+    mov eax, 88                  ; symlink(target, linkpath)
+    syscall
+    test rax, rax
+    js .fail28
+    mov rdi, linux_test_symlink_path
+    mov rsi, linux_test_info
+    call os_stat
+    test eax, eax
+    jnz .fail29
+    cmp dword [linux_test_info + 36], FC_TYPE_SYMLINK
+    jne .fail30
+    mov eax, [linux_test_info + 40]
+    and eax, 170000o
+    cmp eax, 120000o
+    jne .fail31
+    mov rdi, linux_test_symlink_path
+    call os_unlink
+    test eax, eax
+    jnz .fail32
+
     ; getcwd must return a NUL-terminated path and its byte length.
     mov rdi, linux_test_cwd
     mov esi, 4096
@@ -277,6 +307,18 @@ fc_linux_backend_selftest:
 .fail25: mov eax, 55
     jmp .done
 .fail26: mov eax, 56
+    jmp .done
+.fail27: mov eax, 57
+    jmp .done
+.fail28: mov eax, 58
+    jmp .done
+.fail29: mov eax, 59
+    jmp .done
+.fail30: mov eax, 60
+    jmp .done
+.fail31: mov eax, 61
+    jmp .done
+.fail32: mov eax, 62
 .done:
     add rsp, 16
     pop r13

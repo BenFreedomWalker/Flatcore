@@ -103,7 +103,7 @@ fc_cmd_ls_emit:
     test rax, rax
     jnz .emit_failed
 
-    mov rdi, [fc_cmd_ls_info]
+    mov rdi, qword [fc_cmd_ls_info]
     mov rsi, fc_cmd_ls_number
     mov edx, 32
     call fc_u64toa

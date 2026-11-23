@@ -25,6 +25,18 @@ actual="$("$BIN" echo "$expected")"
 [[ "$("$BIN" echo -n "$expected")" == "$expected" ]]
 [[ "$("$BIN" basename '/tmp/flatcore-test/')" == 'flatcore-test' ]]
 [[ "$("$BIN" dirname '/tmp/flatcore-test/file.txt')" == '/tmp/flatcore-test' ]]
+[[ "$("$BIN" pwd)" == "$(pwd -P)" ]]
+[[ "$("$BIN" basename 'C:\folder\file.txt')" == 'file.txt' ]]
+[[ "$("$BIN" basename '/')" == '/' ]]
+[[ "$("$BIN" basename 'C:\')" == '\' ]]
+[[ "$("$BIN" dirname 'file.txt')" == '.' ]]
+[[ "$("$BIN" dirname '/file.txt')" == '/' ]]
+[[ "$("$BIN" dirname 'C:\folder\file.txt')" == 'C:\folder' ]]
+[[ "$("$BIN" dirname 'C:\file.txt')" == 'C:\' ]]
+if "$BIN" pwd unexpected >/dev/null 2>&1; then
+    printf 'pwd accepted an unexpected operand\n' >&2
+    exit 1
+fi
 
 (
     cd "$TMP_DIR"

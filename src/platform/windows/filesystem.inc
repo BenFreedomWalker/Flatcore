@@ -412,7 +412,6 @@ os_dir_open:
     jmp .dir_open_find_slot
 
 .dir_open_slot_found:
-    mov rdi, rdi
     mov rsi, windows_path_buffer
     mov edx, 32768
     call fc_utf8_to_utf16

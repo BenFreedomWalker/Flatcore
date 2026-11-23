@@ -133,7 +133,9 @@ fc_cmd_rmdir_one:
 .parent_check_dotdot:
     cmp r13, 2
     jne .remove_parent
-    cmp word [fc_cmd_rmdir_work_path], '..'
+    cmp byte [fc_cmd_rmdir_work_path], '.'
+    jne .remove_parent
+    cmp byte [fc_cmd_rmdir_work_path + 1], '.'
     je .one_success
     jmp .remove_parent
 .parent_root:

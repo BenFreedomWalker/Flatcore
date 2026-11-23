@@ -40,6 +40,7 @@ fi
 
 (
     cd "$TMP_DIR"
+    [[ "$("$BIN" pwd)" == "$TMP_DIR" ]]
     "$BIN" touch sample.txt
     "$BIN" echo 'assembly userspace' > input.txt
     "$BIN" cp input.txt copied.txt

@@ -147,21 +147,21 @@ fc_runtime_selftest:
     jne .fail22
     mov ax, word [test_utf16_roundtrip]
     cmp ax, [test_utf16]
-    jne .fail22
+    jne .fail25
     mov ax, word [test_utf16_roundtrip + 2]
     cmp ax, [test_utf16 + 2]
-    jne .fail22
+    jne .fail26
     mov ax, word [test_utf16_roundtrip + 4]
     cmp ax, [test_utf16 + 4]
-    jne .fail22
+    jne .fail27
     mov ax, word [test_utf16_roundtrip + 6]
     cmp ax, [test_utf16 + 6]
-    jne .fail22
+    jne .fail28
     mov ax, word [test_utf16_roundtrip + 8]
     cmp ax, [test_utf16 + 8]
-    jne .fail22
+    jne .fail29
     cmp word [test_utf16_roundtrip + 10], 0
-    jne .fail22
+    jne .fail30
 
     ; Overlong UTF-8 encodings must be rejected, not silently accepted.
     mov rdi, test_utf8_invalid
@@ -252,6 +252,24 @@ fc_runtime_selftest:
     jmp .return
 .fail24:
     mov eax, 24
+    jmp .return
+.fail25:
+    mov eax, 25
+    jmp .return
+.fail26:
+    mov eax, 26
+    jmp .return
+.fail27:
+    mov eax, 27
+    jmp .return
+.fail28:
+    mov eax, 28
+    jmp .return
+.fail29:
+    mov eax, 29
+    jmp .return
+.fail30:
+    mov eax, 30
     jmp .return
 .failed:
     mov eax, 1

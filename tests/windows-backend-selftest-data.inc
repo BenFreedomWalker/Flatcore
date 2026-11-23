@@ -11,7 +11,7 @@ windows_test_readback rb 8
 
 align 8
 windows_test_info rb 64
-windows_test_entry_path db 'build\\windows\\flatcore-测试-dir\\entry-猫.txt', 0
+windows_test_entry_path db 'build\windows\flatcore-测试-dir\entry-猫.txt', 0
 windows_test_entry_name db 'entry-猫.txt', 0
 windows_test_dir_name rb 4096
 windows_test_dir_name2 rb 4096

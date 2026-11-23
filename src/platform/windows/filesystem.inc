@@ -51,9 +51,9 @@ os_open:
 .open_create_always:
     mov eax, 2               ; CREATE_ALWAYS
 .open_no_create:
-    test esi, FC_OPEN_TRUNCATE
+    test r14d, FC_OPEN_TRUNCATE
     jz .open_flags
-    test esi, FC_OPEN_CREATE
+    test r14d, FC_OPEN_CREATE
     jnz .open_flags
     mov eax, 5               ; TRUNCATE_EXISTING
 .open_flags:

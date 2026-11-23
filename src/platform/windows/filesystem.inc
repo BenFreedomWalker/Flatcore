@@ -425,11 +425,11 @@ os_dir_open:
     cmp r15, 32765
     ja .dir_open_too_long
     mov ax, [windows_path_buffer + r15*2 - 2]
-    cmp ax, '\\'
+    cmp ax, '\'
     je .dir_open_append_star
     cmp ax, '/'
     je .dir_open_append_star
-    mov word [windows_path_buffer + r15*2], '\\'
+    mov word [windows_path_buffer + r15*2], '\'
     inc r15
 .dir_open_append_star:
     mov word [windows_path_buffer + r15*2], '*'
@@ -636,7 +636,7 @@ os_dir_next:
 ; os_dir_close(handle)
 os_dir_close:
     push r12
-    sub rsp, 40
+    sub rsp, 32
     cmp rdi, 1
     jb .dir_close_invalid
     cmp rdi, WINDOWS_DIR_SLOT_COUNT

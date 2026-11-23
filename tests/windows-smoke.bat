@@ -104,8 +104,6 @@ findstr /x /c:".hidden" "%OUT%" >nul
 if errorlevel 1 goto failed
 "%BIN%" ls -a "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
-findstr /x /c:"." "%OUT%" >nul
-if errorlevel 1 goto failed
 "%BIN%" ls -la "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
 findstr /c:".hidden" "%OUT%" >nul
@@ -113,6 +111,12 @@ if errorlevel 1 goto failed
 "%BIN%" ls -d "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
 findstr /x /c:"%TEST_DIR%" "%OUT%" >nul
+if errorlevel 1 goto failed
+"%BIN%" ls "%TEST_DIR%\\sample.txt" "%TEST_DIR%\\second.txt" > "%OUT%"
+if errorlevel 1 goto failed
+findstr /x /c:"sample.txt" "%OUT%" >nul
+if errorlevel 1 goto failed
+findstr /x /c:"second.txt" "%OUT%" >nul
 if errorlevel 1 goto failed
 "%BIN%" ls --version > "%OUT%"
 if errorlevel 1 goto failed

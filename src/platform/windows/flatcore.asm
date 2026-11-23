@@ -858,6 +858,9 @@ import kernel32, \
     MoveFileW, 'MoveFileW', \
     GetCurrentDirectoryW, 'GetCurrentDirectoryW', \
     GetFileAttributesExW, 'GetFileAttributesExW', \
+    FindFirstFileW, 'FindFirstFileW', \
+    FindNextFileW, 'FindNextFileW', \
+    FindClose, 'FindClose', \
     SetCurrentDirectoryW, 'SetCurrentDirectoryW', \
     GetCurrentDirectoryA, 'GetCurrentDirectoryA', \
     GetComputerNameA, 'GetComputerNameA', \

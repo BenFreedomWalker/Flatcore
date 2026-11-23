@@ -110,7 +110,7 @@ fc_linux_backend_selftest:
     mov rsi, linux_test_info
     mov rdx, linux_test_name
     mov ecx, 256
-    mov r9, linux_test_name_length
+    mov r8, linux_test_name_length
     call os_dir_next
     cmp eax, 1
     jne .fail16
@@ -135,7 +135,7 @@ fc_linux_backend_selftest:
     mov rsi, linux_test_info
     mov rdx, linux_test_name
     mov ecx, 256
-    mov r9, linux_test_name_length
+    mov r8, linux_test_name_length
     call os_dir_next
     test eax, eax
     jz .directory_eof

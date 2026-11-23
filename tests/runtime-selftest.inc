@@ -145,19 +145,19 @@ fc_runtime_selftest:
     call fc_utf8_to_utf16
     cmp rax, 5
     jne .fail22
-    mov ax, [test_utf16_roundtrip]
+    mov ax, word [test_utf16_roundtrip]
     cmp ax, [test_utf16]
     jne .fail22
-    mov ax, [test_utf16_roundtrip + 2]
+    mov ax, word [test_utf16_roundtrip + 2]
     cmp ax, [test_utf16 + 2]
     jne .fail22
-    mov ax, [test_utf16_roundtrip + 4]
+    mov ax, word [test_utf16_roundtrip + 4]
     cmp ax, [test_utf16 + 4]
     jne .fail22
-    mov ax, [test_utf16_roundtrip + 6]
+    mov ax, word [test_utf16_roundtrip + 6]
     cmp ax, [test_utf16 + 6]
     jne .fail22
-    mov ax, [test_utf16_roundtrip + 8]
+    mov ax, word [test_utf16_roundtrip + 8]
     cmp ax, [test_utf16 + 8]
     jne .fail22
     cmp word [test_utf16_roundtrip + 10], 0

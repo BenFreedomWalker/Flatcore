@@ -289,7 +289,8 @@ os_chdir:
 os_stat:
     push r12
     push r13
-    sub rsp, 40
+    push r14
+    sub rsp, 32
     mov r12, rsi
     mov rsi, windows_path_buffer
     mov edx, 32768
@@ -340,6 +341,7 @@ os_stat:
     mov [r12 + 24], rax
 
     mov eax, [r13]
+    mov r14d, eax
     ; Translate the common DOS attribute bits.
     test eax, 2                  ; FILE_ATTRIBUTE_HIDDEN
     jz .stat_not_hidden
@@ -357,9 +359,26 @@ os_stat:
     jz .stat_type
     or dword [r12 + 32], FC_ATTR_ARCHIVE
 
-.stat_type:
+ .stat_type:
     test eax, 400h               ; FILE_ATTRIBUTE_REPARSE_POINT
-    jnz .stat_done               ; tag-specific classification is not available
+    jz .stat_not_reparse
+    ; FindFirstFileW exposes dwReserved0, the reparse tag, which distinguishes
+    ; symbolic links from junctions and unrelated reparse-point providers.
+    mov rcx, windows_path_buffer
+    mov rdx, windows_stat_find_data
+    call [FindFirstFileW]
+    cmp rax, -1
+    je .stat_done                ; retain UNKNOWN if tag lookup is unavailable
+    mov r13, rax
+    cmp dword [windows_stat_find_data + 36], 0A000000Ch ; IO_REPARSE_TAG_SYMLINK
+    jne .stat_reparse_close
+    mov dword [r12 + 36], FC_TYPE_SYMLINK
+.stat_reparse_close:
+    mov rcx, r13
+    call [FindClose]
+    jmp .stat_done
+.stat_not_reparse:
+    mov eax, r14d
     test eax, 10h                ; FILE_ATTRIBUTE_DIRECTORY
     jz .stat_regular
     mov dword [r12 + 36], FC_TYPE_DIRECTORY
@@ -376,7 +395,8 @@ os_stat:
 .stat_error:
     call fc_windows_set_error
 .stat_return:
-    add rsp, 40
+    add rsp, 32
+    pop r14
     pop r13
     pop r12
     ret
@@ -781,4 +801,11 @@ os_dir_close:
 ; Capability reporting remains conservative until the optional operations land.
 os_get_capabilities:
     xor eax, eax
+    ret
+
+; Windows can identify symbolic links by their reparse tag and supports
+; FILETIME updates. POSIX modes, hard-link operations, and other optional
+; interfaces are not exposed by this backend contract.
+os_get_capabilities:
+    mov eax, FC_CAP_SYMLINKS or FC_CAP_FILE_TIMES
     ret

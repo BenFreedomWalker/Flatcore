@@ -291,7 +291,6 @@ os_stat:
     push r13
     sub rsp, 40
     mov r12, rsi
-    mov rdi, rdi
     mov rsi, windows_path_buffer
     mov edx, 32768
     call fc_utf8_to_utf16
@@ -315,7 +314,8 @@ os_stat:
     ; 64-bit file size = (high << 32) | low.
     mov eax, [r13 + 28]
     shl rax, 32
-    mov eax, [r13 + 32]
+    mov edx, [r13 + 32]
+    or rax, rdx
     mov [r12], rax
 
     ; Creation FILETIME (100 ns since 1601) -> Unix nanoseconds.

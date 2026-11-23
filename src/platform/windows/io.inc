@@ -22,7 +22,8 @@ os_read:
     push r12
     sub rsp, 48
     mov r12, rcx
-    cmp rdx, 0FFFFFFFFh
+    mov eax, 0FFFFFFFFh
+    cmp rdx, rax
     ja .read_invalid
     mov r9, rsp
     mov qword [rsp + 32], 0
@@ -52,14 +53,15 @@ os_write:
     push r12
     sub rsp, 48
     mov r12, rcx
-    cmp rdx, 0FFFFFFFFh
+    mov eax, 0FFFFFFFFh
+    cmp rdx, rax
     ja .write_invalid
     mov r9, rsp
     mov qword [rsp + 32], 0
     mov dword [rsp + 40], 0
+    mov r8d, edx
     mov rcx, rdi
     mov rdx, rsi
-    mov r8d, edx
     call [WriteFile]
     test eax, eax
     jz .write_error

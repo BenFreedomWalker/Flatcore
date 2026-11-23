@@ -18,7 +18,7 @@ fc_cmd_ls_flags dq 0
 fc_cmd_ls_dir_handle dq 0
 fc_cmd_ls_name_length dq 0
 fc_cmd_ls_info rb 64
-fc_cmd_ls_name rb 1024
+fc_cmd_ls_entry_name rb 1024
 fc_cmd_ls_full_path rb 8192
 fc_cmd_ls_mode rb 10
 fc_cmd_ls_number rb 32

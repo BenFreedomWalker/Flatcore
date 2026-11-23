@@ -178,19 +178,11 @@ fc_cmd_mkdir_one:
     cmp byte [fc_cmd_mkdir_work_path + 1], ':'
     je .path_next
 .path_unc_check:
-    ; For UNC paths, skip the server and share roots. Accept either slash.
-    mov al, [fc_cmd_mkdir_work_path]
-    cmp al, '\'
-    je .path_unc_second
-    cmp al, '/'
+    ; For backslash-based UNC paths, skip the server and share roots.
+    cmp byte [fc_cmd_mkdir_work_path], '\'
     jne .path_prefix
-.path_unc_second:
-    mov al, [fc_cmd_mkdir_work_path + 1]
-    cmp al, '\'
-    je .path_unc_found
-    cmp al, '/'
+    cmp byte [fc_cmd_mkdir_work_path + 1], '\'
     jne .path_prefix
-.path_unc_found:
     cmp r15, 2
     jb .path_count_unc
     jmp .path_prefix

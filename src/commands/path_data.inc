@@ -9,7 +9,8 @@ fc_basic_registry:
     dq fc_cmd_cat_name, fc_cmd_cat
     dq fc_cmd_ls_name, fc_cmd_ls
     dq fc_cmd_mkdir_name, fc_cmd_mkdir
-fc_basic_registry_count = 9
+    dq fc_cmd_rmdir_name, fc_cmd_rmdir
+fc_basic_registry_count = 10
 
 fc_cmd_true_name     db 'true', 0
 fc_cmd_false_name    db 'false', 0
@@ -20,6 +21,7 @@ fc_cmd_dirname_name  db 'dirname', 0
 fc_cmd_cat_name      db 'cat', 0
 fc_cmd_ls_name       db 'ls', 0
 fc_cmd_mkdir_name    db 'mkdir', 0
+fc_cmd_rmdir_name    db 'rmdir', 0
 fc_cmd_cat_stdin_name db '-', 0
 fc_cmd_cat_error_text db 'flatcore: cat: input/output error', 10
 fc_cmd_cat_error_length = $ - fc_cmd_cat_error_text
@@ -85,3 +87,27 @@ fc_cmd_mkdir_help_text db 'Usage: mkdir [OPTION]... DIRECTORY...', 10
 fc_cmd_mkdir_help_length = $ - fc_cmd_mkdir_help_text
 fc_cmd_mkdir_version_text db 'Flatcore mkdir 0.1', 10
 fc_cmd_mkdir_version_length = $ - fc_cmd_mkdir_version_text
+
+; Shared rmdir command options, diagnostics, and immutable output strings.
+fc_cmd_rmdir_opt_parents db '--parents', 0
+fc_cmd_rmdir_opt_verbose db '--verbose', 0
+fc_cmd_rmdir_opt_help db '--help', 0
+fc_cmd_rmdir_opt_version db '--version', 0
+fc_cmd_rmdir_usage_text db 'usage: rmdir [-pv] [--] DIRECTORY...', 10
+fc_cmd_rmdir_usage_length = $ - fc_cmd_rmdir_usage_text
+fc_cmd_rmdir_bad_option_text db 'flatcore: rmdir: invalid option', 10
+fc_cmd_rmdir_bad_option_length = $ - fc_cmd_rmdir_bad_option_text
+fc_cmd_rmdir_error_prefix db 'flatcore: rmdir: failed to remove ', 39
+fc_cmd_rmdir_error_prefix_length = $ - fc_cmd_rmdir_error_prefix
+fc_cmd_rmdir_error_suffix db 39, ': operation failed', 10
+fc_cmd_rmdir_error_suffix_length = $ - fc_cmd_rmdir_error_suffix
+fc_cmd_rmdir_verbose_prefix db 'rmdir: removed ', 39
+fc_cmd_rmdir_verbose_prefix_length = $ - fc_cmd_rmdir_verbose_prefix
+fc_cmd_rmdir_quote_newline db 39, 10
+fc_cmd_rmdir_help_text db 'Usage: rmdir [OPTION]... DIRECTORY...', 10
+                    db '  -p, --parents  remove DIRECTORY and its empty parents', 10
+                    db '  -v, --verbose  output a diagnostic for every directory processed', 10
+                    db '  --             end option parsing', 10
+fc_cmd_rmdir_help_length = $ - fc_cmd_rmdir_help_text
+fc_cmd_rmdir_version_text db 'Flatcore rmdir 0.1', 10
+fc_cmd_rmdir_version_length = $ - fc_cmd_rmdir_version_text

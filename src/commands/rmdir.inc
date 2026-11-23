@@ -121,12 +121,9 @@ fc_cmd_rmdir_one:
     mov r13, r14
     jmp .remove_parent
 .parent_root:
-    mov byte [fc_cmd_rmdir_work_path + 1], 0
-    mov r13, 1
-    jmp .remove_parent
+    jmp .one_success
 .parent_drive_root:
-    mov byte [fc_cmd_rmdir_work_path + 3], 0
-    mov r13, 3
+    jmp .one_success
 .remove_parent:
     mov rdi, fc_cmd_rmdir_work_path
     call os_rmdir

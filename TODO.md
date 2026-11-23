@@ -219,10 +219,10 @@ Both existing native source files include and assemble these same common modules
 - [x] Implement os_getcwd and os_chdir in the Linux backend.
 - [x] Implement Linux file timestamp updates with `utimensat`; verify nanosecond precision through `os_stat`.
 - [x] Complete the currently required Linux syscall-backed filesystem and I/O operations; Linux runtime tests cover read/write/open/close/stat/directory iteration/basic path operations/getcwd/chdir/timestamps.
-- [ ] Finish Linux/backend capability semantics and document cross-platform differences.
+- [x] Implement os_get_capabilities on Linux and Windows with conservative, backend-specific capability masks.
 - [x] Complete Windows Unicode Win32-backed versions, including runtime-verified I/O/basic filesystem, `os_stat`, directory iteration, and `os_set_times`.
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
-- [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
+- [ ] Runtime-verify no-follow symlink metadata and capability masks on both platforms; Windows reparse-tag classification is implemented for os_stat and directory entries.
 - [x] Implement Windows `os_stat` with Unicode `GetFileAttributesExW`, 64-bit file sizes, DOS attribute translation, and FILETIME-to-Unix-nanosecond conversion.
 - [x] Implement Windows `os_dir_open`, `os_dir_next`, and `os_dir_close` with independent Unicode `FindFirstFileW`/`FindNextFileW` iterators.
 - [x] Runtime-verify Windows directory iteration: Unicode names, simultaneous handles, too-small-buffer retry, metadata, EOF, and close.
@@ -446,3 +446,15 @@ Both existing native source files include and assemble these same common modules
 - User also ran `./build.sh test` under WSL; shared runtime helper tests and Linux smoke tests passed with fish exit status 0. The printed `flatcore: operation failed` is expected output from the existing negative/error-path smoke test.
 - Windows timestamp tests now verify that distinct access and modification timestamps can be set on a Unicode-named file and read back through `os_stat` at the native 100 ns FILETIME precision.
 - Stage 4's Linux and Windows filesystem/I/O operations implemented so far are runtime-verified. Remaining Stage 4 work is capability reporting and explicit symlink/reparse-point and unsupported-metadata semantics. Stage 5 remains blocked until those semantics are implemented and tested.
+
+**Stage 4 capability and symlink semantics implementation checkpoint (2026-11-23)**
+
+- Added the documented os_get_capabilities() FC64 backend entry point and clarified the meaning of the optional capability bits. A set FC_CAP_SYMLINKS bit means metadata queries and directory iteration can identify symbolic links without following them; it does not imply link-creation or readlink operations are already exposed.
+- Linux now reports FC_CAP_SYMLINKS | FC_CAP_POSIX_MODES | FC_CAP_FILE_TIMES. It does not claim hard-link operations, owner-ID metadata, or process-signal support through this backend contract.
+- Windows reports FC_CAP_SYMLINKS | FC_CAP_FILE_TIMES. It does not claim POSIX mode bits, hard-link operations, owner-ID metadata, or process-signal support.
+- Changed Linux os_stat to pass AT_SYMLINK_NOFOLLOW to newfstatat, giving it lstat semantics: the metadata describes the link itself rather than its target. Linux directory iteration already translates d_type symbolic links to FC_TYPE_SYMLINK.
+- Windows os_stat now obtains WIN32_FIND_DATAW.dwReserved0 for reparse points and classifies only IO_REPARSE_TAG_SYMLINK as FC_TYPE_SYMLINK. Junctions and other reparse providers remain FC_TYPE_UNKNOWN; failure to retrieve the tag also leaves the type unknown rather than guessing.
+- Windows directory iteration now applies the same tag check to its existing WIN32_FIND_DATAW record. Regular files/directories retain their existing classification; unrecognized reparse tags remain unknown.
+- Added Linux integration coverage that creates a relative symbolic link, checks no-follow type and S_IFLNK mode through os_stat, and removes the link. Added capability-mask assertions to both backend integration tests.
+- Windows integration tests assert its conservative capability mask. The reparse-tag classification path is implemented; a dedicated Windows symlink fixture is not forced because creating symbolic links can require elevated privilege on supported Windows versions. Runtime verification remains pending.
+- Source changes are committed on main. Do not begin Stage 5 until both platform test suites pass and the user reports their results.

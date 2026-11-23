@@ -334,10 +334,10 @@ Both existing native source files include and assemble these same common modules
 
 **Linux directory iteration implementation (2026-11-23)**
 
-- Added `src/platform/linux/directories.inc` with FC64 `os_dir_open`, `os_dir_next`, and `os_dir_close` using native `openat`-compatible `open` and `getdents64`/close syscalls.
+- Added `src/platform/linux/directories.inc` with FC64 `os_dir_open`, `os_dir_next`, and `os_dir_close` using native `open`, `getdents64`, and `close` syscalls.
 - Directory handles are opaque slot tokens backed by eight independent iterator contexts. Each context owns a 4096-byte kernel-entry buffer, so multiple open directories can be interleaved without sharing cursor state.
 - `os_dir_next` validates record boundaries and NUL-terminated names, reports byte lengths, appends a terminator when capacity permits, and returns 1 for an entry, 0 for EOF, or -1 for errors. A too-small name buffer returns `FC_ERR_TOO_SMALL` without consuming the entry.
 - Linux `d_type` values are translated to `FC_TYPE_*`; hidden names receive `FC_ATTR_HIDDEN`. Fields not supplied by `getdents64` (such as size and timestamps) remain zero, and unknown `d_type` remains `FC_TYPE_UNKNOWN`.
-- Extended the Linux backend self-test to open two iterators simultaneously, test too-small-buffer retry, read from both handles, drain one iterator to EOF, and close both.
+- Extended the Linux backend self-test to create a dedicated empty directory, open two iterators simultaneously, test too-small-buffer retry without consuming the entry, read from both handles, drain one iterator through EOF, close both, and remove the fixture.
 - Added the directory backend to `tests/runtime-linux.asm`. The Windows build and test sources are unchanged.
 - Source implementation and static review are complete. Runtime verification is pending; do not mark the directory backend verified until the user runs both platform test commands and reports the results.

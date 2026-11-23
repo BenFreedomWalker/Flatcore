@@ -32,6 +32,9 @@ set "STEP=pwd output"
 "%BIN%" pwd > "%OUT%"
 if errorlevel 1 goto failed
 for %%A in ("%OUT%") do if "%%~zA"=="0" goto failed
+set "PWD_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="%CD%" set "PWD_MATCH=1"
+if not defined PWD_MATCH goto failed
 
 set "STEP=hostname output"
 "%BIN%" hostname > "%OUT%"

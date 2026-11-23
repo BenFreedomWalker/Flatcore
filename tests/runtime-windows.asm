@@ -13,6 +13,7 @@ include 'src/common/formatting.inc'
 include 'src/common/startup.inc'
 include 'src/common/dispatcher.inc'
 include 'src/common/errors.inc'
+include 'src/commands/basic.inc'
 include 'src/platform/windows/io.inc'
 include 'src/platform/windows/filesystem.inc'
 include 'tests/windows-backend-selftest.inc'
@@ -33,6 +34,7 @@ start:
 section '.data' data readable writeable
 include 'src/platform/windows/data.inc'
 include 'src/common/errors_data.inc'
+include 'src/commands/basic_data.inc'
 include 'tests/runtime-selftest-data.inc'
 include 'tests/windows-backend-selftest-data.inc'
 

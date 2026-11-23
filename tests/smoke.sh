@@ -158,13 +158,13 @@ fi
     "$BIN" rmdir --version > rmdir-version.txt
     grep -q 'Flatcore rmdir' rmdir-version.txt
     if "$BIN" rmdir --not-a-real-option >/dev/null 2>&1; then
-        printf 'rmdir accepted an unknown option\\n' >&2
+        printf 'rmdir accepted an unknown option\n' >&2
         exit 1
     fi
     "$BIN" mkdir rmdir-nonempty
-    printf 'keep\\n' > rmdir-nonempty/file
+    printf 'keep\n' > rmdir-nonempty/file
     if "$BIN" rmdir rmdir-nonempty; then
-        printf 'rmdir removed a non-empty directory\\n' >&2
+        printf 'rmdir removed a non-empty directory\n' >&2
         exit 1
     fi
     [[ -d rmdir-nonempty ]]

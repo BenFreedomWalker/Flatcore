@@ -433,7 +433,7 @@ Both existing native source files include and assemble these same common modules
 **Windows timestamp update implementation checkpoint (2026-11-23)**
 
 - Added FC64 `os_set_times(path_utf8, accessed_ns, modified_ns)` to `src/platform/windows/filesystem.inc`.
-- Converts signed Unix-epoch nanoseconds to Windows FILETIME ticks (100 ns), applying floor division for negative/pre-epoch values rather than truncating toward zero.
+- Converts signed Unix-epoch nanoseconds to Windows FILETIME ticks (100 ns), applying floor division for negative/pre-epoch values rather than truncating toward zero. Values earlier than the Windows FILETIME epoch (1601-01-01) are rejected as invalid instead of wrapping.
 - Opens the target through `CreateFileW` with `FILE_WRITE_ATTRIBUTES`, full read/write/delete sharing, and `FILE_FLAG_BACKUP_SEMANTICS` so directories can also be timestamped; calls `SetFileTime` to update access and modification times while leaving creation time unchanged.
 - Closes the temporary handle on success and on SetFileTime failure, retaining the original Win32 error state. UTF-8 conversion and native API failures use the common normalized error state.
 - Extended the Windows backend integration test to set distinct timestamps on the Unicode fixture and verify both exact values through `os_stat`. Test values are aligned to the Windows 100 ns precision; separate failure codes 96–98 identify the set/access/modified checks.

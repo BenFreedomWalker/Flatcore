@@ -215,8 +215,42 @@ set "DIRNAME_DOT_MATCH="
 for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="." set "DIRNAME_DOT_MATCH=1"
 if not defined DIRNAME_DOT_MATCH goto failed
 
-set "STEP=remove sample file"
+set "STEP=rm help and version"
+"%BIN%" rm --help > "%OUT%"
+if errorlevel 1 goto failed
+set "RM_HELP_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="Usage: rm [OPTION]... FILE..." set "RM_HELP_MATCH=1"
+if not defined RM_HELP_MATCH goto failed
+"%BIN%" rm --version > "%OUT%"
+if errorlevel 1 goto failed
+set "RM_VERSION_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="Flatcore rm 0.1" set "RM_VERSION_MATCH=1"
+if not defined RM_VERSION_MATCH goto failed
+set "STEP=rm force ignores missing path"
+"%BIN%" rm -f "%TEST_DIR%\missing-rm-file"
+if errorlevel 1 goto failed
+set "STEP=rm removes sample file"
 "%BIN%" rm "%TEST_DIR%\sample.txt"
+if errorlevel 1 goto failed
+set "STEP=rm verbose output"
+"%BIN%" rm -v "%TEST_DIR%\moved.txt" > "%OUT%"
+if errorlevel 1 goto failed
+set "RM_VERBOSE_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="rm: removed '%TEST_DIR%\moved.txt'" set "RM_VERBOSE_MATCH=1"
+if not defined RM_VERBOSE_MATCH goto failed
+set "STEP=rm removes empty directory with -d"
+mkdir "%TEST_DIR%\rm-empty"
+"%BIN%" rm -dv "%TEST_DIR%\rm-empty" > "%OUT%"
+if errorlevel 1 goto failed
+if exist "%TEST_DIR%\rm-empty" goto failed
+set "STEP=rm -d rejects non-empty directory"
+mkdir "%TEST_DIR%\rm-nonempty"
+> "%TEST_DIR%\rm-nonempty\keep.txt" echo keep
+"%BIN%" rm -d "%TEST_DIR%\rm-nonempty" >nul 2>nul
+if not errorlevel 1 goto failed
+if not exist "%TEST_DIR%\rm-nonempty\keep.txt" goto failed
+del "%TEST_DIR%\rm-nonempty\keep.txt"
+"%BIN%" rm -d "%TEST_DIR%\rm-nonempty"
 if errorlevel 1 goto failed
 
 set "STEP=remove moved file"

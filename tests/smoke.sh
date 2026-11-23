@@ -137,6 +137,27 @@ fi
     grep -q -- '--parents' mkdir-help.txt
 
     "$BIN" rm mkdir-blocker
+    "$BIN" rm --help > rm-help.txt
+    grep -q -- '--force' rm-help.txt
+    "$BIN" rm --version > rm-version.txt
+    grep -q 'Flatcore rm' rm-version.txt
+    "$BIN" rm -f missing-rm-file
+    printf 'verbose removal\\n' > rm-verbose-file
+    "$BIN" rm -v rm-verbose-file > rm-verbose.txt
+    grep -q "removed 'rm-verbose-file'" rm-verbose.txt
+    "$BIN" mkdir rm-empty-dir
+    "$BIN" rm -dv rm-empty-dir > rm-dir-verbose.txt
+    grep -q "removed 'rm-empty-dir'" rm-dir-verbose.txt
+    "$BIN" mkdir rm-nonempty-dir
+    printf 'keep\\n' > rm-nonempty-dir/file
+    if "$BIN" rm -d rm-nonempty-dir; then
+        printf 'rm -d removed a non-empty directory\\n' >&2
+        exit 1
+    fi
+    "$BIN" rm rm-nonempty-dir/file
+    "$BIN" rm -d rm-nonempty-dir
+    printf 'leading\\n' > ./-rm-leading
+    "$BIN" rm -- ./-rm-leading
     "$BIN" rm ls-dir/visible ls-dir/.hidden ls-file-one ls-file-two ./-ls-leading
     "$BIN" rmdir ls-dir
     "$BIN" rmdir -p mkdir-tree/one/two

@@ -37,7 +37,7 @@ if /i "%~1"=="test" (
     "%ROOT%build\windows\runtime-selftest.exe"
     set "RUNTIME_STATUS=%errorlevel%"
     popd
-    if not "%RUNTIME_STATUS%"=="0" (
+    if not "!RUNTIME_STATUS!"=="0" (
         echo Flatcore shared runtime and backend tests failed with status !RUNTIME_STATUS!.
         exit /b !RUNTIME_STATUS!
     )

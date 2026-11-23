@@ -477,3 +477,10 @@ Both existing native source files include and assemble these same common modules
 - The first Stage 5 test run exposed that both runtime self-test assemblies included `basic.inc` without including its shared output dependency, `src/common/output.inc`. The production executables already included the output helpers; only the test harnesses were incomplete.
 - Added `src/common/output.inc` to both `tests/runtime-linux.asm` and `tests/runtime-windows.asm` before the shared command implementation.
 - Source correction is committed. Runtime verification is pending; rerun both test commands before migrating the next command tranche.
+
+**Stage 5 Windows echo smoke assertion correction (2026-11-23)**
+
+- The shared runtime and Windows backend self-tests assembled and passed, but the Windows smoke runner rejected the shared echo output.
+- The shared echo contract intentionally emits LF (0x0A) on both platforms. The smoke runner used `findstr /x`, which assumes Windows text-line handling and is unsuitable for this LF-only output.
+- Replaced that assertion with CMD `for /f` line extraction and an exact string comparison, without changing the shared command's output bytes.
+- Source correction is committed; both platform test suites remain pending at this checkpoint.

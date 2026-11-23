@@ -106,7 +106,7 @@ fc_cmd_rmdir_one:
     mov al, [fc_cmd_rmdir_work_path + r14]
     cmp al, '/'
     je .parent_separator
-    cmp al, '\\'
+    cmp al, 5Ch
     jne .parent_scan
 .parent_separator:
     ; Preserve a POSIX root or a Windows drive root.
@@ -125,7 +125,7 @@ fc_cmd_rmdir_one:
     mov al, [fc_cmd_rmdir_work_path]
     cmp al, '/'
     je .one_success
-    cmp al, '\\'
+    cmp al, 5Ch
     je .one_success
     cmp al, '.'
     je .one_success

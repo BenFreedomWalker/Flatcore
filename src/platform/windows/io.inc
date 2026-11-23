@@ -25,7 +25,7 @@ os_read:
     mov eax, 0FFFFFFFFh
     cmp rdx, rax
     ja .read_invalid
-    mov r9, rsp
+    lea r9, [rsp + 40]
     mov qword [rsp + 32], 0
     mov dword [rsp + 40], 0
     mov r8d, edx
@@ -57,7 +57,7 @@ os_write:
     mov eax, 0FFFFFFFFh
     cmp rdx, rax
     ja .write_invalid
-    mov r9, rsp
+    lea r9, [rsp + 40]
     mov qword [rsp + 32], 0
     mov dword [rsp + 40], 0
     mov r8d, edx

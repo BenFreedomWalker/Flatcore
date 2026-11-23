@@ -116,8 +116,8 @@ fi
     [[ "$(stat -c '%a' mkdir-mode)" == '700' ]]
     "$BIN" mkdir --mode=755 mkdir-mode-long
     [[ "$(stat -c '%a' mkdir-mode-long)" == '755' ]]
-    "$BIN" mkdir -- --mkdir-leading
-    [[ -d -- --mkdir-leading ]]
+    "$BIN" mkdir -- -mkdir-leading
+    [[ -d ./-mkdir-leading ]]
     if "$BIN" mkdir mkdir-mode; then
         printf 'mkdir succeeded for an existing directory without -p\n' >&2
         exit 1
@@ -138,6 +138,15 @@ fi
 
     "$BIN" rm mkdir-blocker\n    "$BIN" rm ls-dir/visible ls-dir/.hidden ls-file-one ls-file-two ./-ls-leading
     "$BIN" rmdir ls-dir
+    "$BIN" rmdir mkdir-tree/one/two
+    "$BIN" rmdir mkdir-tree/one
+    "$BIN" rmdir mkdir-tree
+    "$BIN" rmdir mkdir-verbose/a/b
+    "$BIN" rmdir mkdir-verbose/a
+    "$BIN" rmdir mkdir-verbose
+    "$BIN" rmdir mkdir-mode
+    "$BIN" rmdir mkdir-mode-long
+    "$BIN" rmdir ./-mkdir-leading
     "$BIN" mkdir sample-dir
     "$BIN" rmdir sample-dir
 

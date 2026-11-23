@@ -14,6 +14,7 @@ include 'src/common/dispatcher.inc'
 include 'src/common/errors.inc'
 include 'src/platform/linux/io.inc'
 include 'src/platform/linux/filesystem.inc'
+include 'src/platform/linux/directories.inc'
 include 'tests/linux-backend-selftest.inc'
 include 'tests/runtime-selftest.inc'
 

@@ -805,6 +805,7 @@ include 'src/common/output.inc'
 include 'src/common/startup.inc'
 include 'src/common/dispatcher.inc'
 include 'src/commands/basic.inc'
+include 'src/commands/path.inc'
 include 'src/common/errors.inc'
 include 'src/platform/windows/io.inc'
 include 'src/platform/windows/filesystem.inc'
@@ -812,6 +813,7 @@ include 'src/platform/windows/filesystem.inc'
 section '.rdata' data readable
 include 'src/common/errors_data.inc'
 include 'src/commands/basic_data.inc'
+include 'src/commands/path_data.inc'
 
 help_name db 'help', 0
 echo_name db 'echo', 0

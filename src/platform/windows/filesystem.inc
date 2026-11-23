@@ -5,9 +5,11 @@
 os_open:
     push r12
     push r13
-    sub rsp, 72
+    push r14
+    sub rsp, 64
     mov r12, rdi
     mov r13, rcx
+    mov r14d, esi
     mov rdi, r12
     mov rsi, windows_path_buffer
     mov edx, 32768
@@ -17,15 +19,15 @@ os_open:
 
     ; Map Flatcore access and append flags to Win32 desired access.
     xor r10d, r10d
-    test esi, FC_OPEN_READ
+    test r14d, FC_OPEN_READ
     jz .open_no_read
     or r10d, 80000000h
 .open_no_read:
-    test esi, FC_OPEN_WRITE
+    test r14d, FC_OPEN_WRITE
     jz .open_no_write
     or r10d, 40000000h
 .open_no_write:
-    test esi, FC_OPEN_APPEND
+    test r14d, FC_OPEN_APPEND
     jz .open_access_ready
     and r10d, 0BFFFFFFFh
     or r10d, 00000004h       ; FILE_APPEND_DATA
@@ -35,11 +37,11 @@ os_open:
     mov r8d, 7               ; share read/write/delete
     xor r9d, r9d             ; default security
     mov eax, 3               ; OPEN_EXISTING
-    test esi, FC_OPEN_CREATE
+    test r14d, FC_OPEN_CREATE
     jz .open_no_create
-    test esi, FC_OPEN_EXCLUSIVE
+    test r14d, FC_OPEN_EXCLUSIVE
     jnz .open_create_new
-    test esi, FC_OPEN_TRUNCATE
+    test r14d, FC_OPEN_TRUNCATE
     jnz .open_create_always
     mov eax, 4               ; OPEN_ALWAYS
     jmp .open_no_create
@@ -57,7 +59,7 @@ os_open:
 .open_flags:
     mov [rsp + 32], rax
     mov eax, 80h             ; FILE_ATTRIBUTE_NORMAL
-    test esi, FC_OPEN_DIRECTORY
+    test r14d, FC_OPEN_DIRECTORY
     jz .open_store_flags
     or eax, 02000000h        ; FILE_FLAG_BACKUP_SEMANTICS
 .open_store_flags:
@@ -76,7 +78,8 @@ os_open:
 .open_error:
     call fc_windows_set_error
 .open_done:
-    add rsp, 72
+    add rsp, 64
+    pop r14
     pop r13
     pop r12
     ret

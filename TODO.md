@@ -245,8 +245,9 @@ Both existing native source files include and assemble these same common modules
 - [x] Port true, false, and echo into `src/commands/basic.inc`; both native entry points now try the shared registry before falling back to unmigrated legacy commands.
 - [x] Port pwd, basename, and dirname into the shared `src/commands/path.inc`; both production targets and both runtime test assemblies now compile the same handlers and registry.
 - [x] Implement and runtime-verify shared cat on Linux and Windows, including standard input and multiple file operands.
-- [x] Implement shared ls source with common GNU-style options and multiple operands; runtime verification pending.
-- [ ] Port mkdir, including -p, -m, and -v where supported.
+- [x] Implement and runtime-verify shared ls source with common options, multiple operands, and backend-neutral directory iteration.
+- [x] Implement shared mkdir in `src/commands/mkdir.inc`, including recursive `-p`, octal `-m`, and `-v`; Windows explicitly ignores POSIX creation modes.
+- [ ] Runtime-verify shared mkdir on Linux and Windows.
 - [ ] Port rmdir.
 - [ ] Port rm, including -f, -i, -r/-R, and -v.
 - [ ] Port cp, including -f, -i, -n, -r/-R, and -v.
@@ -534,3 +535,13 @@ Both existing native source files include and assemble these same common modules
 - Linux shared runtime/backend tests and smoke tests passed. Windows shared runtime/backend tests and smoke tests passed.
 - The Linux `flatcore: operation failed` and Windows `flatcore: cat: input/output error` messages are expected negative-path diagnostics; both suites completed successfully.
 - Shared `ls` is now runtime-verified on both targets. Next command tranche: shared `mkdir` with `-p`, `-m`, and `-v`. Wait for the user's `ok` before implementation.
+
+
+**Stage 5 shared mkdir — source implementation checkpoint (2026-11-23)**
+
+- Added `src/commands/mkdir.inc`, a single FC64 implementation using the shared argument vector, `os_stat`, `os_mkdir`, and the common output callback. No native syscalls or Win32 API calls appear in the command source.
+- Registered `mkdir` in the shared dispatcher and compiled the same implementation into both production executables and both runtime-test assemblies. Added per-platform scratch storage for recursive path processing and metadata.
+- Implemented `-p` / `--parents` with existing-directory acceptance, recursive parent creation, and rejection of non-directory path components; `-m MODE` / `--mode=MODE` with octal validation; `-v` / `--verbose`; combined short options; `--`; `--help`; and `--version`.
+- Linux passes the requested mode to native `mkdir(2)`, subject to the process umask. Windows accepts and validates the option but ignores POSIX mode bits because its backend does not expose POSIX creation permissions.
+- Added Linux and Windows smoke coverage for recursive creation, already-existing parents, verbose output, mode parsing, help/version, and invalid mode input. Linux additionally checks resulting POSIX modes, non-directory parent rejection, and a leading-hyphen operand.
+- Source implementation and test wiring are complete. Runtime verification is pending. Run both platform test commands and report their exit statuses before proceeding to `rmdir`.

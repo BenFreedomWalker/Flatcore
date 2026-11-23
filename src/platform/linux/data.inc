@@ -22,6 +22,11 @@ fc_cmd_ls_entry_name rb 1024
 fc_cmd_ls_full_path rb 8192
 fc_cmd_ls_mode rb 10
 fc_cmd_ls_number rb 32
+align 16
+fc_cmd_mkdir_flags dq 0
+fc_cmd_mkdir_mode dq 0777o
+fc_cmd_mkdir_info rb 64
+fc_cmd_mkdir_work_path rb 8192
 
 align 16
 linux_stat_buffer rb 144

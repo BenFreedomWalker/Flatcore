@@ -225,3 +225,62 @@ os_stat:
     neg eax
     jmp fc_linux_set_error
 
+
+; os_set_times(path_utf8, accessed_ns, modified_ns)
+; Set access and modification times using UTC Unix-epoch nanoseconds.
+; Convert each signed nanosecond value to a normalized Linux timespec.
+os_set_times:
+    push r12
+    push r13
+    push r14
+    sub rsp, 32
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, rdx
+
+    ; atime: signed nanoseconds -> seconds + nonnegative nanosecond remainder.
+    mov rax, r13
+    cqo
+    mov rcx, 1000000000
+    idiv rcx
+    test rdx, rdx
+    jns .atime_normalized
+    dec rax
+    add rdx, 1000000000
+.atime_normalized:
+    mov [rsp], rax
+    mov [rsp + 8], rdx
+
+    ; mtime: signed nanoseconds -> seconds + nonnegative nanosecond remainder.
+    mov rax, r14
+    cqo
+    mov rcx, 1000000000
+    idiv rcx
+    test rdx, rdx
+    jns .mtime_normalized
+    dec rax
+    add rdx, 1000000000
+.mtime_normalized:
+    mov [rsp + 16], rax
+    mov [rsp + 24], rdx
+
+    ; utimensat(AT_FDCWD, path, times, 0).
+    mov edi, -100
+    mov rsi, r12
+    mov rdx, rsp
+    xor r10d, r10d
+    mov eax, 280
+    syscall
+    test rax, rax
+    js .set_times_error
+    xor eax, eax
+    jmp .set_times_done
+.set_times_error:
+    neg eax
+    call fc_linux_set_error
+.set_times_done:
+    add rsp, 32
+    pop r14
+    pop r13
+    pop r12
+    ret

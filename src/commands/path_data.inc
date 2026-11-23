@@ -8,7 +8,8 @@ fc_basic_registry:
     dq fc_cmd_dirname_name, fc_cmd_dirname
     dq fc_cmd_cat_name, fc_cmd_cat
     dq fc_cmd_ls_name, fc_cmd_ls
-fc_basic_registry_count = 8
+    dq fc_cmd_mkdir_name, fc_cmd_mkdir
+fc_basic_registry_count = 9
 
 fc_cmd_true_name     db 'true', 0
 fc_cmd_false_name    db 'false', 0
@@ -18,6 +19,7 @@ fc_cmd_basename_name db 'basename', 0
 fc_cmd_dirname_name  db 'dirname', 0
 fc_cmd_cat_name      db 'cat', 0
 fc_cmd_ls_name       db 'ls', 0
+fc_cmd_mkdir_name    db 'mkdir', 0
 fc_cmd_cat_stdin_name db '-', 0
 fc_cmd_cat_error_text db 'flatcore: cat: input/output error', 10
 fc_cmd_cat_error_length = $ - fc_cmd_cat_error_text
@@ -55,3 +57,31 @@ fc_cmd_ls_version_text db 'Flatcore ls 0.1', 10
 fc_cmd_ls_version_length = $ - fc_cmd_ls_version_text
 fc_cmd_ls_perm_bits dw 256, 128, 64, 32, 16, 8, 4, 2, 1
 fc_cmd_ls_perm_chars db 'rwxrwxrwx'
+
+; Shared mkdir command options, diagnostics, and immutable output strings.
+fc_cmd_mkdir_opt_parents db '--parents', 0
+fc_cmd_mkdir_opt_verbose db '--verbose', 0
+fc_cmd_mkdir_opt_help db '--help', 0
+fc_cmd_mkdir_opt_version db '--version', 0
+fc_cmd_mkdir_opt_mode_prefix db '--mode=', 0
+fc_cmd_mkdir_usage_text db 'usage: mkdir [-pv] [-m MODE] [--] DIRECTORY...', 10
+fc_cmd_mkdir_usage_length = $ - fc_cmd_mkdir_usage_text
+fc_cmd_mkdir_bad_option_text db 'flatcore: mkdir: invalid option', 10
+fc_cmd_mkdir_bad_option_length = $ - fc_cmd_mkdir_bad_option_text
+fc_cmd_mkdir_bad_mode_text db 'flatcore: mkdir: invalid mode', 10
+fc_cmd_mkdir_bad_mode_length = $ - fc_cmd_mkdir_bad_mode_text
+fc_cmd_mkdir_error_prefix db 'flatcore: mkdir: cannot create directory ', 39
+fc_cmd_mkdir_error_prefix_length = $ - fc_cmd_mkdir_error_prefix
+fc_cmd_mkdir_error_suffix db ': operation failed', 10
+fc_cmd_mkdir_error_suffix_length = $ - fc_cmd_mkdir_error_suffix
+fc_cmd_mkdir_verbose_prefix db 'mkdir: created directory ', 39
+fc_cmd_mkdir_verbose_prefix_length = $ - fc_cmd_mkdir_verbose_prefix
+fc_cmd_mkdir_quote_newline db 39, 10
+fc_cmd_mkdir_help_text db 'Usage: mkdir [OPTION]... DIRECTORY...', 10
+                    db '  -p, --parents  create parent directories as needed', 10
+                    db '  -m, --mode=MODE set file mode (octal; ignored by Windows)', 10
+                    db '  -v, --verbose  print a message for each created directory', 10
+                    db '  --             end option parsing', 10
+fc_cmd_mkdir_help_length = $ - fc_cmd_mkdir_help_text
+fc_cmd_mkdir_version_text db 'Flatcore mkdir 0.1', 10
+fc_cmd_mkdir_version_length = $ - fc_cmd_mkdir_version_text

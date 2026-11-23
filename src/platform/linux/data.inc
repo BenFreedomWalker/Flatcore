@@ -10,3 +10,7 @@ os_native_error dq 0
 
 align 16
 linux_stat_buffer rb 144
+
+align 16
+; Eight independent directory iterator contexts: state, fd, position, count, buffer.
+linux_dir_slots rb 8 * 4112

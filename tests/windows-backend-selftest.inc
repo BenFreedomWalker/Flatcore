@@ -6,6 +6,15 @@ fc_windows_backend_selftest:
     push r13
     sub rsp, 16
 
+    ; Remove leftovers from an interrupted earlier run; these failures are
+    ; intentionally ignored so the fixture remains repeatable.
+    mov rdi, windows_test_path
+    call os_unlink
+    mov rdi, windows_test_renamed_path
+    call os_unlink
+    mov rdi, windows_test_dir
+    call os_rmdir
+
     ; Preserve the original working directory for the chdir round-trip.
     mov rdi, windows_test_cwd
     mov esi, 4096

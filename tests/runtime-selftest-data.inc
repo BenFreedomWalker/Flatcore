@@ -25,3 +25,5 @@ test_dispatch_argv rq 1
 
 test_utf16_roundtrip rb 16
 test_utf8_invalid db 0C0h, 080h, 0
+
+test_utf8_truncated db 0E2h, 082h, 0

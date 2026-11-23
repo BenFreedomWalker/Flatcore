@@ -526,3 +526,11 @@ Both existing native source files include and assemble these same common modules
 - Implemented `-a`, `-A`, `-l`, `-d`, `-1`, combined short options, `--all`, `--almost-all`, `--directory`, `--help`, `--version`, and `--`. Directory entries are filtered and formatted in shared code. Long format reports file type, available POSIX permission bits, byte size, and name; Windows reports dashes for POSIX permission bits because its backend does not expose them.
 - Added Linux and Windows smoke coverage for hidden-file filtering, long format, almost-all, directory operands, multiple file operands, help/version, and invalid options. Linux additionally verifies `-a` dot entries and `--` with a leading-hyphen filename. Windows batch assertions use `for /f` to remain compatible with LF-only shared output.
 - Source implementation and test wiring are complete. Runtime verification is pending. Run both platform test commands and report their exit statuses before proceeding to the next command tranche.
+
+
+**Stage 5 shared ls — runtime verification passed (2026-11-23)**
+
+- The user ran `./build.sh test` under WSL and `build-windows.bat test` under Windows after the final Windows smoke-assertion correction. Both returned exit status 0.
+- Linux shared runtime/backend tests and smoke tests passed. Windows shared runtime/backend tests and smoke tests passed.
+- The Linux `flatcore: operation failed` and Windows `flatcore: cat: input/output error` messages are expected negative-path diagnostics; both suites completed successfully.
+- Shared `ls` is now runtime-verified on both targets. Next command tranche: shared `mkdir` with `-p`, `-m`, and `-v`. Wait for the user's `ok` before implementation.

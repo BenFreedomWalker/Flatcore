@@ -210,7 +210,7 @@ fc_cmd_ls_directory:
     mov rsi, fc_cmd_ls_info
     mov rdx, fc_cmd_ls_entry_name
     mov ecx, 1024
-    mov r8, fc_cmd_ls_entry_name_length
+    mov r8, fc_cmd_ls_name_length
     call os_dir_next
     cmp rax, 1
     je .directory_entry

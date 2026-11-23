@@ -27,9 +27,9 @@ os_read:
     mov r9, rsp
     mov qword [rsp + 32], 0
     mov dword [rsp + 40], 0
+    mov r8d, edx
     mov rcx, rdi
     mov rdx, rsi
-    mov r8d, edx
     call [ReadFile]
     test eax, eax
     jz .read_error

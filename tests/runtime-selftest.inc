@@ -138,6 +138,39 @@ fc_runtime_selftest:
     test eax, eax
     jz .fail19
 
+    ; UTF-8 -> UTF-16 must round-trip ASCII, BMP, and supplementary points.
+    mov rdi, test_utf8_expected
+    mov rsi, test_utf16_roundtrip
+    mov edx, 16
+    call fc_utf8_to_utf16
+    cmp rax, 5
+    jne .fail22
+    mov ax, [test_utf16_roundtrip]
+    cmp ax, [test_utf16]
+    jne .fail22
+    mov ax, [test_utf16_roundtrip + 2]
+    cmp ax, [test_utf16 + 2]
+    jne .fail22
+    mov ax, [test_utf16_roundtrip + 4]
+    cmp ax, [test_utf16 + 4]
+    jne .fail22
+    mov ax, [test_utf16_roundtrip + 6]
+    cmp ax, [test_utf16 + 6]
+    jne .fail22
+    mov ax, [test_utf16_roundtrip + 8]
+    cmp ax, [test_utf16 + 8]
+    jne .fail22
+    cmp word [test_utf16_roundtrip + 10], 0
+    jne .fail22
+
+    ; Overlong UTF-8 encodings must be rejected, not silently accepted.
+    mov rdi, test_utf8_invalid
+    mov rsi, test_utf16_roundtrip
+    mov edx, 16
+    call fc_utf8_to_utf16
+    cmp rax, -1
+    jne .fail23
+
     xor eax, eax
     jmp .return
 .fail1:
@@ -202,6 +235,12 @@ fc_runtime_selftest:
     jmp .return
 .fail21:
     mov eax, 21
+    jmp .return
+.fail22:
+    mov eax, 22
+    jmp .return
+.fail23:
+    mov eax, 23
     jmp .return
 .failed:
     mov eax, 1

@@ -53,6 +53,49 @@ fc_linux_backend_selftest:
     cmp dword [linux_test_info + 40], 100600o
     jne .fail13
 
+    ; Two simultaneous directory handles must keep independent iteration state.
+    mov rdi, linux_test_dir_path
+    mov rsi, linux_test_dir_handle
+    call os_dir_open
+    test eax, eax
+    jnz .fail14
+    mov rdi, linux_test_dir_path
+    mov rsi, linux_test_dir_handle2
+    call os_dir_open
+    test eax, eax
+    jnz .fail15
+
+    mov rdi, [linux_test_dir_handle]
+    mov rsi, linux_test_info
+    mov rdx, linux_test_name
+    mov ecx, 256
+    mov r9, linux_test_name_length
+    call os_dir_next
+    cmp eax, 1
+    jne .fail16
+    cmp qword [linux_test_name_length], 0
+    je .fail17
+
+    mov rdi, [linux_test_dir_handle2]
+    mov rsi, linux_test_info2
+    mov rdx, linux_test_name2
+    mov ecx, 256
+    mov r9, linux_test_name_length2
+    call os_dir_next
+    cmp eax, 1
+    jne .fail18
+    cmp qword [linux_test_name_length2], 0
+    je .fail19
+
+    mov rdi, [linux_test_dir_handle]
+    call os_dir_close
+    test eax, eax
+    jnz .fail20
+    mov rdi, [linux_test_dir_handle2]
+    call os_dir_close
+    test eax, eax
+    jnz .fail21
+
     ; Reopen and read back the exact payload.
     mov rdi, linux_test_path
     mov esi, FC_OPEN_READ
@@ -120,6 +163,48 @@ fc_linux_backend_selftest:
 .fail12: mov eax, 42
     jmp .done
 .fail13: mov eax, 43
+    jmp .done
+.fail14: mov eax, 44
+    jmp .done
+.fail15:
+    mov rdi, [linux_test_dir_handle]
+    call os_dir_close
+    mov eax, 45
+    jmp .done
+.fail16:
+    mov rdi, [linux_test_dir_handle]
+    call os_dir_close
+    mov rdi, [linux_test_dir_handle2]
+    call os_dir_close
+    mov eax, 46
+    jmp .done
+.fail17:
+    mov rdi, [linux_test_dir_handle]
+    call os_dir_close
+    mov rdi, [linux_test_dir_handle2]
+    call os_dir_close
+    mov eax, 47
+    jmp .done
+.fail18:
+    mov rdi, [linux_test_dir_handle]
+    call os_dir_close
+    mov rdi, [linux_test_dir_handle2]
+    call os_dir_close
+    mov eax, 48
+    jmp .done
+.fail19:
+    mov rdi, [linux_test_dir_handle]
+    call os_dir_close
+    mov rdi, [linux_test_dir_handle2]
+    call os_dir_close
+    mov eax, 49
+    jmp .done
+.fail20:
+    mov rdi, [linux_test_dir_handle2]
+    call os_dir_close
+    mov eax, 50
+    jmp .done
+.fail21: mov eax, 51
 .done:
     add rsp, 16
     pop r13

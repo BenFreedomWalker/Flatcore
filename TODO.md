@@ -220,9 +220,11 @@ Both existing native source files include and assemble these same common modules
 - [x] Implement Linux file timestamp updates with `utimensat`; verify nanosecond precision through `os_stat`.
 - [x] Complete the currently required Linux syscall-backed filesystem and I/O operations; Linux runtime tests cover read/write/open/close/stat/directory iteration/basic path operations/getcwd/chdir/timestamps.
 - [ ] Finish Linux/backend capability semantics and document cross-platform differences.
-- [ ] Complete Windows Unicode Win32-backed versions (initial I/O and basic filesystem operations are implemented and runtime-verified; metadata, directory iteration, and timestamp updates remain).
+- [ ] Complete Windows Unicode Win32-backed versions (initial I/O/basic filesystem operations are runtime-verified; `os_stat` is implemented and awaiting verification; directory iteration and timestamp updates remain).
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
+- [x] Implement Windows `os_stat` with Unicode `GetFileAttributesExW`, 64-bit file sizes, DOS attribute translation, and FILETIME-to-Unix-nanosecond conversion.
+- [ ] Runtime-verify Windows `os_stat` size/type results and zero-valued unsupported POSIX mode/link-count fields.
 
 **Stage 4 Linux backend source checkpoint (2026-11-23)**
 
@@ -391,3 +393,13 @@ Both existing native source files include and assemble these same common modules
 - The same user checkpoint reran `./build.sh test`; shared runtime helper tests and Linux smoke tests passed with fish exit status 0. The printed `flatcore: operation failed` is expected output from an existing negative/error-path smoke test.
 - Fixed the Windows test runner's delayed-expansion handling so it now reports and propagates the actual runtime test exit code. A diagnostic failure path was also added temporarily to expose native Win32 error codes; the successful run confirms the write path now passes.
 - Verified scope: shared UTF-8-to-UTF-16 conversion and the initial Windows I/O/basic filesystem slice are green. Windows `os_stat`, directory iteration, timestamp updates, and final capability/symlink-reparse semantics remain outstanding. Do not start Stage 5 until these Stage 4 items are implemented and tested.
+
+
+**Windows `os_stat` implementation checkpoint (2026-11-23)**
+
+- Added FC64 `os_stat(path_utf8, out_fc_file_info)` to `src/platform/windows/filesystem.inc`. It converts the UTF-8 path to UTF-16 and calls `GetFileAttributesExW`.
+- Populates 64-bit file size, creation/access/modification timestamps converted from 100-nanosecond FILETIME ticks to Unix-epoch nanoseconds, and the shared hidden/read-only/system/archive attribute bits.
+- Windows does not provide POSIX mode bits or a portable link count through this query; those fields are explicitly zero. Reparse points are reported as `FC_TYPE_UNKNOWN` rather than incorrectly treating junctions and all other reparse tags as symbolic links. Regular files and directories are classified normally.
+- Added the required Win32 import and metadata scratch storage to both production and test targets.
+- Extended the Windows backend integration test to verify a Unicode-named file's size, regular-file type, and zero-valued unsupported mode field. Distinct failure statuses identify each assertion.
+- Source implementation is complete; runtime verification is pending. The next test checkpoint covers both Linux and Windows to ensure the shared helper suite and existing Linux backend remain green.

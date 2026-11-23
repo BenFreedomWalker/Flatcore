@@ -72,7 +72,7 @@ fc_cmd_mkdir_bad_mode_text db 'flatcore: mkdir: invalid mode', 10
 fc_cmd_mkdir_bad_mode_length = $ - fc_cmd_mkdir_bad_mode_text
 fc_cmd_mkdir_error_prefix db 'flatcore: mkdir: cannot create directory ', 39
 fc_cmd_mkdir_error_prefix_length = $ - fc_cmd_mkdir_error_prefix
-fc_cmd_mkdir_error_suffix db ': operation failed', 10
+fc_cmd_mkdir_error_suffix db 39, ': operation failed', 10
 fc_cmd_mkdir_error_suffix_length = $ - fc_cmd_mkdir_error_suffix
 fc_cmd_mkdir_verbose_prefix db 'mkdir: created directory ', 39
 fc_cmd_mkdir_verbose_prefix_length = $ - fc_cmd_mkdir_verbose_prefix

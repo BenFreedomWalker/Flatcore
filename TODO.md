@@ -375,7 +375,7 @@ Both existing native source files include and assemble these same common modules
 
 **Windows Unicode backend — initial implementation (2026-11-23)**
 
-- Added strict shared `fc_utf8_to_utf16` conversion. It validates UTF-8 continuation bytes, rejects overlong encodings, surrogate code points, and values above U+10FFFF, and emits UTF-16 surrogate pairs for supplementary code points. Shared runtime tests now cover round-trip conversion and rejection of an overlong sequence on both targets.
+- Added strict shared `fc_utf8_to_utf16` conversion. It validates UTF-8 continuation bytes, rejects overlong encodings, surrogate code points, and values above U+10FFFF, and emits UTF-16 surrogate pairs for supplementary code points. Shared runtime tests now cover round-trip conversion, overlong-sequence rejection, and truncated-sequence rejection on both targets.
 - Added `src/platform/windows/io.inc`: initializes standard stream handles with `GetStdHandle`, implements FC64 `os_read`, `os_write`, `os_close`, and `os_process_exit`, and maps common `GetLastError` values to normalized FC_ERR_* diagnostics while retaining the native code/domain.
 - Added `src/platform/windows/filesystem.inc`: implements Unicode-W versions of `os_open`, `os_mkdir`, `os_rmdir`, `os_unlink`, `os_rename`, `os_getcwd`, and `os_chdir`. Shared paths remain UTF-8; conversion occurs at the Win32 boundary. Open modes are mapped to CreateFileW dispositions, with directory handles using FILE_FLAG_BACKUP_SEMANTICS. POSIX creation mode is intentionally ignored on Windows.
 - Added Windows backend state and conversion buffers in `src/platform/windows/data.inc`; wired the backend into the Windows executable and native test harness.

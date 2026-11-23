@@ -14,10 +14,7 @@ align 8
 windows_file_data rb 40
 
 ; Independent FindFirstFileW iterators (active, pending, HANDLE, FIND_DATA).
-WINDOWS_DIR_SLOT_COUNT = 8
-WINDOWS_DIR_DATA_SIZE = 592
-WINDOWS_DIR_SLOT_SIZE = 16 + WINDOWS_DIR_DATA_SIZE
 align 16
-windows_dir_slots rb WINDOWS_DIR_SLOT_COUNT * WINDOWS_DIR_SLOT_SIZE
+windows_dir_slots rb 8 * (16 + 592)
 align 16
 windows_dir_name_buffer rb 1024

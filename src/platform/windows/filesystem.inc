@@ -381,6 +381,292 @@ os_stat:
     pop r12
     ret
 
+; Windows directory iterator pool. Each token identifies one independent
+; FindFirstFileW/FindNextFileW search and its current WIN32_FIND_DATAW record.
+WINDOWS_DIR_SLOT_COUNT = 8
+WINDOWS_DIR_DATA_SIZE = 592
+WINDOWS_DIR_SLOT_SIZE = 16 + WINDOWS_DIR_DATA_SIZE
+
+; os_dir_open(path_utf8, out_dir_handle)
+; Appends a wildcard to the directory path and opens an independent iterator.
+os_dir_open:
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp, 40
+    mov r13, rsi
+    test r13, r13
+    jz .dir_open_invalid
+
+    ; Reserve a free iterator slot before doing any native work.
+    lea r12, [windows_dir_slots]
+    xor r14d, r14d
+.dir_open_find_slot:
+    cmp r14d, WINDOWS_DIR_SLOT_COUNT
+    jae .dir_open_no_slots
+    cmp dword [r12], 0
+    je .dir_open_slot_found
+    add r12, WINDOWS_DIR_SLOT_SIZE
+    inc r14d
+    jmp .dir_open_find_slot
+
+.dir_open_slot_found:
+    mov rdi, rdi
+    mov rsi, windows_path_buffer
+    mov edx, 32768
+    call fc_utf8_to_utf16
+    cmp rax, -1
+    je .dir_open_encoding
+    test rax, rax
+    jz .dir_open_invalid
+    mov r15, rax
+
+    ; Ensure room for an optional separator, '*', and UTF-16 NUL.
+    cmp r15, 32765
+    ja .dir_open_too_long
+    mov ax, [windows_path_buffer + r15*2 - 2]
+    cmp ax, '\\'
+    je .dir_open_append_star
+    cmp ax, '/'
+    je .dir_open_append_star
+    mov word [windows_path_buffer + r15*2], '\\'
+    inc r15
+.dir_open_append_star:
+    mov word [windows_path_buffer + r15*2], '*'
+    inc r15
+    mov word [windows_path_buffer + r15*2], 0
+
+    mov rcx, windows_path_buffer
+    lea rdx, [r12 + 16]
+    call [FindFirstFileW]
+    cmp rax, -1
+    je .dir_open_error
+
+    mov [r12 + 8], rax
+    mov dword [r12 + 4], 1
+    mov dword [r12], 1
+    lea rax, [r14 + 1]
+    mov [r13], rax
+    xor eax, eax
+    jmp .dir_open_done
+
+.dir_open_no_slots:
+    mov eax, FC_ERR_NO_MEMORY
+    call fc_windows_set_normalized_error
+    jmp .dir_open_done
+.dir_open_invalid:
+    mov eax, FC_ERR_INVALID
+    call fc_windows_set_normalized_error
+    jmp .dir_open_done
+.dir_open_encoding:
+    mov eax, FC_ERR_ENCODING
+    call fc_windows_set_normalized_error
+    jmp .dir_open_done
+.dir_open_too_long:
+    mov eax, FC_ERR_TOO_SMALL
+    call fc_windows_set_normalized_error
+    jmp .dir_open_done
+.dir_open_error:
+    call fc_windows_set_error
+.dir_open_done:
+    add rsp, 40
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    ret
+
+; os_dir_next(handle, out_info, name_buffer, name_capacity, out_name_len)
+; Returns 1 for an entry, 0 for EOF, or -1 for an error. A too-small output
+; buffer leaves the current native record pending so the caller can retry.
+os_dir_next:
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp, 32
+    mov rbx, r8
+    mov r13, rsi
+    mov r14, rdx
+    mov r15, rcx
+
+    test rbx, rbx
+    jz .dir_next_invalid
+    mov qword [rbx], 0
+    test r13, r13
+    jz .dir_next_invalid
+    test r14, r14
+    jz .dir_next_invalid
+    cmp rdi, 1
+    jb .dir_next_invalid
+    cmp rdi, WINDOWS_DIR_SLOT_COUNT
+    ja .dir_next_invalid
+    dec rdi
+    imul r12, rdi, WINDOWS_DIR_SLOT_SIZE
+    lea r12, [windows_dir_slots + r12]
+    cmp dword [r12], 1
+    jne .dir_next_invalid
+
+    cmp dword [r12 + 4], 1
+    je .dir_next_record_ready
+
+    ; The previous record was consumed; advance this iterator only.
+    mov rcx, [r12 + 8]
+    lea rdx, [r12 + 16]
+    call [FindNextFileW]
+    test eax, eax
+    jnz .dir_next_mark_pending
+    call [GetLastError]
+    cmp eax, 18                  ; ERROR_NO_MORE_FILES
+    je .dir_next_eof
+    mov [os_native_error], rax
+    mov dword [os_error_domain], FC_ERROR_DOMAIN_WINDOWS
+    mov dword [os_error_code], FC_ERR_IO
+    mov rax, -1
+    jmp .dir_next_done
+.dir_next_mark_pending:
+    mov dword [r12 + 4], 1
+
+.dir_next_record_ready:
+    ; Convert the native UTF-16 filename into a bounded temporary UTF-8 name.
+    lea rdi, [r12 + 16 + 44]
+    mov rsi, windows_dir_name_buffer
+    mov edx, 1024
+    call fc_utf16_to_utf8
+    cmp rax, -1
+    je .dir_next_encoding
+    mov r10, rax
+    cmp r10, r15
+    ja .dir_next_too_small
+
+    ; Copy bytes first; terminate only if the caller supplied the extra byte.
+    mov rdi, r14
+    mov rsi, windows_dir_name_buffer
+    mov rcx, r10
+    rep movsb
+    cmp r10, r15
+    jae .dir_next_no_terminator
+    mov byte [r14 + r10], 0
+.dir_next_no_terminator:
+    mov [rbx], r10
+
+    ; Populate metadata available in WIN32_FIND_DATAW.
+    mov rdi, r13
+    xor eax, eax
+    mov ecx, 8
+    rep stosq
+    lea r11, [r12 + 16]
+    mov eax, [r11 + 28]
+    shl rax, 32
+    mov edx, [r11 + 32]
+    or rax, rdx
+    mov [r13], rax
+
+    mov rax, [r11 + 20]
+    mov rdx, 116444736000000000
+    sub rax, rdx
+    imul rax, 100
+    mov [r13 + 8], rax
+    mov rax, [r11 + 4]
+    mov rdx, 116444736000000000
+    sub rax, rdx
+    imul rax, 100
+    mov [r13 + 16], rax
+    mov rax, [r11 + 12]
+    mov rdx, 116444736000000000
+    sub rax, rdx
+    imul rax, 100
+    mov [r13 + 24], rax
+
+    mov eax, [r11]
+    test eax, 2
+    jz .dir_next_not_hidden
+    or dword [r13 + 32], FC_ATTR_HIDDEN
+.dir_next_not_hidden:
+    test eax, 1
+    jz .dir_next_not_readonly
+    or dword [r13 + 32], FC_ATTR_READ_ONLY
+.dir_next_not_readonly:
+    test eax, 4
+    jz .dir_next_not_system
+    or dword [r13 + 32], FC_ATTR_SYSTEM
+.dir_next_not_system:
+    test eax, 20h
+    jz .dir_next_type
+    or dword [r13 + 32], FC_ATTR_ARCHIVE
+.dir_next_type:
+    test eax, 400h
+    jnz .dir_next_consume       ; preserve UNKNOWN for unclassified reparse tags
+    test eax, 10h
+    jz .dir_next_regular
+    mov dword [r13 + 36], FC_TYPE_DIRECTORY
+    jmp .dir_next_consume
+.dir_next_regular:
+    mov dword [r13 + 36], FC_TYPE_REGULAR
+
+.dir_next_consume:
+    mov dword [r12 + 4], 0
+    mov eax, 1
+    jmp .dir_next_done
+.dir_next_eof:
+    xor eax, eax
+    jmp .dir_next_done
+.dir_next_too_small:
+    mov eax, FC_ERR_TOO_SMALL
+    call fc_windows_set_normalized_error
+    jmp .dir_next_done
+.dir_next_encoding:
+    mov eax, FC_ERR_ENCODING
+    call fc_windows_set_normalized_error
+    jmp .dir_next_done
+.dir_next_invalid:
+    mov eax, FC_ERR_INVALID
+    call fc_windows_set_normalized_error
+    jmp .dir_next_done
+.dir_next_done:
+    add rsp, 32
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    ret
+
+; os_dir_close(handle)
+os_dir_close:
+    push r12
+    sub rsp, 40
+    cmp rdi, 1
+    jb .dir_close_invalid
+    cmp rdi, WINDOWS_DIR_SLOT_COUNT
+    ja .dir_close_invalid
+    dec rdi
+    imul r12, rdi, WINDOWS_DIR_SLOT_SIZE
+    lea r12, [windows_dir_slots + r12]
+    cmp dword [r12], 1
+    jne .dir_close_invalid
+    mov rcx, [r12 + 8]
+    call [FindClose]
+    test eax, eax
+    jz .dir_close_error
+    mov dword [r12], 0
+    mov dword [r12 + 4], 0
+    mov qword [r12 + 8], 0
+    xor eax, eax
+    jmp .dir_close_done
+.dir_close_invalid:
+    mov eax, FC_ERR_INVALID
+    call fc_windows_set_normalized_error
+    jmp .dir_close_done
+.dir_close_error:
+    call fc_windows_set_error
+.dir_close_done:
+    add rsp, 40
+    pop r12
+    ret
+
 ; Capability reporting remains conservative until the optional operations land.
 os_get_capabilities:
     xor eax, eax

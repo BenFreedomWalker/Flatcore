@@ -69,7 +69,7 @@ os_dir_next:
     push r14
     push r15
 
-    mov rbx, r9
+    mov rbx, r8
     mov r13, rsi
     mov r14, rdx
     mov r15, rcx

@@ -341,3 +341,8 @@ Both existing native source files include and assemble these same common modules
 - Extended the Linux backend self-test to create a dedicated empty directory, open two iterators simultaneously, test too-small-buffer retry without consuming the entry, read from both handles, drain one iterator through EOF, close both, and remove the fixture.
 - Added the directory backend to `tests/runtime-linux.asm`. The Windows build and test sources are unchanged.
 - Source implementation and static review are complete. Runtime verification is pending; do not mark the directory backend verified until the user runs both platform test commands and reports the results.
+
+
+**Linux directory test fixture correction (2026-11-23)**
+
+- First directory-backend test returned status 44 because its fixture path incorrectly pointed at `/tmp`; the setup attempted to remove/recreate the system temporary directory. Changed the fixture to the dedicated `/tmp/flatcore-fc64-backend-dir`. Re-run the Linux backend tests before treating directory iteration as verified.

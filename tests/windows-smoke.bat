@@ -233,10 +233,11 @@ set "STEP=rm removes sample file"
 "%BIN%" rm "%TEST_DIR%\sample.txt"
 if errorlevel 1 goto failed
 set "STEP=rm verbose output"
-"%BIN%" rm -v "%TEST_DIR%\moved.txt" > "%OUT%"
+> "%TEST_DIR%\rm-verbose.txt" echo verbose
+"%BIN%" rm -v "%TEST_DIR%\rm-verbose.txt" > "%OUT%"
 if errorlevel 1 goto failed
 set "RM_VERBOSE_MATCH="
-for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="rm: removed '%TEST_DIR%\moved.txt'" set "RM_VERBOSE_MATCH=1"
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="rm: removed '%TEST_DIR%\rm-verbose.txt'" set "RM_VERBOSE_MATCH=1"
 if not defined RM_VERBOSE_MATCH goto failed
 set "STEP=rm removes empty directory with -d"
 mkdir "%TEST_DIR%\rm-empty"

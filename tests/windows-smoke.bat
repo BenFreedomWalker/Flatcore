@@ -49,6 +49,38 @@ if errorlevel 1 goto failed
 set "STEP=create sample file"
 > "%TEST_DIR%\sample.txt" echo alpha
 if not exist "%TEST_DIR%\sample.txt" goto failed
+> "%TEST_DIR%\second.txt" echo beta
+type nul > "%TEST_DIR%\empty.txt"
+
+set "STEP=cat stdin redirection"
+"%BIN%" cat < "%TEST_DIR%\sample.txt" > "%OUT%"
+if errorlevel 1 goto failed
+fc /b "%TEST_DIR%\sample.txt" "%OUT%" >nul
+if errorlevel 1 goto failed
+
+set "STEP=cat multiple operands"
+copy /b "%TEST_DIR%\sample.txt"+"%TEST_DIR%\second.txt" "%EXPECTED%" >nul
+"%BIN%" cat "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" > "%OUT%"
+if errorlevel 1 goto failed
+fc /b "%EXPECTED%" "%OUT%" >nul
+if errorlevel 1 goto failed
+
+set "STEP=cat dash stdin operand"
+"%BIN%" cat - < "%TEST_DIR%\second.txt" > "%OUT%"
+if errorlevel 1 goto failed
+fc /b "%TEST_DIR%\second.txt" "%OUT%" >nul
+if errorlevel 1 goto failed
+
+set "STEP=cat empty file"
+"%BIN%" cat "%TEST_DIR%\empty.txt" > "%OUT%"
+if errorlevel 1 goto failed
+for %%A in ("%OUT%") do if not "%%~zA"=="0" goto failed
+
+set "STEP=cat continues after missing operand"
+"%BIN%" cat "%TEST_DIR%\missing.txt" "%TEST_DIR%\sample.txt" > "%OUT%"
+if not errorlevel 1 goto failed
+fc /b "%TEST_DIR%\sample.txt" "%OUT%" >nul
+if errorlevel 1 goto failed
 
 set "STEP=head output"
 "%BIN%" head "%TEST_DIR%\sample.txt" > "%OUT%"
@@ -122,7 +154,7 @@ exit /b 0
 :failed
 echo Flatcore Windows smoke test failed at: %STEP%
 if defined TEST_DIR (
-    del "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt" >nul 2>nul
+    del "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt" >nul 2>nul
     rmdir "%TEST_DIR%" >nul 2>nul
 )
 del "%OUT%" "%EXPECTED%" >nul 2>nul

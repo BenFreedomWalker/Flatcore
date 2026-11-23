@@ -210,14 +210,14 @@ Both existing native source files include and assemble these same common modules
 
 ## Stage 4 — Implement the filesystem and I/O backends
 
-- [ ] Implement os_read, os_write, and complete-write handling.
-- [ ] Implement os_open, os_close, and file creation/truncation modes.
+- [x] Implement Linux os_read and os_write; shared complete-write handling is implemented and helper-tested.
+- [x] Implement Linux os_open, os_close, and file creation/truncation modes.
 - [x] Implement Linux os_stat using the shared 64-byte metadata structure.
-- [ ] Implement os_dir_open, os_dir_next, and os_dir_close.
+- [x] Implement Linux os_dir_open, os_dir_next, and os_dir_close (source complete; runtime verification pending).
 - [x] Implement os_mkdir, os_rmdir, os_unlink, and os_rename in the Linux backend.
 - [x] Implement os_getcwd and os_chdir in the Linux backend.
 - [ ] Implement file timestamps and the operations required by touch.
-- [ ] Complete remaining Linux syscall-backed versions (directory iteration and timestamps remain).
+- [ ] Complete remaining Linux syscall-backed versions (timestamps remain).
 - [ ] Implement Windows Unicode Win32-backed versions.
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
@@ -330,3 +330,14 @@ Both existing native source files include and assemble these same common modules
 - User reran both `./build.sh test` and `build-windows.bat test`; both returned exit status 0.
 - Linux backend tests now verify `os_stat` size, regular-file type, and full POSIX mode, in addition to getcwd/open/write/read/close/unlink.
 - The Linux backend test checkpoint is green. Directory iteration, timestamps, Windows Unicode backend, and capability/symlink semantics remain outstanding in Stage 4.
+
+
+**Linux directory iteration implementation (2026-11-23)**
+
+- Added `src/platform/linux/directories.inc` with FC64 `os_dir_open`, `os_dir_next`, and `os_dir_close` using native `openat`-compatible `open` and `getdents64`/close syscalls.
+- Directory handles are opaque slot tokens backed by eight independent iterator contexts. Each context owns a 4096-byte kernel-entry buffer, so multiple open directories can be interleaved without sharing cursor state.
+- `os_dir_next` validates record boundaries and NUL-terminated names, reports byte lengths, appends a terminator when capacity permits, and returns 1 for an entry, 0 for EOF, or -1 for errors. A too-small name buffer returns `FC_ERR_TOO_SMALL` without consuming the entry.
+- Linux `d_type` values are translated to `FC_TYPE_*`; hidden names receive `FC_ATTR_HIDDEN`. Fields not supplied by `getdents64` (such as size and timestamps) remain zero, and unknown `d_type` remains `FC_TYPE_UNKNOWN`.
+- Extended the Linux backend self-test to open two iterators simultaneously, test too-small-buffer retry, read from both handles, drain one iterator to EOF, and close both.
+- Added the directory backend to `tests/runtime-linux.asm`. The Windows build and test sources are unchanged.
+- Source implementation and static review are complete. Runtime verification is pending; do not mark the directory backend verified until the user runs both platform test commands and reports the results.

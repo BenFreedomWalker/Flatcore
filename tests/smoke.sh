@@ -136,7 +136,8 @@ fi
     "$BIN" mkdir --help > mkdir-help.txt
     grep -q -- '--parents' mkdir-help.txt
 
-    "$BIN" rm mkdir-blocker\n    "$BIN" rm ls-dir/visible ls-dir/.hidden ls-file-one ls-file-two ./-ls-leading
+    "$BIN" rm mkdir-blocker
+    "$BIN" rm ls-dir/visible ls-dir/.hidden ls-file-one ls-file-two ./-ls-leading
     "$BIN" rmdir ls-dir
     "$BIN" rmdir mkdir-tree/one/two
     "$BIN" rmdir mkdir-tree/one

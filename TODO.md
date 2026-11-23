@@ -162,6 +162,7 @@ No C or C++ components, no C runtime, and no third-party runtime dependencies.
 - [x] Implement shared memory/buffer helpers required by commands.
 - [x] Implement shared unsigned integer parsing and decimal formatting.
 - [x] Implement strict UTF-16LE-to-UTF-8 conversion with surrogate validation.
+- [x] Implement strict UTF-8-to-UTF-16 conversion with overlong, surrogate, and out-of-range rejection.
 - [x] Implement a backend-neutral complete-write loop and NUL-terminated string output helper.
 - [x] Implement shared normalized-error-to-message mapping.
 - [x] Implement the shared table-driven dispatcher and define its command registry/handler layout.
@@ -218,7 +219,7 @@ Both existing native source files include and assemble these same common modules
 - [x] Implement os_getcwd and os_chdir in the Linux backend.
 - [x] Implement Linux file timestamp updates with `utimensat`; verify nanosecond precision through `os_stat`.
 - [ ] Complete remaining Linux syscall-backed versions (Windows Unicode backend and capability semantics remain).
-- [ ] Implement Windows Unicode Win32-backed versions.
+- [ ] Complete Windows Unicode Win32-backed versions (initial I/O and basic filesystem operations are implemented; metadata, directory iteration, and timestamp updates remain).
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
 
@@ -370,3 +371,13 @@ Both existing native source files include and assemble these same common modules
 - User reran `./build.sh test` under WSL and `build-windows.bat test` under Windows. Both returned exit status 0.
 - Linux now verifies setting distinct access and modification timestamps and reading back the exact nanosecond values through `os_stat`. The Windows test suite also remains green.
 - Linux filesystem/I/O work completed so far—read/write/open/close, stat, directory iteration, basic filesystem operations, getcwd/chdir, errno normalization, and timestamp updates—is runtime-verified. Windows Unicode backend, capability implementation, and symlink/reparse-point semantics remain open Stage 4 work.
+
+
+**Windows Unicode backend — initial implementation (2026-11-23)**
+
+- Added strict shared `fc_utf8_to_utf16` conversion. It validates UTF-8 continuation bytes, rejects overlong encodings, surrogate code points, and values above U+10FFFF, and emits UTF-16 surrogate pairs for supplementary code points. Shared runtime tests now cover round-trip conversion and rejection of an overlong sequence on both targets.
+- Added `src/platform/windows/io.inc`: initializes standard stream handles with `GetStdHandle`, implements FC64 `os_read`, `os_write`, `os_close`, and `os_process_exit`, and maps common `GetLastError` values to normalized FC_ERR_* diagnostics while retaining the native code/domain.
+- Added `src/platform/windows/filesystem.inc`: implements Unicode-W versions of `os_open`, `os_mkdir`, `os_rmdir`, `os_unlink`, `os_rename`, `os_getcwd`, and `os_chdir`. Shared paths remain UTF-8; conversion occurs at the Win32 boundary. Open modes are mapped to CreateFileW dispositions, with directory handles using FILE_FLAG_BACKUP_SEMANTICS. POSIX creation mode is intentionally ignored on Windows.
+- Added Windows backend state and conversion buffers in `src/platform/windows/data.inc`; wired the backend into the Windows executable and native test harness.
+- Added Windows integration tests using non-ASCII filenames and directory names. They cover cwd capture, create/write/close/read, rename/unlink, mkdir/chdir/restore/rmdir. Test execution is rooted at the repository directory so fixture paths are deterministic.
+- Runtime verification is pending. Run both `./build.sh test` and `build-windows.bat test`; the Linux run also validates the new shared UTF-8-to-UTF-16 helper. Windows backend metadata (`os_stat`), directory iteration, timestamp updates, and final capability semantics remain outstanding.

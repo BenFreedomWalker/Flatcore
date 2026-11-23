@@ -40,7 +40,8 @@ os_read:
     jmp .read_done
 .read_invalid:
     mov eax, FC_ERR_INVALID
-    jmp fc_windows_set_normalized_error
+    call fc_windows_set_normalized_error
+    jmp .read_done
 .read_error:
     call fc_windows_set_error
 .read_done:
@@ -71,7 +72,8 @@ os_write:
     jmp .write_done
 .write_invalid:
     mov eax, FC_ERR_INVALID
-    jmp fc_windows_set_normalized_error
+    call fc_windows_set_normalized_error
+    jmp .write_done
 .write_error:
     call fc_windows_set_error
 .write_done:

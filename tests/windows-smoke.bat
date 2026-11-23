@@ -89,9 +89,37 @@ if errorlevel 1 goto failed
 fc /b "%OUT%" "%EXPECTED%" >nul
 if errorlevel 1 goto failed
 
-set "STEP=ls directory"
-"%BIN%" ls "%TEST_DIR%" >nul
+set "STEP=ls directory and option coverage"
+> "%TEST_DIR%\\.hidden" echo hidden
+> "%TEST_DIR%\\visible" echo visible
+"%BIN%" ls "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
+findstr /x /c:"visible" "%OUT%" >nul
+if errorlevel 1 goto failed
+findstr /x /c:".hidden" "%OUT%" >nul
+if not errorlevel 1 goto failed
+"%BIN%" ls -A "%TEST_DIR%" > "%OUT%"
+if errorlevel 1 goto failed
+findstr /x /c:".hidden" "%OUT%" >nul
+if errorlevel 1 goto failed
+"%BIN%" ls -a "%TEST_DIR%" > "%OUT%"
+if errorlevel 1 goto failed
+findstr /x /c:"." "%OUT%" >nul
+if errorlevel 1 goto failed
+"%BIN%" ls -la "%TEST_DIR%" > "%OUT%"
+if errorlevel 1 goto failed
+findstr /c:".hidden" "%OUT%" >nul
+if errorlevel 1 goto failed
+"%BIN%" ls -d "%TEST_DIR%" > "%OUT%"
+if errorlevel 1 goto failed
+findstr /x /c:"%TEST_DIR%" "%OUT%" >nul
+if errorlevel 1 goto failed
+"%BIN%" ls --version > "%OUT%"
+if errorlevel 1 goto failed
+findstr /c:"Flatcore ls" "%OUT%" >nul
+if errorlevel 1 goto failed
+"%BIN%" ls --not-a-real-option >nul 2>nul
+if not errorlevel 1 goto failed
 
 set "STEP=copy file"
 "%BIN%" cp "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt"

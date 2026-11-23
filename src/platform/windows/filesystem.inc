@@ -16,6 +16,10 @@ os_open:
     call fc_utf8_to_utf16
     cmp rax, -1
     je .open_encoding
+    mov eax, r14d
+    and eax, FC_OPEN_READ or FC_OPEN_WRITE
+    test eax, eax
+    jz .open_invalid
 
     ; Map Flatcore access and append flags to Win32 desired access.
     xor r10d, r10d
@@ -73,6 +77,10 @@ os_open:
     jmp .open_done
 .open_encoding:
     mov eax, FC_ERR_ENCODING
+    call fc_windows_set_normalized_error
+    jmp .open_done
+.open_invalid:
+    mov eax, FC_ERR_INVALID
     call fc_windows_set_normalized_error
     jmp .open_done
 .open_error:

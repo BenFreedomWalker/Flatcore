@@ -53,6 +53,15 @@ fc_linux_backend_selftest:
     cmp dword [linux_test_info + 40], 100600o
     jne .fail13
 
+    ; Use a dedicated empty directory so entry/EOF behavior is deterministic.
+    mov rdi, linux_test_dir_path
+    call os_rmdir
+    mov rdi, linux_test_dir_path
+    mov esi, 700o
+    call os_mkdir
+    test eax, eax
+    jnz .fail14
+
     ; Two simultaneous directory handles must keep independent iteration state.
     mov rdi, linux_test_dir_path
     mov rsi, linux_test_dir_handle
@@ -101,7 +110,7 @@ fc_linux_backend_selftest:
     je .fail19
 
     ; Drain the first iterator and require an explicit EOF result.
-    mov ebx, 4096
+    mov ebx, 8
 .drain_directory:
     mov rdi, [linux_test_dir_handle]
     mov rsi, linux_test_info
@@ -125,6 +134,10 @@ fc_linux_backend_selftest:
     call os_dir_close
     test eax, eax
     jnz .fail21
+    mov rdi, linux_test_dir_path
+    call os_rmdir
+    test eax, eax
+    jnz .fail22
 
     ; Reopen and read back the exact payload.
     mov rdi, linux_test_path
@@ -235,6 +248,8 @@ fc_linux_backend_selftest:
     mov eax, 50
     jmp .done
 .fail21: mov eax, 51
+    jmp .done
+.fail22: mov eax, 52
 .done:
     add rsp, 16
     pop r13

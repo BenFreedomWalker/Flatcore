@@ -320,19 +320,22 @@ os_stat:
 
     ; Creation FILETIME (100 ns since 1601) -> Unix nanoseconds.
     mov rax, [r13 + 4]
-    sub rax, 116444736000000000
+    mov rdx, 116444736000000000
+    sub rax, rdx
     imul rax, 100
     mov [r12 + 16], rax
 
     ; Last-write FILETIME -> modified_ns.
     mov rax, [r13 + 20]
-    sub rax, 116444736000000000
+    mov rdx, 116444736000000000
+    sub rax, rdx
     imul rax, 100
     mov [r12 + 8], rax
 
     ; Last-access FILETIME -> accessed_ns.
     mov rax, [r13 + 12]
-    sub rax, 116444736000000000
+    mov rdx, 116444736000000000
+    sub rax, rdx
     imul rax, 100
     mov [r12 + 24], rax
 

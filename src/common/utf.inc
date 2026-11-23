@@ -258,15 +258,16 @@ fc_utf8_to_utf16:
     cmp al, 8Fh
     ja .bad
 .four_range_ok:
+    mov r8d, eax             ; preserve the first continuation byte
     lea rax, [r15 + 3]       ; two UTF-16 units plus the terminating NUL
     cmp rax, r14
     ja .bad
     add r12, 3
     and ebx, 7
     shl ebx, 18
-    and eax, 3Fh
-    shl eax, 12
-    or ebx, eax
+    and r8d, 3Fh
+    shl r8d, 12
+    or ebx, r8d
     and ecx, 3Fh
     shl ecx, 6
     or ebx, ecx

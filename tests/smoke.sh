@@ -79,7 +79,25 @@ fi
     fi
     "$BIN" ls -la ls-dir > ls-long.txt
     grep -Eq '^d[rwx-]{9} ' ls-long.txt
-    grep -q '\.hidden
+    grep -q '\.hidden$' ls-long.txt
+    grep -q 'visible$' ls-long.txt
+    "$BIN" ls -A ls-dir > ls-almost.txt
+    grep -qx '\.hidden' ls-almost.txt
+    if grep -qx '\.' ls-almost.txt || grep -qx '\.\.' ls-almost.txt; then
+        printf 'ls -A included dot entries\n' >&2
+        exit 1
+    fi
+    "$BIN" ls -a ls-dir > ls-all.txt
+    grep -qx '\.' ls-all.txt
+    grep -qx '\.\.' ls-all.txt
+    [[ "$("$BIN" ls -d ls-dir)" == 'ls-dir' ]]
+    "$BIN" ls ls-file-one ls-file-two > ls-multiple.txt
+    grep -qx 'ls-file-one' ls-multiple.txt
+    grep -qx 'ls-file-two' ls-multiple.txt
+    "$BIN" ls -- ./-ls-leading > ls-leading.txt
+    grep -qx './-ls-leading' ls-leading.txt
+    "$BIN" ls --version > ls-version.txt
+    grep -q 'Flatcore ls' ls-version.txt
     "$BIN" ls --help > ls-help.txt
     grep -q -- '--almost-all' ls-help.txt
     if "$BIN" ls --not-a-real-option >/dev/null 2>&1; then

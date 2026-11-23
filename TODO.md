@@ -509,3 +509,11 @@ Both existing native source files include and assemble these same common modules
 - Registered `cat` in the shared dispatcher and wired the same command source into both production executables and both runtime-test assemblies. Added a 4096-byte per-process transfer buffer for each backend.
 - Expanded Linux and Windows smoke tests for redirected standard input, `-`, multiple operands, empty files, binary/line-ending preservation, and continuing after a missing operand. Windows fixtures are located under a path containing spaces.
 - Source implementation and static review are complete. Runtime verification is pending; do not mark cat verified or start the next command tranche until both platform test commands pass.
+
+
+**Stage 5 shared cat — runtime verification passed (2026-11-23)**
+
+- The user ran `./build.sh test` under WSL and `build-windows.bat test` under Windows after pulling the shared `cat` implementation. Both runtime/backend test suites and both smoke suites passed with exit status 0.
+- Linux verified stdin redirection, `-` as stdin, ordered multi-file concatenation, empty files, byte-for-byte binary/line-ending preservation, and continuing after a missing operand. Windows verified the same behaviors, including paths containing spaces.
+- The Linux `flatcore: operation failed` and Windows `flatcore: cat: input/output error` messages are expected negative-path diagnostics; neither indicates a suite failure.
+- Shared `cat` is now runtime-verified on both targets. Next: shared `ls` with grouped short options, GNU-style long options, multiple operands, and backend-neutral directory iteration. Wait for the user's `ok` before implementation.

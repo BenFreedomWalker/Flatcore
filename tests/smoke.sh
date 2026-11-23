@@ -78,7 +78,7 @@ fi
         exit 1
     fi
     "$BIN" ls -la ls-dir > ls-long.txt
-    grep -q '^d---------' ls-long.txt
+    grep -Eq '^d[rwx-]{9} ' ls-long.txt
     grep -q '\.hidden
     "$BIN" ls --help > ls-help.txt
     grep -q -- '--almost-all' ls-help.txt

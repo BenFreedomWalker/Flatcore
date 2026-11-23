@@ -183,9 +183,10 @@ fc_utf8_to_utf16:
     jmp .bad
 .decode_two:
     movzx eax, byte [r12]
-    test al, 0C0h
     cmp al, 80h
-    jne .bad
+    jb .bad
+    cmp al, 0BFh
+    ja .bad
     inc r12
     and ebx, 1Fh
     shl ebx, 6

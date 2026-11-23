@@ -34,8 +34,21 @@ _start:
 .multicall_startup:
     mov r14, 1
 .startup_ready:
+    ; Give migrated commands to the shared dispatcher first. Unknown commands
+    ; fall back to the legacy table until their migration tranche is complete.
+    mov rdi, [normalized_argc]
+    mov rsi, [normalized_argv]
+    mov rdx, fc_basic_registry
+    mov rcx, fc_basic_registry_count
+    call fc_dispatch
+    cmp eax, 127
+    jne .shared_command_exit
+    mov rax, [normalized_argv]
     mov rsi, [rax]
     jmp dispatch
+.shared_command_exit:
+    mov edi, eax
+    jmp process_exit
 
 .invalid_startup:
     mov edi, 2
@@ -231,6 +244,8 @@ include 'src/common/formatting.inc'
 include 'src/common/output.inc'
 include 'src/common/startup.inc'
 include 'src/common/dispatcher.inc'
+include 'src/commands/basic.inc'
 include 'src/common/errors.inc'
 include 'src/data.inc'
+include 'src/commands/basic_data.inc'
 include 'src/common/errors_data.inc'

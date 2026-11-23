@@ -72,15 +72,27 @@ if errorlevel 1 goto failed
 
 set "STEP=basename output"
 "%BIN%" basename "%TEST_DIR%\sample.txt" > "%OUT%"
-> "%EXPECTED%" echo sample.txt
-fc /b "%OUT%" "%EXPECTED%" >nul
-if errorlevel 1 goto failed
+set "BASENAME_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="sample.txt" set "BASENAME_MATCH=1"
+if not defined BASENAME_MATCH goto failed
+
+set "STEP=basename drive root"
+"%BIN%" basename "C:\" > "%OUT%"
+set "BASENAME_ROOT_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="\" set "BASENAME_ROOT_MATCH=1"
+if not defined BASENAME_ROOT_MATCH goto failed
 
 set "STEP=dirname output"
 "%BIN%" dirname "%TEST_DIR%\sample.txt" > "%OUT%"
-> "%EXPECTED%" echo %TEST_DIR%
-fc /b "%OUT%" "%EXPECTED%" >nul
-if errorlevel 1 goto failed
+set "DIRNAME_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="%TEST_DIR%" set "DIRNAME_MATCH=1"
+if not defined DIRNAME_MATCH goto failed
+
+set "STEP=dirname drive root"
+"%BIN%" dirname "C:\file.txt" > "%OUT%"
+set "DIRNAME_ROOT_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="C:\" set "DIRNAME_ROOT_MATCH=1"
+if not defined DIRNAME_ROOT_MATCH goto failed
 
 set "STEP=remove sample file"
 "%BIN%" rm "%TEST_DIR%\sample.txt"

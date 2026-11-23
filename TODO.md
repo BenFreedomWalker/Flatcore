@@ -244,7 +244,7 @@ Both existing native source files include and assemble these same common modules
 
 - [x] Port true, false, and echo into `src/commands/basic.inc`; both native entry points now try the shared registry before falling back to unmigrated legacy commands.
 - [x] Port pwd, basename, and dirname into the shared `src/commands/path.inc`; both production targets and both runtime test assemblies now compile the same handlers and registry.
-- [ ] Port cat, including standard input and multiple file operands.
+- [x] Implement shared cat, including standard input and multiple file operands; runtime verification pending.
 - [ ] Port ls, including common GNU-style options and multiple operands.
 - [ ] Port mkdir, including -p, -m, and -v where supported.
 - [ ] Port rmdir.
@@ -500,3 +500,12 @@ Both existing native source files include and assemble these same common modules
 
 - Linux and Windows test runs both passed after the shared `pwd`, `basename`, and `dirname` migration. Linux printed the expected `flatcore: operation failed` diagnostic from its negative/error-path smoke case; the smoke suite completed successfully with status 0.
 - The path-command tranche is verified. The next implementation tranche is shared `cat`, including stdin and multiple file operands. Wait for the user's `ok` before starting it.
+
+
+**Stage 5 shared cat — source implementation checkpoint (2026-11-23)**
+
+- Added `src/commands/cat.inc`, a single FC64 implementation using only `os_open`, `os_read`, `os_write`, and `os_close`; it contains no platform-specific syscalls or Win32 calls.
+- `cat` reads standard input when no file operands are supplied, accepts `-` as standard input, concatenates multiple file operands in order, preserves bytes exactly, handles empty files, retries partial output writes through `fc_write_all`, and continues to later operands after an input error while returning a nonzero status.
+- Registered `cat` in the shared dispatcher and wired the same command source into both production executables and both runtime-test assemblies. Added a 4096-byte per-process transfer buffer for each backend.
+- Expanded Linux and Windows smoke tests for redirected standard input, `-`, multiple operands, empty files, binary/line-ending preservation, and continuing after a missing operand. Windows fixtures are located under a path containing spaces.
+- Source implementation and static review are complete. Runtime verification is pending; do not mark cat verified or start the next command tranche until both platform test commands pass.

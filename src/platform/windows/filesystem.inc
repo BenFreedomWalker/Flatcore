@@ -281,8 +281,104 @@ os_chdir:
     pop r12
     ret
 
-; Timestamp setting and metadata/directory APIs are added in the next backend
-; slice; until then capability reporting is deliberately conservative.
+; os_stat(path_utf8, out_fc_file_info)
+; Query Win32 file metadata and translate FILETIME to Unix-epoch nanoseconds.
+; Windows does not expose POSIX mode bits or a portable link count here, so
+; those FC_FILE_INFO fields remain zero. Reparse points are left UNKNOWN
+; rather than incorrectly classifying every reparse tag as a symbolic link.
+os_stat:
+    push r12
+    push r13
+    sub rsp, 40
+    mov r12, rsi
+    mov rdi, rdi
+    mov rsi, windows_path_buffer
+    mov edx, 32768
+    call fc_utf8_to_utf16
+    cmp rax, -1
+    je .stat_encoding
+
+    mov rcx, windows_path_buffer
+    xor edx, edx                 ; GetFileExInfoStandard
+    mov r8, windows_file_data
+    call [GetFileAttributesExW]
+    test eax, eax
+    jz .stat_error
+
+    ; Clear all fields so unavailable POSIX metadata is deterministically zero.
+    mov rdi, r12
+    xor eax, eax
+    mov ecx, 8
+    rep stosq
+
+    mov r13, windows_file_data
+    ; 64-bit file size = (high << 32) | low.
+    mov eax, [r13 + 28]
+    shl rax, 32
+    mov eax, [r13 + 32]
+    mov [r12], rax
+
+    ; Creation FILETIME (100 ns since 1601) -> Unix nanoseconds.
+    mov rax, [r13 + 4]
+    sub rax, 116444736000000000
+    imul rax, 100
+    mov [r12 + 16], rax
+
+    ; Last-write FILETIME -> modified_ns.
+    mov rax, [r13 + 20]
+    sub rax, 116444736000000000
+    imul rax, 100
+    mov [r12 + 8], rax
+
+    ; Last-access FILETIME -> accessed_ns.
+    mov rax, [r13 + 12]
+    sub rax, 116444736000000000
+    imul rax, 100
+    mov [r12 + 24], rax
+
+    mov eax, [r13]
+    ; Translate the common DOS attribute bits.
+    test eax, 2                  ; FILE_ATTRIBUTE_HIDDEN
+    jz .stat_not_hidden
+    or dword [r12 + 32], FC_ATTR_HIDDEN
+.stat_not_hidden:
+    test eax, 1                  ; FILE_ATTRIBUTE_READONLY
+    jz .stat_not_readonly
+    or dword [r12 + 32], FC_ATTR_READ_ONLY
+.stat_not_readonly:
+    test eax, 4                  ; FILE_ATTRIBUTE_SYSTEM
+    jz .stat_not_system
+    or dword [r12 + 32], FC_ATTR_SYSTEM
+.stat_not_system:
+    test eax, 20h                ; FILE_ATTRIBUTE_ARCHIVE
+    jz .stat_type
+    or dword [r12 + 32], FC_ATTR_ARCHIVE
+
+.stat_type:
+    test eax, 400h               ; FILE_ATTRIBUTE_REPARSE_POINT
+    jnz .stat_done               ; tag-specific classification is not available
+    test eax, 10h                ; FILE_ATTRIBUTE_DIRECTORY
+    jz .stat_regular
+    mov dword [r12 + 36], FC_TYPE_DIRECTORY
+    jmp .stat_done
+.stat_regular:
+    mov dword [r12 + 36], FC_TYPE_REGULAR
+.stat_done:
+    xor eax, eax
+    jmp .stat_return
+.stat_encoding:
+    mov eax, FC_ERR_ENCODING
+    call fc_windows_set_normalized_error
+    jmp .stat_return
+.stat_error:
+    call fc_windows_set_error
+.stat_return:
+    add rsp, 40
+    pop r13
+    pop r12
+    ret
+
+; Capability reporting remains conservative until the optional operations land.
 os_get_capabilities:
     xor eax, eax
     ret

@@ -10,3 +10,13 @@ linux_test_length dq 0
 
 align 8
 linux_test_info rb 64
+
+linux_test_dir_path db '/tmp', 0
+align 8
+linux_test_dir_handle dq 0
+linux_test_dir_handle2 dq 0
+linux_test_name_length dq 0
+linux_test_name_length2 dq 0
+linux_test_name rb 256
+linux_test_name2 rb 256
+linux_test_info2 rb 64

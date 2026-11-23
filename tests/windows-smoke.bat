@@ -143,6 +143,8 @@ set "STEP=remove moved file"
 "%BIN%" rm "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
 
+del "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" >nul 2>nul
+
 set "STEP=rmdir test directory"
 "%BIN%" rmdir "%TEST_DIR%"
 if errorlevel 1 goto failed

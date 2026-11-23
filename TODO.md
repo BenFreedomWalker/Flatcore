@@ -242,7 +242,7 @@ Both existing native source files include and assemble these same common modules
 
 ## Stage 5 — Port shared commands
 
-- [ ] Port true, false, and echo.
+- [x] Port true, false, and echo into `src/commands/basic.inc`; both native entry points now try the shared registry before falling back to unmigrated legacy commands.
 - [ ] Port pwd, basename, and dirname.
 - [ ] Port cat, including standard input and multiple file operands.
 - [ ] Port ls, including common GNU-style options and multiple operands.
@@ -261,6 +261,17 @@ Both existing native source files include and assemble these same common modules
 - [ ] Ensure common commands support --help, --version where appropriate, -- option termination, combined short options where applicable, consistent diagnostics, and correct exit statuses.
 
 **Runtime verification:** pending; command parity suite must run against both executables.
+
+
+
+**Stage 5 first command tranche — source implementation checkpoint (2026-11-23)**
+
+- Added the platform-neutral `src/commands/basic.inc` implementations for `true`, `false`, and `echo`, plus a shared command registry/data include.
+- The shared `echo` implementation emits UTF-8 arguments separated by one ASCII space, supports `-n`, and writes through the FC64 `os_write` backend callback. Newline output is LF on both platforms so command output bytes are consistent.
+- Wired the same shared registry into Linux and Windows production entry points. A shared command is dispatched first; an unrecognized command falls back to the legacy dispatcher so the remaining commands continue working during migration.
+- Linked the Linux native backend into the production Linux build; Windows already had its Unicode I/O backend linked. Both runtime self-test executables also assemble the shared command module.
+- Extended smoke coverage for `echo -n` and made the Windows echo assertion independent of the platform's line-ending convention.
+- Source implementation and static integration are complete for this tranche. Runtime verification is pending; the next user checkpoint must run both full test commands. Do not mark the three commands verified or migrate the next group until both suites pass.
 
 ## Stage 6 — Make the test suite cross-platform
 

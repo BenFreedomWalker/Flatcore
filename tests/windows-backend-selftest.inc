@@ -113,10 +113,126 @@ fc_windows_backend_selftest:
     call os_chdir
     test eax, eax
     jnz .fail13
+    ; Create a Unicode-named entry inside the test directory.
+    mov rdi, windows_test_entry_path
+    mov esi, FC_OPEN_WRITE or FC_OPEN_CREATE or FC_OPEN_TRUNCATE
+    mov edx, 600o
+    mov rcx, windows_test_handle
+    call os_open
+    test eax, eax
+    jnz .fail79
+    mov rdi, [windows_test_handle]
+    mov rsi, windows_test_payload
+    mov edx, 2
+    mov rcx, windows_test_length
+    call os_write
+    test eax, eax
+    jnz .fail80
+    mov rdi, [windows_test_handle]
+    call os_close
+    test eax, eax
+    jnz .fail81
+
+    ; Open two independent iterators over the same Unicode directory.
+    mov rdi, windows_test_dir
+    mov rsi, windows_test_dir_handle1
+    call os_dir_open
+    test eax, eax
+    jnz .fail82
+    mov rdi, windows_test_dir
+    mov rsi, windows_test_dir_handle2
+    call os_dir_open
+    test eax, eax
+    jnz .fail83
+
+    ; A zero-byte name buffer must fail without consuming the current record.
+    mov rdi, [windows_test_dir_handle1]
+    mov rsi, windows_test_info
+    mov rdx, windows_test_dir_name
+    xor ecx, ecx
+    mov r8, windows_test_dir_name_length
+    call os_dir_next
+    cmp rax, -1
+    jne .fail84
+    cmp dword [os_error_code], FC_ERR_TOO_SMALL
+    jne .fail84
+
+    ; Retry the same record with sufficient capacity.
+    mov rdi, [windows_test_dir_handle1]
+    mov rsi, windows_test_info
+    mov rdx, windows_test_dir_name
+    mov ecx, 4096
+    mov r8, windows_test_dir_name_length
+    call os_dir_next
+    cmp rax, 1
+    jne .fail85
+
+    ; The second iterator starts independently at the first directory entry.
+    mov rdi, [windows_test_dir_handle2]
+    mov rsi, windows_test_info2
+    mov rdx, windows_test_dir_name2
+    mov ecx, 4096
+    mov r8, windows_test_dir_name_length2
+    call os_dir_next
+    cmp rax, 1
+    jne .fail86
+
+    ; Drain iterator one and find the UTF-8 filename created above.
+    mov dword [windows_test_dir_found], 0
+.dir_drain:
+    mov rdi, [windows_test_dir_handle1]
+    mov rsi, windows_test_info
+    mov rdx, windows_test_dir_name
+    mov ecx, 4096
+    mov r8, windows_test_dir_name_length
+    call os_dir_next
+    cmp rax, 1
+    jne .dir_drain_end
+    mov rdi, windows_test_dir_name
+    mov rsi, windows_test_entry_name
+    call fc_streq
+    test eax, eax
+    jz .dir_drain
+    cmp qword [windows_test_info], 2
+    jne .fail87
+    cmp dword [windows_test_info + 36], FC_TYPE_REGULAR
+    jne .fail88
+    mov dword [windows_test_dir_found], 1
+    jmp .dir_drain
+
+.dir_drain_end:
+    test rax, rax
+    jnz .fail89
+    cmp dword [windows_test_dir_found], 1
+    jne .fail90
+
+    ; Iterator two must still have another entry after iterator one reached EOF.
+    mov rdi, [windows_test_dir_handle2]
+    mov rsi, windows_test_info2
+    mov rdx, windows_test_dir_name2
+    mov ecx, 4096
+    mov r8, windows_test_dir_name_length2
+    call os_dir_next
+    cmp rax, 1
+    jne .fail91
+
+    mov rdi, [windows_test_dir_handle1]
+    call os_dir_close
+    test eax, eax
+    jnz .fail92
+    mov rdi, [windows_test_dir_handle2]
+    call os_dir_close
+    test eax, eax
+    jnz .fail93
+
+    mov rdi, windows_test_entry_path
+    call os_unlink
+    test eax, eax
+    jnz .fail94
     mov rdi, windows_test_dir
     call os_rmdir
     test eax, eax
-    jnz .fail14
+    jnz .fail95
 
     xor eax, eax
     jmp .done
@@ -163,6 +279,43 @@ fc_windows_backend_selftest:
 .fail17: mov eax, 77
     jmp .done
 .fail18: mov eax, 78
+    jmp .done
+.fail79: mov eax, 79
+    jmp .done
+.fail80:
+    mov rdi, [windows_test_handle]
+    call os_close
+    mov eax, 80
+    jmp .done
+.fail81: mov eax, 81
+    jmp .done
+.fail82: mov eax, 82
+    jmp .done
+.fail83: mov eax, 83
+    jmp .done
+.fail84: mov eax, 84
+    jmp .done
+.fail85: mov eax, 85
+    jmp .done
+.fail86: mov eax, 86
+    jmp .done
+.fail87: mov eax, 87
+    jmp .done
+.fail88: mov eax, 88
+    jmp .done
+.fail89: mov eax, 89
+    jmp .done
+.fail90: mov eax, 90
+    jmp .done
+.fail91: mov eax, 91
+    jmp .done
+.fail92: mov eax, 92
+    jmp .done
+.fail93: mov eax, 93
+    jmp .done
+.fail94: mov eax, 94
+    jmp .done
+.fail95: mov eax, 95
 .done:
     add rsp, 16
     pop r13

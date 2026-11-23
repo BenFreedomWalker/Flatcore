@@ -141,7 +141,7 @@ os_stat:
     mov edi, -100
     lea rdx, [linux_stat_buffer]
     mov r9, rdx
-    xor r10d, r10d
+    mov r10d, 100h             ; AT_SYMLINK_NOFOLLOW (lstat semantics)
     mov eax, 262
     syscall
     test rax, rax
@@ -283,4 +283,11 @@ os_set_times:
     pop r14
     pop r13
     pop r12
+    ret
+
+; os_get_capabilities()
+; Linux exposes no-follow symlink metadata, complete POSIX st_mode, and
+; nanosecond file timestamp updates through the operations in this backend.
+os_get_capabilities:
+    mov eax, FC_CAP_SYMLINKS or FC_CAP_POSIX_MODES or FC_CAP_FILE_TIMES
     ret

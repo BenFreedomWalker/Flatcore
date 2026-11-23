@@ -11,6 +11,8 @@ align 16
 fc_cmd_path_buffer rb 4096
 fc_cmd_path_length dq 0
 align 16
+fc_cmd_cat_buffer rb 4096
+align 16
 windows_path_buffer rb 65536
 windows_path_buffer2 rb 65536
 

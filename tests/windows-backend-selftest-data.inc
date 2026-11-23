@@ -8,3 +8,6 @@ windows_test_length rq 1
 windows_test_handle rq 1
 windows_test_cwd rb 4096
 windows_test_readback rb 8
+
+align 8
+windows_test_info rb 64

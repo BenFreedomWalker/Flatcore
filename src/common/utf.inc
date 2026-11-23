@@ -144,3 +144,149 @@ fc_utf16_to_utf8:
     pop r12
     pop rbx
     ret
+
+
+; fc_utf8_to_utf16(source_utf8, destination_utf16, destination_capacity_units)
+; Strict UTF-8 decoder. Returns UTF-16 code units written (excluding NUL),
+; or -1 for malformed UTF-8 / insufficient capacity. Capacity includes NUL.
+fc_utf8_to_utf16:
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, rdx
+    xor r15d, r15d
+    test r12, r12
+    jz .bad
+    test r13, r13
+    jz .bad
+    test r14, r14
+    jz .bad
+.decode:
+    movzx ebx, byte [r12]
+    test ebx, ebx
+    jz .finish
+    inc r12
+    cmp ebx, 80h
+    jb .emit_bmp
+    cmp ebx, 0C2h
+    jb .bad
+    cmp ebx, 0DFh
+    jbe .decode_two
+    cmp ebx, 0EFh
+    jbe .decode_three
+    cmp ebx, 0F4h
+    jbe .decode_four
+    jmp .bad
+.decode_two:
+    movzx eax, byte [r12]
+    test al, 0C0h
+    cmp al, 80h
+    jne .bad
+    inc r12
+    and ebx, 1Fh
+    shl ebx, 6
+    and eax, 3Fh
+    or ebx, eax
+    jmp .emit_bmp
+.decode_three:
+    movzx eax, byte [r12]
+    movzx ecx, byte [r12 + 1]
+    cmp al, 80h
+    jb .bad
+    cmp al, 0BFh
+    ja .bad
+    cmp cl, 80h
+    jb .bad
+    cmp cl, 0BFh
+    ja .bad
+    cmp bl, 0E0h
+    jne .three_not_e0
+    cmp al, 0A0h
+    jb .bad
+.three_not_e0:
+    cmp bl, 0EDh
+    jne .three_not_ed
+    cmp al, 9Fh
+    ja .bad
+.three_not_ed:
+    add r12, 2
+    and ebx, 0Fh
+    shl ebx, 12
+    and eax, 3Fh
+    shl eax, 6
+    or ebx, eax
+    and ecx, 3Fh
+    or ebx, ecx
+    jmp .emit_bmp
+.decode_four:
+    movzx eax, byte [r12]
+    movzx ecx, byte [r12 + 1]
+    movzx edx, byte [r12 + 2]
+    cmp al, 80h
+    jb .bad
+    cmp al, 0BFh
+    ja .bad
+    cmp cl, 80h
+    jb .bad
+    cmp cl, 0BFh
+    ja .bad
+    cmp dl, 80h
+    jb .bad
+    cmp dl, 0BFh
+    ja .bad
+    cmp bl, 0F0h
+    jne .four_not_f0
+    cmp al, 90h
+    jb .bad
+.four_not_f0:
+    cmp bl, 0F4h
+    jne .four_range_ok
+    cmp al, 8Fh
+    ja .bad
+.four_range_ok:
+    add r12, 3
+    and ebx, 7
+    shl ebx, 18
+    and eax, 3Fh
+    shl eax, 12
+    or ebx, eax
+    and ecx, 3Fh
+    shl ecx, 6
+    or ebx, ecx
+    and edx, 3Fh
+    or ebx, edx
+    sub ebx, 10000h
+    mov eax, ebx
+    shr eax, 10
+    add eax, 0D800h
+    mov [r13 + r15*2], ax
+    and ebx, 3FFh
+    add ebx, 0DC00h
+    mov [r13 + r15*2 + 2], bx
+    add r15, 2
+    jmp .decode
+.emit_bmp:
+    cmp r15, r14
+    jae .bad
+    mov [r13 + r15*2], bx
+    inc r15
+    jmp .decode
+.finish:
+    cmp r15, r14
+    jae .bad
+    mov word [r13 + r15*2], 0
+    mov rax, r15
+    jmp .return
+.bad:
+    mov rax, -1
+.return:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    ret

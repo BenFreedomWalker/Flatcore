@@ -224,7 +224,7 @@ Both existing native source files include and assemble these same common modules
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
 - [x] Implement Windows `os_stat` with Unicode `GetFileAttributesExW`, 64-bit file sizes, DOS attribute translation, and FILETIME-to-Unix-nanosecond conversion.
-- [ ] Runtime-verify Windows `os_stat` size/type results and zero-valued unsupported POSIX mode/link-count fields.
+- [x] Runtime-verify Windows `os_stat` size/type results and zero-valued unsupported POSIX mode/link-count fields.
 
 **Stage 4 Linux backend source checkpoint (2026-11-23)**
 
@@ -403,3 +403,10 @@ Both existing native source files include and assemble these same common modules
 - Added the required Win32 import and metadata scratch storage to both production and test targets.
 - Extended the Windows backend integration test to verify a Unicode-named file's size, regular-file type, and zero-valued unsupported mode field. Distinct failure statuses identify each assertion.
 - Source implementation is complete; runtime verification is pending. The next test checkpoint covers both Linux and Windows to ensure the shared helper suite and existing Linux backend remain green.
+
+**Windows `os_stat` verification passed (2026-11-23)**
+
+- User reran `build-windows.bat test` after the FASM immediate-range correction in the FILETIME epoch conversion. Shared runtime/backend tests and Windows smoke tests passed; CMD exit status was 0.
+- User also reran `./build.sh test`; shared runtime helper tests and Linux smoke tests passed; fish exit status was 0. The `flatcore: operation failed` line is expected output from the negative/error-path smoke test.
+- Windows `os_stat` size, regular-file type, and unsupported POSIX mode-field assertions are now runtime-verified. Both platforms remain green.
+- Remaining Stage 4 work: Windows directory iteration, Windows timestamp updates, and explicit cross-platform capability plus symlink/reparse-point semantics. Stage 5 remains blocked until Stage 4 is complete.

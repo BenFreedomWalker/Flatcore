@@ -56,6 +56,7 @@ fc_cmd_mkdir_parse_mode:
 fc_cmd_mkdir_verbose:
     push rbx
     push r12
+    sub rsp, 8
     mov r12, rdi
     mov rdi, [os_stdout]
     mov rsi, fc_cmd_mkdir_verbose_prefix
@@ -77,6 +78,7 @@ fc_cmd_mkdir_verbose:
     mov edx, 2
     call fc_cmd_mkdir_write
 .verbose_done:
+    add rsp, 8
     pop r12
     pop rbx
     ret
@@ -205,11 +207,11 @@ fc_cmd_mkdir_one:
     mov rdi, fc_cmd_mkdir_work_path
     mov rsi, 0777o
     call fc_cmd_mkdir_ensure
-    mov byte [fc_cmd_mkdir_work_path + rbx], al
+    mov rdx, rax
     ; Restore the separator from the original operand.
     mov al, [r12 + rbx]
     mov [fc_cmd_mkdir_work_path + rbx], al
-    test rax, rax
+    test rdx, rdx
     jnz .one_failed
 .path_next:
     inc rbx
@@ -282,11 +284,17 @@ fc_cmd_mkdir:
     test eax, eax
     jnz .version
     mov rsi, [r13 + r14 * 8]
+    mov rdx, rsi
     mov rdi, fc_cmd_mkdir_opt_mode_prefix
-    call fc_strstarts
-    test eax, eax
-    jnz .mode_equals
-    jmp .bad_option
+.mode_prefix_compare:
+    mov al, [rdi]
+    test al, al
+    jz .mode_equals
+    cmp al, [rdx]
+    jne .bad_option
+    inc rdi
+    inc rdx
+    jmp .mode_prefix_compare
 
 .set_parents:
     or qword [fc_cmd_mkdir_flags], 1

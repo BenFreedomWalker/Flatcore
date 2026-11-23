@@ -208,9 +208,9 @@ fc_cmd_ls_directory:
 .directory_next:
     mov rdi, [fc_cmd_ls_dir_handle]
     mov rsi, fc_cmd_ls_info
-    mov rdx, fc_cmd_ls_name
+    mov rdx, fc_cmd_ls_entry_name
     mov ecx, 1024
-    mov r8, fc_cmd_ls_name_length
+    mov r8, fc_cmd_ls_entry_name_length
     call os_dir_next
     cmp rax, 1
     je .directory_entry
@@ -220,13 +220,13 @@ fc_cmd_ls_directory:
 
 .directory_entry:
     ; Skip "." and ".." unless -a; -A includes other dotfiles.
-    cmp byte [fc_cmd_ls_name], '.'
+    cmp byte [fc_cmd_ls_entry_name], '.'
     jne .directory_visible
-    cmp byte [fc_cmd_ls_name + 1], 0
+    cmp byte [fc_cmd_ls_entry_name + 1], 0
     je .directory_dot
-    cmp byte [fc_cmd_ls_name + 1], '.'
+    cmp byte [fc_cmd_ls_entry_name + 1], '.'
     jne .directory_hidden
-    cmp byte [fc_cmd_ls_name + 2], 0
+    cmp byte [fc_cmd_ls_entry_name + 2], 0
     je .directory_dot
 .directory_hidden:
     test qword [fc_cmd_ls_flags], 3
@@ -238,11 +238,11 @@ fc_cmd_ls_directory:
 
 .directory_visible:
     mov rdi, r12
-    mov rsi, fc_cmd_ls_name
+    mov rsi, fc_cmd_ls_entry_name
     call fc_cmd_ls_join
     test rax, rax
     jnz .directory_failed_close
-    mov rdi, fc_cmd_ls_name
+    mov rdi, fc_cmd_ls_entry_name
     mov rsi, fc_cmd_ls_full_path
     call fc_cmd_ls_emit
     test rax, rax

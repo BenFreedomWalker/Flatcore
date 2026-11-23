@@ -220,10 +220,12 @@ Both existing native source files include and assemble these same common modules
 - [x] Implement Linux file timestamp updates with `utimensat`; verify nanosecond precision through `os_stat`.
 - [x] Complete the currently required Linux syscall-backed filesystem and I/O operations; Linux runtime tests cover read/write/open/close/stat/directory iteration/basic path operations/getcwd/chdir/timestamps.
 - [ ] Finish Linux/backend capability semantics and document cross-platform differences.
-- [ ] Complete Windows Unicode Win32-backed versions (initial I/O/basic filesystem operations are runtime-verified; `os_stat` is implemented and awaiting verification; directory iteration and timestamp updates remain).
+- [ ] Complete Windows Unicode Win32-backed versions (initial I/O/basic filesystem and `os_stat` are runtime-verified; directory iteration is implemented and awaiting runtime verification; timestamp updates remain).
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
 - [x] Implement Windows `os_stat` with Unicode `GetFileAttributesExW`, 64-bit file sizes, DOS attribute translation, and FILETIME-to-Unix-nanosecond conversion.
+- [x] Implement Windows `os_dir_open`, `os_dir_next`, and `os_dir_close` with independent Unicode `FindFirstFileW`/`FindNextFileW` iterators.
+- [ ] Runtime-verify Windows directory iteration: Unicode names, simultaneous handles, too-small-buffer retry, metadata, EOF, and close.
 - [x] Runtime-verify Windows `os_stat` size/type results and zero-valued unsupported POSIX mode/link-count fields.
 
 **Stage 4 Linux backend source checkpoint (2026-11-23)**
@@ -410,3 +412,12 @@ Both existing native source files include and assemble these same common modules
 - User also reran `./build.sh test`; shared runtime helper tests and Linux smoke tests passed; fish exit status was 0. The `flatcore: operation failed` line is expected output from the negative/error-path smoke test.
 - Windows `os_stat` size, regular-file type, and unsupported POSIX mode-field assertions are now runtime-verified. Both platforms remain green.
 - Remaining Stage 4 work: Windows directory iteration, Windows timestamp updates, and explicit cross-platform capability plus symlink/reparse-point semantics. Stage 5 remains blocked until Stage 4 is complete.
+
+**Windows directory iteration implementation checkpoint (2026-11-23)**
+
+- Added a bounded pool of eight independent directory iterator slots. Each slot owns its `FindFirstFileW` search handle and `WIN32_FIND_DATAW` record; handles are exposed as opaque slot tokens.
+- Implemented `os_dir_open` with UTF-8-to-UTF-16 path conversion and a `\\*` search pattern, `os_dir_next` with strict UTF-16-to-UTF-8 filename conversion, and `os_dir_close` with `FindClose`.
+- `os_dir_next` preserves the current native entry when the caller's name buffer is too small, allowing a retry without skipping entries. It returns 1 for an entry, 0 for EOF, and -1 for errors as specified by the FC64 contract.
+- Directory entries populate available file size, timestamps, common DOS attributes, and regular-file/directory type. Reparse points remain UNKNOWN rather than being mislabeled as symlinks; POSIX mode and link count remain zero.
+- Added Windows backend tests for two simultaneous iterators, too-small-buffer retry, Unicode filename discovery, entry metadata, EOF, and closing both handles. The test also removes a leftover Unicode fixture before starting.
+- Source implementation and static review are complete. Runtime verification is pending. Run both platform test commands below; do not proceed to Windows timestamp updates until the user reports the results.

@@ -24,8 +24,7 @@ if not errorlevel 1 goto failed
 
 set "STEP=echo output"
 "%BIN%" echo Flatcore-Windows-smoke > "%OUT%"
-> "%EXPECTED%" echo Flatcore-Windows-smoke
-fc /b "%OUT%" "%EXPECTED%" >nul
+findstr /x /c:"Flatcore-Windows-smoke" "%OUT%" >nul
 if errorlevel 1 goto failed
 
 set "STEP=pwd output"

@@ -424,20 +424,21 @@ os_dir_open:
     ; Ensure room for an optional separator, '*', and UTF-16 NUL.
     cmp r15, 32765
     ja .dir_open_too_long
+    lea r11, [windows_path_buffer]
     lea rdx, [r15 + r15]
-    mov ax, [windows_path_buffer + rdx - 2]
+    mov ax, [r11 + rdx - 2]
     cmp ax, '\'
     je .dir_open_append_star
     cmp ax, '/'
     je .dir_open_append_star
-    mov word [windows_path_buffer + rdx], '\'
+    mov word [r11 + rdx], '\'
     add rdx, 2
     inc r15
 .dir_open_append_star:
-    mov word [windows_path_buffer + rdx], '*'
+    mov word [r11 + rdx], '*'
     add rdx, 2
     inc r15
-    mov word [windows_path_buffer + rdx], 0
+    mov word [r11 + rdx], 0
 
     mov rcx, windows_path_buffer
     lea rdx, [r12 + 16]

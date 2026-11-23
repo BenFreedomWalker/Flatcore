@@ -544,4 +544,11 @@ Both existing native source files include and assemble these same common modules
 - Implemented `-p` / `--parents` with existing-directory acceptance, recursive parent creation, and rejection of non-directory path components; `-m MODE` / `--mode=MODE` with octal validation; `-v` / `--verbose`; combined short options; `--`; `--help`; and `--version`.
 - Linux passes the requested mode to native `mkdir(2)`, subject to the process umask. Windows accepts and validates the option but ignores POSIX mode bits because its backend does not expose POSIX creation permissions.
 - Added Linux and Windows smoke coverage for recursive creation, already-existing parents, verbose output, mode parsing, help/version, and invalid mode input. Linux additionally checks resulting POSIX modes, non-directory parent rejection, and a leading-hyphen operand.
-- Source implementation and test wiring are complete. Runtime verification is pending. Run both platform test commands and report their exit statuses before proceeding to `rmdir`.
+- Source implementation and test wiring are complete. Runtime verification passed (2026-11-23): the user ran `./build.sh test` under WSL and `build-windows.bat test` under Windows. Both shared runtime/backend suites and both smoke suites passed. Linux verified recursive parent creation, idempotent existing directories, verbose output, POSIX mode application subject to umask, invalid mode rejection, leading-hyphen operands, and rejection of a regular-file parent. Windows verified recursive creation, existing parents, verbose output, mode-option acceptance, help/version, and invalid mode rejection. The printed diagnostics are expected negative-path assertions; both commands completed successfully.
+
+
+**Stage 5 shared mkdir — runtime verification passed (2026-11-23)**
+
+- Both platform test suites passed after correcting the Windows drive-root test operand. Linux `./build.sh test` completed with fish status 0; Windows `build-windows.bat test` completed with CMD status 0.
+- Shared `mkdir` is now runtime-verified on Linux and Windows. The Windows test-harness correction also preserves the existing `basename` drive-root assertion by passing `C:\` as an unquoted argument, avoiding CMD/CRT trailing-backslash quote parsing.
+- Next command tranche: shared `rmdir`. Wait for the user's `ok` before implementation.

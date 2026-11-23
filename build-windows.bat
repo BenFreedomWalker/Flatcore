@@ -41,7 +41,7 @@ if /i "%~1"=="test" (
         echo Flatcore shared runtime and backend tests failed with status %RUNTIME_STATUS%.
         exit /b %RUNTIME_STATUS%
     )
-    echo Flatcore shared runtime helper tests passed.
+    echo Flatcore shared runtime and Windows backend tests passed.
     call "%ROOT%tests\windows-smoke.bat"
     if errorlevel 1 exit /b 1
     exit /b 0

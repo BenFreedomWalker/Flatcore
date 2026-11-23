@@ -213,7 +213,7 @@ Both existing native source files include and assemble these same common modules
 - [x] Implement Linux os_read and os_write; shared complete-write handling is implemented and helper-tested.
 - [x] Implement Linux os_open, os_close, and file creation/truncation modes.
 - [x] Implement Linux os_stat using the shared 64-byte metadata structure.
-- [x] Implement Linux os_dir_open, os_dir_next, and os_dir_close (source complete; runtime verification pending).
+- [x] Implement and runtime-verify Linux os_dir_open, os_dir_next, and os_dir_close on both platform test checkpoints.
 - [x] Implement os_mkdir, os_rmdir, os_unlink, and os_rename in the Linux backend.
 - [x] Implement os_getcwd and os_chdir in the Linux backend.
 - [ ] Implement file timestamps and the operations required by touch.
@@ -346,3 +346,10 @@ Both existing native source files include and assemble these same common modules
 **Linux directory test fixture correction (2026-11-23)**
 
 - First directory-backend test returned status 44 because its fixture path incorrectly pointed at `/tmp`; the setup attempted to remove/recreate the system temporary directory. Changed the fixture to the dedicated `/tmp/flatcore-fc64-backend-dir`. Re-run the Linux backend tests before treating directory iteration as verified.
+
+
+**Linux directory iteration verification passed (2026-11-23)**
+
+- User reran `./build.sh test` under WSL and `build-windows.bat test` under Windows after correcting the Linux directory fixture path. Both returned exit status 0.
+- Linux backend tests now pass the dedicated-directory setup, simultaneous iterator handles, too-small-buffer retry, entry reads, EOF handling, iterator close, and fixture cleanup. The Windows helper and smoke suites also remain green.
+- Directory iteration is verified on Linux; Windows directory backend implementation remains outstanding.

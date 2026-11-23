@@ -53,6 +53,23 @@ fc_linux_backend_selftest:
     cmp dword [linux_test_info + 40], 100600o
     jne .fail13
 
+    ; Set and read back distinct nanosecond timestamps.
+    mov rdi, linux_test_path
+    mov rsi, 1700000000123456789
+    mov rdx, 1800000000987654321
+    call os_set_times
+    test eax, eax
+    jnz .fail23
+    mov rdi, linux_test_path
+    mov rsi, linux_test_info
+    call os_stat
+    test eax, eax
+    jnz .fail24
+    cmp qword [linux_test_info + 24], 1700000000123456789
+    jne .fail25
+    cmp qword [linux_test_info + 8], 1800000000987654321
+    jne .fail26
+
     ; Use a dedicated empty directory so entry/EOF behavior is deterministic.
     mov rdi, linux_test_dir_path
     call os_rmdir
@@ -79,7 +96,7 @@ fc_linux_backend_selftest:
     mov rsi, linux_test_info
     mov rdx, linux_test_name
     xor ecx, ecx
-    mov r9, linux_test_name_length
+    mov r8, linux_test_name_length
     call os_dir_next
     cmp eax, -1
     jne .fail16
@@ -102,7 +119,7 @@ fc_linux_backend_selftest:
     mov rsi, linux_test_info2
     mov rdx, linux_test_name2
     mov ecx, 256
-    mov r9, linux_test_name_length2
+    mov r8, linux_test_name_length2
     call os_dir_next
     cmp eax, 1
     jne .fail18
@@ -250,6 +267,14 @@ fc_linux_backend_selftest:
 .fail21: mov eax, 51
     jmp .done
 .fail22: mov eax, 52
+    jmp .done
+.fail23: mov eax, 53
+    jmp .done
+.fail24: mov eax, 54
+    jmp .done
+.fail25: mov eax, 55
+    jmp .done
+.fail26: mov eax, 56
 .done:
     add rsp, 16
     pop r13

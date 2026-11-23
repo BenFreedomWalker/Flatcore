@@ -59,8 +59,9 @@ fc_windows_backend_selftest:
     call os_close
     test eax, eax
     jnz .fail7
-    mov ax, [windows_test_readback]
-    cmp ax, 'KO'
+    cmp byte [windows_test_readback], 'O'
+    jne .fail8
+    cmp byte [windows_test_readback + 1], 'K'
     jne .fail8
 
     ; Rename and remove the Unicode filename.

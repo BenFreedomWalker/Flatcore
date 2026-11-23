@@ -414,6 +414,8 @@ os_set_times:
 .set_times_atime_floor:
     mov rdx, 116444736000000000
     add rax, rdx
+    test rax, rax
+    js .set_times_range
     mov [rsp + 64], rax
 
     mov rax, r14
@@ -426,6 +428,8 @@ os_set_times:
 .set_times_mtime_floor:
     mov rdx, 116444736000000000
     add rax, rdx
+    test rax, rax
+    js .set_times_range
     mov [rsp + 72], rax
 
     ; FILE_WRITE_ATTRIBUTES, share read/write/delete, OPEN_EXISTING.
@@ -466,6 +470,10 @@ os_set_times:
     jmp .set_times_done
 .set_times_close_error:
     call fc_windows_set_error
+    jmp .set_times_done
+.set_times_range:
+    mov eax, FC_ERR_INVALID
+    call fc_windows_set_normalized_error
     jmp .set_times_done
 .set_times_encoding:
     mov eax, FC_ERR_ENCODING

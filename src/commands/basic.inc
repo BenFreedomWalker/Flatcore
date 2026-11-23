@@ -28,7 +28,7 @@ fc_cmd_echo:
     test eax, eax
     jz .echo_operands
     mov r14, 0
-    inc r13
+    add r13, 8
     dec r12
 .echo_operands:
     mov ebx, 1

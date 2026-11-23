@@ -1,5 +1,4 @@
 ; Windows backend state and scratch storage.
-section '.data' data readable writeable
 align 8
 os_stdin dq 0
 os_stdout dq 0

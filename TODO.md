@@ -220,7 +220,7 @@ Both existing native source files include and assemble these same common modules
 - [x] Implement Linux file timestamp updates with `utimensat`; verify nanosecond precision through `os_stat`.
 - [x] Complete the currently required Linux syscall-backed filesystem and I/O operations; Linux runtime tests cover read/write/open/close/stat/directory iteration/basic path operations/getcwd/chdir/timestamps.
 - [ ] Finish Linux/backend capability semantics and document cross-platform differences.
-- [ ] Complete Windows Unicode Win32-backed versions (initial I/O/basic filesystem, `os_stat`, and directory iteration are runtime-verified; timestamp updates remain).
+- [ ] Complete Windows Unicode Win32-backed versions (initial I/O/basic filesystem, `os_stat`, and directory iteration are runtime-verified; `os_set_times` source and precision tests are implemented, awaiting user runtime verification).
 - [x] Add Linux errno-to-FC_ERR_* normalization while retaining the native errno and error domain.
 - [ ] Define and test behavior for symlinks/reparse points and unsupported metadata differences.
 - [x] Implement Windows `os_stat` with Unicode `GetFileAttributesExW`, 64-bit file sizes, DOS attribute translation, and FILETIME-to-Unix-nanosecond conversion.
@@ -429,3 +429,13 @@ Both existing native source files include and assemble these same common modules
 - User also reran `./build.sh test`; shared runtime helper tests and Linux smoke tests passed; fish exit status was 0. The printed `flatcore: operation failed` is expected output from the negative/error-path smoke test.
 - Windows directory iteration now passes its integration coverage: Unicode entry names, two independent iterators, too-small-buffer retry without consuming the entry, metadata, EOF, and closing both handles.
 - Next Stage 4 item: implement and test Windows `os_set_times`. Capability reporting and symlink/reparse-point semantics remain after that. Stage 5 remains blocked until Stage 4 is complete.
+
+**Windows timestamp update implementation checkpoint (2026-11-23)**
+
+- Added FC64 `os_set_times(path_utf8, accessed_ns, modified_ns)` to `src/platform/windows/filesystem.inc`.
+- Converts signed Unix-epoch nanoseconds to Windows FILETIME ticks (100 ns), applying floor division for negative/pre-epoch values rather than truncating toward zero.
+- Opens the target through `CreateFileW` with `FILE_WRITE_ATTRIBUTES`, full read/write/delete sharing, and `FILE_FLAG_BACKUP_SEMANTICS` so directories can also be timestamped; calls `SetFileTime` to update access and modification times while leaving creation time unchanged.
+- Closes the temporary handle on success and on SetFileTime failure, retaining the original Win32 error state. UTF-8 conversion and native API failures use the common normalized error state.
+- Extended the Windows backend integration test to set distinct timestamps on the Unicode fixture and verify both exact values through `os_stat`. Test values are aligned to the Windows 100 ns precision; separate failure codes 96–98 identify the set/access/modified checks.
+- Added the `SetFileTime` import to the Windows backend test executable. The production executable already imports it.
+- Source implementation and static review are complete. Runtime verification is pending; run both platform test commands below. Do not proceed to capability and symlink/reparse semantics until the user reports the results.

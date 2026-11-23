@@ -112,7 +112,9 @@ fc_windows_backend_selftest:
 .fail3:
     mov rdi, [windows_test_handle]
     call os_close
-    mov eax, 63
+    mov eax, [os_native_error]
+    and eax, 0FFFFh
+    add eax, 10000h
     jmp .done
 .fail4: mov eax, 64
     jmp .done

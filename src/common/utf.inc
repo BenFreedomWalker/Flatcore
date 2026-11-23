@@ -194,11 +194,15 @@ fc_utf8_to_utf16:
     jmp .emit_bmp
 .decode_three:
     movzx eax, byte [r12]
-    movzx ecx, byte [r12 + 1]
+    test al, al
+    jz .bad
     cmp al, 80h
     jb .bad
     cmp al, 0BFh
     ja .bad
+    movzx ecx, byte [r12 + 1]
+    test cl, cl
+    jz .bad
     cmp cl, 80h
     jb .bad
     cmp cl, 0BFh
@@ -224,16 +228,22 @@ fc_utf8_to_utf16:
     jmp .emit_bmp
 .decode_four:
     movzx eax, byte [r12]
-    movzx ecx, byte [r12 + 1]
-    movzx edx, byte [r12 + 2]
+    test al, al
+    jz .bad
     cmp al, 80h
     jb .bad
     cmp al, 0BFh
     ja .bad
+    movzx ecx, byte [r12 + 1]
+    test cl, cl
+    jz .bad
     cmp cl, 80h
     jb .bad
     cmp cl, 0BFh
     ja .bad
+    movzx edx, byte [r12 + 2]
+    test dl, dl
+    jz .bad
     cmp dl, 80h
     jb .bad
     cmp dl, 0BFh
@@ -248,6 +258,9 @@ fc_utf8_to_utf16:
     cmp al, 8Fh
     ja .bad
 .four_range_ok:
+    lea rax, [r15 + 3]       ; two UTF-16 units plus the terminating NUL
+    cmp rax, r14
+    ja .bad
     add r12, 3
     and ebx, 7
     shl ebx, 18

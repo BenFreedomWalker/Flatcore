@@ -180,7 +180,7 @@ fc_cmd_mkdir_one:
     mov al, [fc_cmd_mkdir_work_path + rbx]
     cmp al, '/'
     je .path_separator
-    cmp al, '\\'
+    cmp al, '\'
     jne .path_next
 .path_separator:
     test rbx, rbx
@@ -192,9 +192,9 @@ fc_cmd_mkdir_one:
     je .path_next
 .path_unc_check:
     ; For UNC paths, skip the server and share roots.
-    cmp byte [fc_cmd_mkdir_work_path], '\\'
+    cmp byte [fc_cmd_mkdir_work_path], '\'
     jne .path_prefix
-    cmp byte [fc_cmd_mkdir_work_path + 1], '\\'
+    cmp byte [fc_cmd_mkdir_work_path + 1], '\'
     jne .path_prefix
     cmp r15, 2
     jb .path_count_unc

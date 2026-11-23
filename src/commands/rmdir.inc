@@ -67,7 +67,7 @@ fc_cmd_rmdir_one:
     mov al, [fc_cmd_rmdir_work_path + r13 - 1]
     cmp al, '/'
     je .trim_one
-    cmp al, '\\'
+    cmp al, 5Ch
     jne .remove_current
 .trim_one:
     ; Keep "/" and "C:\\" intact.

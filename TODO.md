@@ -244,8 +244,8 @@ Both existing native source files include and assemble these same common modules
 
 - [x] Port true, false, and echo into `src/commands/basic.inc`; both native entry points now try the shared registry before falling back to unmigrated legacy commands.
 - [x] Port pwd, basename, and dirname into the shared `src/commands/path.inc`; both production targets and both runtime test assemblies now compile the same handlers and registry.
-- [x] Implement shared cat, including standard input and multiple file operands; runtime verification pending.
-- [ ] Port ls, including common GNU-style options and multiple operands.
+- [x] Implement and runtime-verify shared cat on Linux and Windows, including standard input and multiple file operands.
+- [x] Implement shared ls source with common GNU-style options and multiple operands; runtime verification pending.
 - [ ] Port mkdir, including -p, -m, and -v where supported.
 - [ ] Port rmdir.
 - [ ] Port rm, including -f, -i, -r/-R, and -v.
@@ -517,3 +517,12 @@ Both existing native source files include and assemble these same common modules
 - Linux verified stdin redirection, `-` as stdin, ordered multi-file concatenation, empty files, byte-for-byte binary/line-ending preservation, and continuing after a missing operand. Windows verified the same behaviors, including paths containing spaces.
 - The Linux `flatcore: operation failed` and Windows `flatcore: cat: input/output error` messages are expected negative-path diagnostics; neither indicates a suite failure.
 - Shared `cat` is now runtime-verified on both targets. Next: shared `ls` with grouped short options, GNU-style long options, multiple operands, and backend-neutral directory iteration. Wait for the user's `ok` before implementation.
+
+
+**Stage 5 shared ls — source implementation checkpoint (2026-11-23)**
+
+- Added `src/commands/ls.inc`, one FC64 implementation shared by Linux and Windows. It uses only `os_stat`, `os_dir_open`, `os_dir_next`, `os_dir_close`, and the common output/formatting helpers; no native syscalls or Win32 APIs appear in the command source.
+- Added `ls` to the shared command registry and compiled the same handler into both production executables and both runtime-test assemblies. Added per-target scratch storage for directory handles, UTF-8 names, joined paths, metadata, mode text, and decimal sizes.
+- Implemented `-a`, `-A`, `-l`, `-d`, `-1`, combined short options, `--all`, `--almost-all`, `--directory`, `--help`, `--version`, and `--`. Directory entries are filtered and formatted in shared code. Long format reports file type, available POSIX permission bits, byte size, and name; Windows reports dashes for POSIX permission bits because its backend does not expose them.
+- Added Linux and Windows smoke coverage for hidden-file filtering, long format, almost-all, directory operands, multiple file operands, help/version, and invalid options. Linux additionally verifies `-a` dot entries and `--` with a leading-hyphen filename. Windows batch assertions use `for /f` to remain compatible with LF-only shared output.
+- Source implementation and test wiring are complete. Runtime verification is pending. Run both platform test commands and report their exit statuses before proceeding to the next command tranche.

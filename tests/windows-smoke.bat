@@ -90,8 +90,8 @@ fc /b "%OUT%" "%EXPECTED%" >nul
 if errorlevel 1 goto failed
 
 set "STEP=ls directory and option coverage"
-> "%TEST_DIR%\\.hidden" echo hidden
-> "%TEST_DIR%\\visible" echo visible
+> "%TEST_DIR%\.hidden" echo hidden
+> "%TEST_DIR%\visible" echo visible
 "%BIN%" ls "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
 findstr /x /c:"visible" "%OUT%" >nul
@@ -112,7 +112,7 @@ if errorlevel 1 goto failed
 if errorlevel 1 goto failed
 findstr /x /c:"%TEST_DIR%" "%OUT%" >nul
 if errorlevel 1 goto failed
-"%BIN%" ls "%TEST_DIR%\\sample.txt" "%TEST_DIR%\\second.txt" > "%OUT%"
+"%BIN%" ls "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" > "%OUT%"
 if errorlevel 1 goto failed
 findstr /x /c:"sample.txt" "%OUT%" >nul
 if errorlevel 1 goto failed
@@ -175,7 +175,7 @@ set "STEP=remove moved file"
 "%BIN%" rm "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
 
-del "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" >nul 2>nul
+del "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\visible" >nul 2>nul
 
 set "STEP=rmdir test directory"
 "%BIN%" rmdir "%TEST_DIR%"
@@ -188,7 +188,7 @@ exit /b 0
 :failed
 echo Flatcore Windows smoke test failed at: %STEP%
 if defined TEST_DIR (
-    del "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt" >nul 2>nul
+    del "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\visible" >nul 2>nul
     rmdir "%TEST_DIR%" >nul 2>nul
 )
 del "%OUT%" "%EXPECTED%" >nul 2>nul

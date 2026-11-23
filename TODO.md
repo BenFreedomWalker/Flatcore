@@ -552,3 +552,12 @@ Both existing native source files include and assemble these same common modules
 - Both platform test suites passed after correcting the Windows drive-root test operand. Linux `./build.sh test` completed with fish status 0; Windows `build-windows.bat test` completed with CMD status 0.
 - Shared `mkdir` is now runtime-verified on Linux and Windows. The Windows test-harness correction also preserves the existing `basename` drive-root assertion by passing `C:\` as an unquoted argument, avoiding CMD/CRT trailing-backslash quote parsing.
 - Next command tranche: shared `rmdir`. Wait for the user's `ok` before implementation.
+
+
+**Stage 5 shared rmdir — source implementation checkpoint (2026-11-23)**
+
+- Added `src/commands/rmdir.inc`, a single FC64 implementation using only `os_rmdir` and the common output/string helpers. No Linux syscalls or Win32 API calls appear in the command source.
+- Registered `rmdir` in the shared dispatcher and included the same source in both production executables and both runtime self-test assemblies. Added per-platform writable state and an 8 KiB path-work buffer.
+- Implemented `-p` / `--parents` to remove the requested directory and then empty parents, preserving POSIX and Windows drive roots; `-v` / `--verbose`; combined short options; `--`; `--help`; and `--version`. Multiple operands continue after an individual failure and produce a nonzero aggregate status.
+- Added Linux and Windows smoke coverage for recursive parent removal, verbose output, help/version, invalid options, and rejection of non-empty directories. Existing simple rmdir coverage remains.
+- Source implementation and test wiring are complete. Runtime verification is pending. Run both platform test commands and report their exit statuses before proceeding to the next command tranche.

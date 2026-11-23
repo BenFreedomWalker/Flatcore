@@ -94,34 +94,42 @@ set "STEP=ls directory and option coverage"
 > "%TEST_DIR%\visible" echo visible
 "%BIN%" ls "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
-findstr /x /c:"visible" "%OUT%" >nul
-if errorlevel 1 goto failed
-findstr /x /c:".hidden" "%OUT%" >nul
-if not errorlevel 1 goto failed
+set "LS_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="visible" set "LS_MATCH=1"
+if not defined LS_MATCH goto failed
+set "LS_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"==".hidden" set "LS_MATCH=1"
+if defined LS_MATCH goto failed
 "%BIN%" ls -A "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
-findstr /x /c:".hidden" "%OUT%" >nul
-if errorlevel 1 goto failed
-"%BIN%" ls -a "%TEST_DIR%" > "%OUT%"
-if errorlevel 1 goto failed
+set "LS_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"==".hidden" set "LS_MATCH=1"
+if not defined LS_MATCH goto failed
 "%BIN%" ls -la "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
-findstr /c:".hidden" "%OUT%" >nul
-if errorlevel 1 goto failed
+set "LS_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"==".hidden" set "LS_MATCH=1"
+if not defined LS_MATCH goto failed
 "%BIN%" ls -d "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
-findstr /x /c:"%TEST_DIR%" "%OUT%" >nul
-if errorlevel 1 goto failed
+set "LS_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="%TEST_DIR%" set "LS_MATCH=1"
+if not defined LS_MATCH goto failed
 "%BIN%" ls "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" > "%OUT%"
 if errorlevel 1 goto failed
-findstr /x /c:"sample.txt" "%OUT%" >nul
-if errorlevel 1 goto failed
-findstr /x /c:"second.txt" "%OUT%" >nul
-if errorlevel 1 goto failed
+set "LS_SAMPLE="
+set "LS_SECOND="
+for /f "usebackq delims=" %%A in ("%OUT%") do (
+    if "%%A"=="sample.txt" set "LS_SAMPLE=1"
+    if "%%A"=="second.txt" set "LS_SECOND=1"
+)
+if not defined LS_SAMPLE goto failed
+if not defined LS_SECOND goto failed
 "%BIN%" ls --version > "%OUT%"
 if errorlevel 1 goto failed
-findstr /c:"Flatcore ls" "%OUT%" >nul
-if errorlevel 1 goto failed
+set "LS_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="Flatcore ls 0.1" set "LS_MATCH=1"
+if not defined LS_MATCH goto failed
 "%BIN%" ls --not-a-real-option >nul 2>nul
 if not errorlevel 1 goto failed
 

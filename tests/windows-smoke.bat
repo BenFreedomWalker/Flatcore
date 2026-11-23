@@ -46,6 +46,36 @@ set "STEP=mkdir path with spaces"
 "%BIN%" mkdir "%TEST_DIR%"
 if errorlevel 1 goto failed
 
+set "STEP=mkdir recursive parents"
+"%BIN%" mkdir -p "%TEST_DIR%\\nested\\one\\two"
+if errorlevel 1 goto failed
+if not exist "%TEST_DIR%\\nested\\one\\two" goto failed
+set "STEP=mkdir parents already exist"
+"%BIN%" mkdir -p "%TEST_DIR%\\nested\\one\\two"
+if errorlevel 1 goto failed
+set "STEP=mkdir verbose output"
+"%BIN%" mkdir -pv "%TEST_DIR%\\verbose\\deep" > "%OUT%"
+if errorlevel 1 goto failed
+findstr /c:"created directory" "%OUT%" >nul
+if errorlevel 1 goto failed
+if not exist "%TEST_DIR%\\verbose\\deep" goto failed
+set "STEP=mkdir mode option accepted"
+"%BIN%" mkdir --mode=700 "%TEST_DIR%\\mode-dir"
+if errorlevel 1 goto failed
+if not exist "%TEST_DIR%\\mode-dir" goto failed
+set "STEP=mkdir help and version"
+"%BIN%" mkdir --help > "%OUT%"
+if errorlevel 1 goto failed
+findstr /c:"--parents" "%OUT%" >nul
+if errorlevel 1 goto failed
+"%BIN%" mkdir --version > "%OUT%"
+if errorlevel 1 goto failed
+findstr /c:"Flatcore mkdir" "%OUT%" >nul
+if errorlevel 1 goto failed
+set "STEP=mkdir invalid mode"
+"%BIN%" mkdir -m 888 "%TEST_DIR%\\bad-mode" >nul 2>nul
+if not errorlevel 1 goto failed
+
 set "STEP=create sample file"
 > "%TEST_DIR%\sample.txt" echo alpha
 if not exist "%TEST_DIR%\sample.txt" goto failed
@@ -191,6 +221,20 @@ set "STEP=remove moved file"
 if errorlevel 1 goto failed
 
 del "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\visible" >nul 2>nul
+
+set "STEP=remove mkdir test tree"
+"%BIN%" rmdir "%TEST_DIR%\\nested\\one\\two"
+if errorlevel 1 goto failed
+"%BIN%" rmdir "%TEST_DIR%\\nested\\one"
+if errorlevel 1 goto failed
+"%BIN%" rmdir "%TEST_DIR%\\nested"
+if errorlevel 1 goto failed
+"%BIN%" rmdir "%TEST_DIR%\\verbose\\deep"
+if errorlevel 1 goto failed
+"%BIN%" rmdir "%TEST_DIR%\\verbose"
+if errorlevel 1 goto failed
+"%BIN%" rmdir "%TEST_DIR%\\mode-dir"
+if errorlevel 1 goto failed
 
 set "STEP=rmdir test directory"
 "%BIN%" rmdir "%TEST_DIR%"

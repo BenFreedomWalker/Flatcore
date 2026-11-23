@@ -381,6 +381,106 @@ os_stat:
     pop r12
     ret
 
+; os_set_times(path_utf8, accessed_ns, modified_ns)
+; Set access and modification times through a temporary FILE_WRITE_ATTRIBUTES
+; handle. Windows FILETIME precision is 100 ns, so sub-100 ns input is rounded
+; down to the preceding FILETIME tick, including for pre-epoch timestamps.
+os_set_times:
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp, 104
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, rdx
+
+    mov rdi, r12
+    mov rsi, windows_path_buffer
+    mov edx, 32768
+    call fc_utf8_to_utf16
+    cmp rax, -1
+    je .set_times_encoding
+
+    ; Convert signed Unix nanoseconds to FILETIME ticks. IDIV truncates toward
+    ; zero, so adjust a negative remainder to obtain mathematical floor(ns/100).
+    mov rax, r13
+    cqo
+    mov rcx, 100
+    idiv rcx
+    test rdx, rdx
+    jns .set_times_atime_floor
+    dec rax
+.set_times_atime_floor:
+    mov rdx, 116444736000000000
+    add rax, rdx
+    mov [rsp + 64], rax
+
+    mov rax, r14
+    cqo
+    mov rcx, 100
+    idiv rcx
+    test rdx, rdx
+    jns .set_times_mtime_floor
+    dec rax
+.set_times_mtime_floor:
+    mov rdx, 116444736000000000
+    add rax, rdx
+    mov [rsp + 72], rax
+
+    ; FILE_WRITE_ATTRIBUTES, share read/write/delete, OPEN_EXISTING.
+    mov rcx, windows_path_buffer
+    mov edx, 100h
+    mov r8d, 7
+    xor r9d, r9d
+    mov qword [rsp + 32], 3
+    mov qword [rsp + 40], 02000000h ; FILE_FLAG_BACKUP_SEMANTICS
+    mov qword [rsp + 48], 0
+    call [CreateFileW]
+    cmp rax, -1
+    je .set_times_error
+    mov r15, rax
+
+    ; Creation time is unchanged; set last-access and last-write times.
+    mov rcx, r15
+    xor edx, edx
+    lea r8, [rsp + 64]
+    lea r9, [rsp + 72]
+    call [SetFileTime]
+    test eax, eax
+    jz .set_times_api_error
+
+    mov rcx, r15
+    call [CloseHandle]
+    test eax, eax
+    jz .set_times_close_error
+    xor eax, eax
+    jmp .set_times_done
+
+.set_times_api_error:
+    call fc_windows_set_error
+    mov r14, rax
+    mov rcx, r15
+    call [CloseHandle]
+    mov rax, r14
+    jmp .set_times_done
+.set_times_close_error:
+    call fc_windows_set_error
+    jmp .set_times_done
+.set_times_encoding:
+    mov eax, FC_ERR_ENCODING
+    call fc_windows_set_normalized_error
+    jmp .set_times_done
+.set_times_error:
+    call fc_windows_set_error
+.set_times_done:
+    add rsp, 104
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    ret
+
 ; Windows directory iterator pool. Each token identifies one independent
 ; FindFirstFileW/FindNextFileW search and its current WIN32_FIND_DATAW record.
 WINDOWS_DIR_SLOT_COUNT = 8

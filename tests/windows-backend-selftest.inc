@@ -12,6 +12,8 @@ fc_windows_backend_selftest:
     call os_unlink
     mov rdi, windows_test_renamed_path
     call os_unlink
+    mov rdi, windows_test_entry_path
+    call os_unlink
     mov rdi, windows_test_dir
     call os_rmdir
 

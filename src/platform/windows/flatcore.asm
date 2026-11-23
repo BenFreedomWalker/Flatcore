@@ -860,7 +860,6 @@ import kernel32, \
     GetFileAttributesExW, 'GetFileAttributesExW', \
     FindFirstFileW, 'FindFirstFileW', \
     FindNextFileW, 'FindNextFileW', \
-    FindClose, 'FindClose', \
     SetCurrentDirectoryW, 'SetCurrentDirectoryW', \
     GetCurrentDirectoryA, 'GetCurrentDirectoryA', \
     GetComputerNameA, 'GetComputerNameA', \

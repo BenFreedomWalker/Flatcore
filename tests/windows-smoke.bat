@@ -111,7 +111,7 @@ set "STEP=ls long and all options"
 "%BIN%" ls -la "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
 set "LS_MATCH="
-for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"==".hidden" set "LS_MATCH=1"
+for /f "usebackq tokens=3*" %%A in ("%OUT%") do if "%%A"==".hidden" set "LS_MATCH=1"
 if not defined LS_MATCH goto failed
 set "STEP=ls directory operand option"
 "%BIN%" ls -d "%TEST_DIR%" > "%OUT%"

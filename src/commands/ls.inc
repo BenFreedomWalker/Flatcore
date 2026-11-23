@@ -166,7 +166,7 @@ fc_cmd_ls_join:
     mov al, [fc_cmd_ls_full_path + rbx - 1]
     cmp al, '/'
     je .join_name
-    cmp al, '\\'
+    cmp al, '\'
     je .join_name
 .join_separator:
     mov byte [fc_cmd_ls_full_path + rbx], '/'

@@ -362,3 +362,11 @@ Both existing native source files include and assemble these same common modules
 - Added backend assertions that set distinct access and modification timestamps and verify the exact nanosecond values through `os_stat`.
 - Corrected `os_dir_next` and its test calls to use R8 for the fifth FC64 argument, matching the public ABI contract (RDI, RSI, RDX, RCX, R8, R9).
 - Runtime verification is pending. The Linux backend test now includes timestamp precision checks; Windows sources are unchanged.
+
+
+**Linux timestamp backend verification passed (2026-11-23)**
+
+- The first test run after adding timestamp checks exposed stale test-call arguments: two `os_dir_next` calls still passed the fifth FC64 argument in R9 instead of R8. Corrected all remaining directory test call sites (commit `b5ab68a`).
+- User reran `./build.sh test` under WSL and `build-windows.bat test` under Windows. Both returned exit status 0.
+- Linux now verifies setting distinct access and modification timestamps and reading back the exact nanosecond values through `os_stat`. The Windows test suite also remains green.
+- Linux filesystem/I/O work completed so far—read/write/open/close, stat, directory iteration, basic filesystem operations, getcwd/chdir, errno normalization, and timestamp updates—is runtime-verified. Windows Unicode backend, capability implementation, and symlink/reparse-point semantics remain open Stage 4 work.

@@ -155,7 +155,7 @@ fc_cmd_touch:
     ; Resolve the reference once before modifying any destination.
     test r15d, 16
     jz .files
-    mov rdi, [fc_cmd_touch_reference]
+    mov rdi, qword [fc_cmd_touch_reference]
     mov rsi, fc_cmd_touch_ref_info
     call os_stat
     test eax, eax
@@ -186,7 +186,7 @@ fc_cmd_touch:
     call os_open
     test eax, eax
     jnz .file_error
-    mov rdi, [fc_cmd_touch_handle]
+    mov rdi, qword [fc_cmd_touch_handle]
     call os_close
     test eax, eax
     jnz .file_error
@@ -204,15 +204,15 @@ fc_cmd_touch:
     jz .current_time
     ; Reference mode: preserve unselected target timestamps and copy the
     ; corresponding reference timestamp for each selected field.
-    mov rsi, [fc_cmd_touch_info + 24]
-    mov rdx, [fc_cmd_touch_info + 8]
+    mov rsi, qword [fc_cmd_touch_info + 24]
+    mov rdx, qword [fc_cmd_touch_info + 8]
     test r15d, 1
     jz .reference_keep_atime
-    mov rsi, [fc_cmd_touch_ref_info + 24]
+    mov rsi, qword [fc_cmd_touch_ref_info + 24]
 .reference_keep_atime:
     test r15d, 2
     jz .reference_keep_mtime
-    mov rdx, [fc_cmd_touch_ref_info + 8]
+    mov rdx, qword [fc_cmd_touch_ref_info + 8]
 .reference_keep_mtime:
     jmp .timestamps_ready
 
@@ -221,15 +221,15 @@ fc_cmd_touch:
     call os_get_time
     test eax, eax
     jnz .file_error
-    mov rsi, [fc_cmd_touch_info + 24] ; preserve atime by default
-    mov rdx, [fc_cmd_touch_info + 8]  ; preserve mtime by default
+    mov rsi, qword [fc_cmd_touch_info + 24] ; preserve atime by default
+    mov rdx, qword [fc_cmd_touch_info + 8]  ; preserve mtime by default
     test r15d, 1
     jz .current_keep_atime
-    mov rsi, [fc_cmd_touch_now]
+    mov rsi, qword [fc_cmd_touch_now]
 .current_keep_atime:
     test r15d, 2
     jz .current_keep_mtime
-    mov rdx, [fc_cmd_touch_now]
+    mov rdx, qword [fc_cmd_touch_now]
 .current_keep_mtime:
 .timestamps_ready:
     mov rdi, rbx
@@ -242,7 +242,7 @@ fc_cmd_touch:
     jmp .files
 
 .reference_error:
-    mov rdi, [fc_cmd_touch_reference]
+    mov rdi, qword [fc_cmd_touch_reference]
     call fc_cmd_touch_error
     mov eax, 1
     jmp .return

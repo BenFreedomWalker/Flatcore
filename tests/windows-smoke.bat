@@ -94,11 +94,15 @@ findstr /c:"Type: regular file" "%OUT%" >nul
 if errorlevel 1 goto failed
 findstr /c:"Hidden: no" "%OUT%" >nul
 if errorlevel 1 goto failed
+findstr /c:"Native hidden: no" "%OUT%" >nul
+if errorlevel 1 goto failed
 set "STEP=stat dotfile basename detection"
 > "%TEST_DIR%\.stat-hidden" echo hidden
 "%BIN%" stat "%TEST_DIR%\.stat-hidden" > "%OUT%"
 if errorlevel 1 goto failed
 findstr /c:"Hidden: yes" "%OUT%" >nul
+if errorlevel 1 goto failed
+findstr /c:"Native hidden: no" "%OUT%" >nul
 if errorlevel 1 goto failed
 set "STEP=stat nested dotfile basename detection"
 mkdir "%TEST_DIR%\stat-hidden-dir"
@@ -121,6 +125,16 @@ if errorlevel 1 goto failed
 findstr /c:"Read-only: yes" "%OUT%" >nul
 if errorlevel 1 goto failed
 attrib -R "%TEST_DIR%\readonly.txt"
+set "STEP=stat native Windows hidden attribute"
+> "%TEST_DIR%\native-hidden.txt" echo hidden
+attrib +H "%TEST_DIR%\native-hidden.txt"
+"%BIN%" stat "%TEST_DIR%\native-hidden.txt" > "%OUT%"
+if errorlevel 1 goto failed
+findstr /c:"Hidden: no" "%OUT%" >nul
+if errorlevel 1 goto failed
+findstr /c:"Native hidden: yes" "%OUT%" >nul
+if errorlevel 1 goto failed
+attrib -H "%TEST_DIR%\native-hidden.txt"
 set "STEP=stat directory metadata"
 "%BIN%" stat "%TEST_DIR%" > "%OUT%"
 if errorlevel 1 goto failed
@@ -303,7 +317,7 @@ set "STEP=remove moved file"
 "%BIN%" rm "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
 
-del "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
+del "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
 rmdir "%TEST_DIR%\stat-hidden-dir" >nul 2>nul
 
 set "STEP=rmdir parents and verbose output"
@@ -374,7 +388,8 @@ goto failed
 echo Flatcore Windows smoke test failed at: %STEP%
 if defined TEST_DIR (
     attrib -R "%TEST_DIR%\readonly.txt" >nul 2>nul
-    del "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
+    attrib -H "%TEST_DIR%\native-hidden.txt" >nul 2>nul
+    del "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
     rmdir /s /q "%TEST_DIR%" >nul 2>nul
 )
 del "%OUT%" "%EXPECTED%" >nul 2>nul

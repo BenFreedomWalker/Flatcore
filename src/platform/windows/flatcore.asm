@@ -894,7 +894,6 @@ import kernel32, \
     ReadFile, 'ReadFile', \
     CloseHandle, 'CloseHandle', \
     GetSystemTimeAsFileTime, 'GetSystemTimeAsFileTime', \
-    GetSystemTimeAsFileTimeAPI, 'GetSystemTimeAsFileTime', \
     SetFileTime, 'SetFileTime', \
     FindFirstFileA, 'FindFirstFileA', \
     FindNextFileA, 'FindNextFileA', \

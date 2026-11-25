@@ -769,10 +769,16 @@ os_dir_next:
     mov [r13 + 24], rax
 
     mov eax, [r11]
-    test eax, 2
-    jz .dir_next_not_hidden
+    ; Dot-prefixed names use the shared hidden convention.
+    cmp byte [windows_dir_name_buffer], '.'
+    jne .dir_next_not_dot_hidden
     or dword [r13 + 32], FC_ATTR_HIDDEN
-.dir_next_not_hidden:
+.dir_next_not_dot_hidden:
+    ; Preserve the Win32 hidden attribute independently.
+    test eax, 2
+    jz .dir_next_not_native_hidden
+    or dword [r13 + 32], FC_ATTR_NATIVE_HIDDEN
+.dir_next_not_native_hidden:
     test eax, 1
     jz .dir_next_not_readonly
     or dword [r13 + 32], FC_ATTR_READ_ONLY

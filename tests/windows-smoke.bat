@@ -159,6 +159,10 @@ if errorlevel 1 goto failed
 if not exist "%TEST_DIR%\touch-one.txt" goto failed
 if not exist "%TEST_DIR%\touch-two.txt" goto failed
 set "STEP=touch clustered timestamp flags"
+"%BIN%" touch -a "%TEST_DIR%\touch-created.txt"
+if errorlevel 1 goto failed
+"%BIN%" touch -m "%TEST_DIR%\touch-created.txt"
+if errorlevel 1 goto failed
 "%BIN%" touch -am "%TEST_DIR%\touch-created.txt"
 if errorlevel 1 goto failed
 set "STEP=touch no-create options"
@@ -180,6 +184,10 @@ if errorlevel 1 goto failed
 set "STEP=touch rejects invalid option"
 "%BIN%" touch --not-a-real-option >nul 2>nul
 if not errorlevel 1 goto failed
+set "STEP=touch continues after an operand error"
+"%BIN%" touch "%TEST_DIR%\missing-parent\child.txt" "%TEST_DIR%\touch-after-error.txt" >nul 2>nul
+if not errorlevel 1 goto failed
+if not exist "%TEST_DIR%\touch-after-error.txt" goto failed
 set "STEP=touch requires an operand"
 "%BIN%" touch >nul 2>nul
 if not errorlevel 1 goto failed
@@ -357,7 +365,7 @@ set "STEP=remove moved file"
 "%BIN%" rm "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
 
-del "%TEST_DIR%\touch-created.txt" "%TEST_DIR%\touch-one.txt" "%TEST_DIR%\touch-two.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
+del "%TEST_DIR%\touch-created.txt" "%TEST_DIR%\touch-one.txt" "%TEST_DIR%\touch-two.txt" "%TEST_DIR%\touch-after-error.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
 rmdir "%TEST_DIR%\stat-hidden-dir" >nul 2>nul
 rmdir "%TEST_DIR%\.stat-hidden-dir" >nul 2>nul
 

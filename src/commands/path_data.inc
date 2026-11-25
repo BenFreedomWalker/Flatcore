@@ -171,7 +171,7 @@ fc_cmd_touch_opt_no_create db '--no-create', 0
 fc_cmd_touch_opt_reference db '-r', 0
 fc_cmd_touch_opt_help db '--help', 0
 fc_cmd_touch_opt_version db '--version', 0
-fc_cmd_touch_usage_text db 'Usage: touch [-acm] [--no-create] [--] FILE...', 10
+fc_cmd_touch_usage_text db 'Usage: touch [-acm] [-r FILE] [--no-create] [--] FILE...', 10
 fc_cmd_touch_usage_length = $ - fc_cmd_touch_usage_text
 fc_cmd_touch_bad_option_text db 'flatcore: touch: invalid option', 10
 fc_cmd_touch_bad_option_length = $ - fc_cmd_touch_bad_option_text

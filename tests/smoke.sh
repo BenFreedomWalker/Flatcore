@@ -265,6 +265,10 @@ fi
     "$BIN" touch -a touch-created.txt
     "$BIN" touch -m touch-created.txt
     "$BIN" touch -am touch-created.txt
+    printf 'reference\n' > touch-reference.txt
+    printf 'target\n' > touch-reference-target.txt
+    "$BIN" touch -r touch-reference.txt touch-reference-target.txt
+    [[ "$(stat -c '%X %Y' touch-reference.txt)" == "$(stat -c '%X %Y' touch-reference-target.txt)" ]]
     "$BIN" touch -c missing-touch-file
     [[ ! -e missing-touch-file ]]
     "$BIN" touch --no-create missing-touch-file-long
@@ -314,7 +318,7 @@ fi
     [[ "$("$BIN" echo symlink-dispatch)" == 'symlink-dispatch' ]]
     [[ "$("$BIN_LINKS/echo" symlink-dispatch)" == 'symlink-dispatch' ]]
 
-    "$BIN" rm sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt stat-file.txt .stat-hidden touch-created.txt touch-one.txt touch-two.txt ./-touch-leading
+    "$BIN" rm sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt stat-file.txt .stat-hidden touch-created.txt touch-one.txt touch-two.txt touch-reference.txt touch-reference-target.txt ./-touch-leading
     "$BIN" rm stat-hidden-dir/.nested-hidden stat-hidden-dir/visible
     "$BIN" rmdir stat-hidden-dir
     "$BIN" rmdir .stat-hidden-dir

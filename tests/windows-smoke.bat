@@ -86,7 +86,7 @@ if not exist "%TEST_DIR%\sample.txt" goto failed
 type nul > "%TEST_DIR%\empty.txt"
 
 set "STEP=stat regular file metadata"
-"%BIN%" stat "%TEST_DIR%\\sample.txt" > "%OUT%"
+"%BIN%" stat "%TEST_DIR%\sample.txt" > "%OUT%"
 if errorlevel 1 goto failed
 findstr /c:"Size: 7 bytes" "%OUT%" >nul
 if errorlevel 1 goto failed
@@ -100,7 +100,7 @@ if errorlevel 1 goto failed
 findstr /c:"Type: directory" "%OUT%" >nul
 if errorlevel 1 goto failed
 set "STEP=stat rejects missing paths"
-"%BIN%" stat "%TEST_DIR%\\missing-stat-file" >nul 2>nul
+"%BIN%" stat "%TEST_DIR%\missing-stat-file" >nul 2>nul
 if not errorlevel 1 goto failed
 
 set "STEP=cat stdin redirection"

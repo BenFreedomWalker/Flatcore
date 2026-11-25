@@ -280,7 +280,7 @@ fi
         exit 1
     fi
     "$BIN" mkdir touch-error-parent
-    if "$BIN" touch touch-error-parent/missing-parent.txt touch-after-error.txt >/dev/null 2>&1; then
+    if "$BIN" touch touch-error-parent/missing/child.txt touch-after-error.txt >/dev/null 2>&1; then
         printf "touch succeeded despite an operand error\\n" >&2
         exit 1
     fi

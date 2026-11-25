@@ -871,7 +871,7 @@ os_dir_close:
 os_get_time:
     sub rsp, 40
     lea rcx, [rsp + 32]
-    call [GetSystemTimeAsFileTimeAPI]
+    call [GetSystemTimeAsFileTime]
     mov rax, [rsp + 32]
     mov rdx, 116444736000000000
     sub rax, rdx

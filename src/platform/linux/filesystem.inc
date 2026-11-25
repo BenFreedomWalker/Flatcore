@@ -301,6 +301,26 @@ os_set_times:
     pop r12
     ret
 
+; os_get_time(out_unix_ns)
+; Read CLOCK_REALTIME using clock_gettime and return Unix-epoch nanoseconds.
+os_get_time:
+    mov r8, rdi
+    xor edi, edi               ; CLOCK_REALTIME
+    lea rsi, [linux_time_buffer]
+    mov eax, 228                ; SYS_clock_gettime
+    syscall
+    test rax, rax
+    js .get_time_error
+    mov rax, [linux_time_buffer]
+    imul rax, 1000000000
+    add rax, [linux_time_buffer + 8]
+    mov [r8], rax
+    xor eax, eax
+    ret
+.get_time_error:
+    neg eax
+    jmp fc_linux_set_error
+
 ; os_get_capabilities()
 ; Linux exposes no-follow symlink metadata, complete POSIX st_mode, and
 ; nanosecond file timestamp updates through the operations in this backend.

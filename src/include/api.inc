@@ -106,6 +106,7 @@
 ; os_rename(old_path_utf8, new_path_utf8)
 ; os_getcwd(buffer, capacity, out_length)
 ; os_chdir(path_utf8)
+; os_get_time(out_unix_ns) returns the current UTC realtime clock in nanoseconds.
 ; os_set_times(path_utf8, accessed_ns, modified_ns)
 ; os_get_capabilities() returns FC_CAP_* flags. FC_CAP_SYMLINKS means
 ; os_stat and directory iteration can identify symbolic links without following them;

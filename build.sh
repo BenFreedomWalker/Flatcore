@@ -56,7 +56,7 @@ mkdir -p "$BIN_DIR"
 commands=(
     help echo true false pwd cat ls
     mkdir rmdir rm touch cp mv clear uname
-    basename dirname head wc ln readlink
+    basename dirname head wc ln readlink stat
     chmod kill sync id hostname uptime sleep
 )
 

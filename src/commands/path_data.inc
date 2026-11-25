@@ -11,7 +11,8 @@ fc_basic_registry:
     dq fc_cmd_mkdir_name, fc_cmd_mkdir
     dq fc_cmd_rmdir_name, fc_cmd_rmdir
     dq fc_cmd_rm_name, fc_cmd_rm
-fc_basic_registry_count = 11
+    dq fc_cmd_stat_name, fc_cmd_stat
+fc_basic_registry_count = 12
 
 fc_cmd_true_name     db 'true', 0
 fc_cmd_false_name    db 'false', 0
@@ -24,6 +25,7 @@ fc_cmd_ls_name       db 'ls', 0
 fc_cmd_mkdir_name    db 'mkdir', 0
 fc_cmd_rmdir_name    db 'rmdir', 0
 fc_cmd_rm_name       db 'rm', 0
+fc_cmd_stat_name     db 'stat', 0
 fc_cmd_cat_stdin_name db '-', 0
 fc_cmd_cat_error_text db 'flatcore: cat: input/output error', 10
 fc_cmd_cat_error_length = $ - fc_cmd_cat_error_text
@@ -139,3 +141,27 @@ fc_cmd_rm_help_text db 'Usage: rm [OPTION]... FILE...', 10
 fc_cmd_rm_help_length = $ - fc_cmd_rm_help_text
 fc_cmd_rm_version_text db 'Flatcore rm 0.1', 10
 fc_cmd_rm_version_length = $ - fc_cmd_rm_version_text
+
+; Shared stat command output and metadata storage.
+fc_cmd_stat_file_prefix db '  File: ', 0
+fc_cmd_stat_size_prefix db '  Size: ', 0
+fc_cmd_stat_bytes_newline db ' bytes', 10, 0
+fc_cmd_stat_type_prefix db '  Type: ', 0
+fc_cmd_stat_hidden_prefix db '  Hidden: ', 0
+fc_cmd_stat_readonly_prefix db '  Read-only: ', 0
+fc_cmd_stat_yes_newline db 'yes', 10, 0
+fc_cmd_stat_no_newline db 'no', 10, 0
+fc_cmd_stat_newline db 10, 0
+fc_cmd_stat_type_regular db 'regular file', 0
+fc_cmd_stat_type_directory db 'directory', 0
+fc_cmd_stat_type_symlink db 'symbolic link', 0
+fc_cmd_stat_type_fifo db 'FIFO', 0
+fc_cmd_stat_type_socket db 'socket', 0
+fc_cmd_stat_type_device db 'device', 0
+fc_cmd_stat_type_unknown db 'unknown', 0
+fc_cmd_stat_usage_text db 'Usage: stat FILE', 10, 0
+fc_cmd_stat_error_prefix db 'flatcore: stat: cannot stat ', 39, 0
+fc_cmd_stat_error_suffix db 39, ': operation failed', 10, 0
+align 8
+fc_cmd_stat_info rb 64
+fc_cmd_stat_number rb 32

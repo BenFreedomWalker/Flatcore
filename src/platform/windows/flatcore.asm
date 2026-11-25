@@ -811,6 +811,7 @@ include 'src/commands/ls.inc'
 include 'src/commands/mkdir.inc'
 include 'src/commands/rmdir.inc'
 include 'src/commands/rm.inc'
+include 'src/commands/stat.inc'
 include 'src/common/errors.inc'
 include 'src/platform/windows/io.inc'
 include 'src/platform/windows/filesystem.inc'
@@ -839,7 +840,7 @@ touch_name db 'touch', 0
 cat_name db 'cat', 0
 help_text db 'Flatcore - native Windows x86-64 multicall userspace', 13, 10
           db 'Usage: flatcore.exe COMMAND [ARGUMENTS...]', 13, 10
-          db 'Windows commands: help, echo, true, false, pwd, hostname, ls, cp, mv, basename, dirname, head, mkdir, rmdir, rm, touch, cat', 13, 10, 0
+          db 'Windows commands: help, echo, true, false, pwd, hostname, ls, cp, mv, basename, dirname, head, mkdir, rmdir, rm, touch, cat, stat', 13, 10, 0
 error_text db 'flatcore: Windows API operation failed', 13, 10, 0
 usage_error_text db 'flatcore: command requires a path argument', 13, 10, 0
 unknown_text db 'flatcore: unknown command in this Windows build', 13, 10, 0

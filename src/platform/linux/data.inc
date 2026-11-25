@@ -43,6 +43,7 @@ fc_cmd_touch_now dq 0
 
 align 16
 linux_stat_buffer rb 144
+linux_time_buffer rb 16
 
 align 16
 ; Eight independent directory iterator contexts: state, fd, position, count, buffer.

@@ -1,0 +1,247 @@
+; Shared FC64 touch command.
+; touch [-a] [-m] [-c] [--no-create] [--] FILE...
+; -a updates access time, -m updates modification time. With neither (or
+; both), both timestamps are updated. New files are created unless -c is used.
+
+fc_cmd_touch_write:
+    mov rcx, os_write
+    jmp fc_write_all
+
+fc_cmd_touch_write_cstr:
+    push rbx
+    push r12
+    sub rsp, 8
+    mov r12, rdi
+    mov rbx, rsi
+    mov rdi, rbx
+    call fc_strlen
+    mov rdx, rax
+    mov rdi, r12
+    mov rsi, rbx
+    call fc_cmd_touch_write
+    add rsp, 8
+    pop r12
+    pop rbx
+    ret
+
+; Print one path-specific failure. RDI=path.
+fc_cmd_touch_error:
+    push rbx
+    push r12
+    sub rsp, 8
+    mov r12, rdi
+    mov rdi, [os_stderr]
+    mov rsi, fc_cmd_touch_error_prefix
+    mov edx, fc_cmd_touch_error_prefix_length
+    call fc_cmd_touch_write
+    mov rdi, r12
+    call fc_strlen
+    mov rbx, rax
+    mov rdi, [os_stderr]
+    mov rsi, r12
+    mov rdx, rbx
+    call fc_cmd_touch_write
+    mov rdi, [os_stderr]
+    mov rsi, fc_cmd_touch_error_suffix
+    mov edx, fc_cmd_touch_error_suffix_length
+    call fc_cmd_touch_write
+    add rsp, 8
+    pop r12
+    pop rbx
+    ret
+
+fc_cmd_touch:
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, 1
+    xor r15d, r15d             ; bit 0: atime, bit 1: mtime, bit 2: no-create
+
+.parse:
+    cmp r14, r12
+    jae .parsed
+    mov rsi, [r13 + r14 * 8]
+    test byte [rsi], '-'
+    jz .parsed
+    cmp byte [rsi + 1], 0
+    je .parsed
+    cmp byte [rsi + 1], '-'
+    jne .short_option
+    cmp byte [rsi + 2], 0
+    je .end_options
+    mov rdi, fc_cmd_touch_opt_no_create
+    call fc_streq
+    test eax, eax
+    jnz .set_no_create
+    mov rsi, [r13 + r14 * 8]
+    mov rdi, fc_cmd_touch_opt_help
+    call fc_streq
+    test eax, eax
+    jnz .help
+    mov rsi, [r13 + r14 * 8]
+    mov rdi, fc_cmd_touch_opt_version
+    call fc_streq
+    test eax, eax
+    jnz .version
+    jmp .bad_option
+
+.short_option:
+    ; Accept clustered -a/-m/-c options.
+    mov rbx, rsi
+    inc rbx
+.short_loop:
+    mov al, [rbx]
+    test al, al
+    jz .short_done
+    cmp al, 'a'
+    je .short_atime
+    cmp al, 'm'
+    je .short_mtime
+    cmp al, 'c'
+    je .short_no_create
+    jmp .bad_option
+.short_atime:
+    or r15d, 1
+    jmp .short_next
+.short_mtime:
+    or r15d, 2
+    jmp .short_next
+.short_no_create:
+    or r15d, 4
+.short_next:
+    inc rbx
+    jmp .short_loop
+.short_done:
+    inc r14
+    jmp .parse
+
+.set_no_create:
+    or r15d, 4
+    inc r14
+    jmp .parse
+.end_options:
+    inc r14
+    jmp .parsed
+
+.parsed:
+    cmp r14, r12
+    jae .usage
+    ; No explicit timestamp selector means update both.
+    test r15d, 3
+    jnz .files
+    or r15d, 3
+
+.files:
+    cmp r14, r12
+    jae .success
+    mov rbx, [r13 + r14 * 8]
+
+    ; Existing entries are not opened: this permits timestamp updates on
+    ; read-only files when the OS grants attribute/metadata access.
+    mov rdi, rbx
+    mov rsi, fc_cmd_touch_info
+    call os_stat
+    test eax, eax
+    jz .have_info
+    cmp dword [os_error_code], FC_ERR_NOT_FOUND
+    jne .file_error
+    test r15d, 4
+    jnz .next_file
+
+    ; Create a missing file without truncating anything (CREATE + WRITE).
+    mov rdi, rbx
+    mov esi, FC_OPEN_WRITE or FC_OPEN_CREATE
+    mov edx, 0644o
+    mov rcx, fc_cmd_touch_handle
+    call os_open
+    test eax, eax
+    jnz .file_error
+    mov rdi, [fc_cmd_touch_handle]
+    call os_close
+    test eax, eax
+    jnz .file_error
+
+    ; Fetch the timestamps established by file creation so -a/-m can
+    ; preserve the unselected timestamp.
+    mov rdi, rbx
+    mov rsi, fc_cmd_touch_info
+    call os_stat
+    test eax, eax
+    jnz .file_error
+
+.have_info:
+    mov rdi, fc_cmd_touch_now
+    call os_get_time
+    test eax, eax
+    jnz .file_error
+
+    mov rsi, [fc_cmd_touch_info + 24] ; preserve atime by default
+    mov rdx, [fc_cmd_touch_info + 8]  ; preserve mtime by default
+    test r15d, 1
+    jz .keep_atime
+    mov rsi, [fc_cmd_touch_now]
+.keep_atime:
+    test r15d, 2
+    jz .keep_mtime
+    mov rdx, [fc_cmd_touch_now]
+.keep_mtime:
+    mov rdi, rbx
+    call os_set_times
+    test eax, eax
+    jnz .file_error
+
+.next_file:
+    inc r14
+    jmp .files
+
+.file_error:
+    mov rdi, rbx
+    call fc_cmd_touch_error
+    mov eax, 1
+    jmp .return
+
+.help:
+    mov rdi, [os_stdout]
+    mov rsi, fc_cmd_touch_help_text
+    mov edx, fc_cmd_touch_help_length
+    call fc_cmd_touch_write
+    xor eax, eax
+    jmp .return
+
+.version:
+    mov rdi, [os_stdout]
+    mov rsi, fc_cmd_touch_version_text
+    mov edx, fc_cmd_touch_version_length
+    call fc_cmd_touch_write
+    xor eax, eax
+    jmp .return
+
+.bad_option:
+    mov rdi, [os_stderr]
+    mov rsi, fc_cmd_touch_bad_option_text
+    mov edx, fc_cmd_touch_bad_option_length
+    call fc_cmd_touch_write
+    mov eax, 2
+    jmp .return
+
+.usage:
+    mov rdi, [os_stderr]
+    mov rsi, fc_cmd_touch_usage_text
+    mov edx, fc_cmd_touch_usage_length
+    call fc_cmd_touch_write
+    mov eax, 2
+.return:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    ret
+
+.success:
+    xor eax, eax
+    jmp .return

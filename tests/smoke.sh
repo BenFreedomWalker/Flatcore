@@ -238,6 +238,9 @@ fi
     "$BIN" stat stat-hidden-dir/visible > stat-nested-visible-output.txt
     grep -q '^  Hidden: no$' stat-nested-visible-output.txt
     grep -q '^  Native hidden: no$' stat-nested-visible-output.txt
+    "$BIN" mkdir .stat-hidden-dir
+    "$BIN" stat .stat-hidden-dir/ > stat-hidden-directory-output.txt
+    grep -q '^  Hidden: yes$' stat-hidden-directory-output.txt
 
     # Read-only follows the native permission representation.
     chmod 444 stat-file.txt
@@ -279,6 +282,7 @@ fi
     "$BIN" rm sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt stat-file.txt .stat-hidden
     "$BIN" rm stat-hidden-dir/.nested-hidden stat-hidden-dir/visible
     "$BIN" rmdir stat-hidden-dir
+    "$BIN" rmdir .stat-hidden-dir
     if "$BIN" rm missing-file; then
         printf 'rm succeeded for a missing file\n' >&2
         exit 1

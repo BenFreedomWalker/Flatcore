@@ -12,7 +12,8 @@ fc_basic_registry:
     dq fc_cmd_rmdir_name, fc_cmd_rmdir
     dq fc_cmd_rm_name, fc_cmd_rm
     dq fc_cmd_stat_name, fc_cmd_stat
-fc_basic_registry_count = 12
+    dq fc_cmd_touch_name, fc_cmd_touch
+fc_basic_registry_count = 13
 
 fc_cmd_true_name     db 'true', 0
 fc_cmd_false_name    db 'false', 0
@@ -26,6 +27,7 @@ fc_cmd_mkdir_name    db 'mkdir', 0
 fc_cmd_rmdir_name    db 'rmdir', 0
 fc_cmd_rm_name       db 'rm', 0
 fc_cmd_stat_name     db 'stat', 0
+fc_cmd_touch_name    db 'touch', 0
 fc_cmd_cat_stdin_name db '-', 0
 fc_cmd_cat_error_text db 'flatcore: cat: input/output error', 10
 fc_cmd_cat_error_length = $ - fc_cmd_cat_error_text
@@ -163,3 +165,24 @@ fc_cmd_stat_type_unknown db 'unknown', 0
 fc_cmd_stat_usage_text db 'Usage: stat FILE', 10, 0
 fc_cmd_stat_error_prefix db 'flatcore: stat: cannot stat ', 39, 0
 fc_cmd_stat_error_suffix db 39, ': operation failed', 10, 0
+
+; Shared touch command options and diagnostics.
+fc_cmd_touch_opt_no_create db '--no-create', 0
+fc_cmd_touch_opt_help db '--help', 0
+fc_cmd_touch_opt_version db '--version', 0
+fc_cmd_touch_usage_text db 'Usage: touch [-acm] [--no-create] [--] FILE...', 10
+fc_cmd_touch_usage_length = $ - fc_cmd_touch_usage_text
+fc_cmd_touch_bad_option_text db 'flatcore: touch: invalid option', 10
+fc_cmd_touch_bad_option_length = $ - fc_cmd_touch_bad_option_text
+fc_cmd_touch_error_prefix db 'flatcore: touch: cannot touch ', 39
+fc_cmd_touch_error_prefix_length = $ - fc_cmd_touch_error_prefix
+fc_cmd_touch_error_suffix db 39, ': operation failed', 10
+fc_cmd_touch_error_suffix_length = $ - fc_cmd_touch_error_suffix
+fc_cmd_touch_help_text db 'Usage: touch [OPTION]... FILE...', 10
+                      db '  -a             change only the access time', 10
+                      db '  -m             change only the modification time', 10
+                      db '  -c, --no-create do not create missing files', 10
+                      db '  --             end option parsing', 10
+fc_cmd_touch_help_length = $ - fc_cmd_touch_help_text
+fc_cmd_touch_version_text db 'Flatcore touch 0.1', 10
+fc_cmd_touch_version_length = $ - fc_cmd_touch_version_text

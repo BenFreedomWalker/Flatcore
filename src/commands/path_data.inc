@@ -148,6 +148,7 @@ fc_cmd_stat_size_prefix db '  Size: ', 0
 fc_cmd_stat_bytes_newline db ' bytes', 10, 0
 fc_cmd_stat_type_prefix db '  Type: ', 0
 fc_cmd_stat_hidden_prefix db '  Hidden: ', 0
+fc_cmd_stat_native_hidden_prefix db '  Native hidden: ', 0
 fc_cmd_stat_readonly_prefix db '  Read-only: ', 0
 fc_cmd_stat_yes_newline db 'yes', 10, 0
 fc_cmd_stat_no_newline db 'no', 10, 0

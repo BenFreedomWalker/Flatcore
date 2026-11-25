@@ -143,6 +143,9 @@ fc_cmd_rm_version_text db 'Flatcore rm 0.1', 10
 fc_cmd_rm_version_length = $ - fc_cmd_rm_version_text
 
 ; Shared stat command output and metadata storage.
+align 8
+fc_cmd_stat_info rb 64
+fc_cmd_stat_number rb 32
 fc_cmd_stat_file_prefix db '  File: ', 0
 fc_cmd_stat_size_prefix db '  Size: ', 0
 fc_cmd_stat_bytes_newline db ' bytes', 10, 0

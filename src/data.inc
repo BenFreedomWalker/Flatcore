@@ -11,8 +11,6 @@ num_buffer   rb 32
 sysinfo_buffer rb 112
 sleep_request rq 2
 sleep_remaining rq 2
-fc_cmd_stat_info rb 64
-fc_cmd_stat_number rb 32
 
 binary_name db 'flatcore', 0
 

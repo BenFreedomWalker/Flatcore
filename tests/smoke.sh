@@ -278,7 +278,7 @@ wait "$child_pid" 2>/dev/null || true
 printf 'Flatcore Linux smoke tests passed.\n'
  stat-hidden-output.txt
 
-    # Hidden status is based on the basename, not an earlier path component.
+    # Hidden status follows the basename, not an earlier path component.
     "$BIN" mkdir stat-hidden-dir
     printf 'nested hidden\n' > stat-hidden-dir/.nested-hidden
     printf 'nested visible\n' > stat-hidden-dir/visible
@@ -333,6 +333,54 @@ printf 'Flatcore Linux smoke tests passed.\n'
  stat-nested-hidden-output.txt
     "$BIN" stat stat-hidden-dir/visible > stat-nested-visible-output.txt
     grep -q '^  Hidden: no
+        printf 'stat succeeded for a missing path\n' >&2
+        exit 1
+    fi
+    if "$BIN" stat >/dev/null 2>&1; then
+        printf 'stat accepted a missing operand\n' >&2
+        exit 1
+    fi
+
+    "$BIN" touch mode.txt
+    "$BIN" chmod 600 mode.txt
+    [[ "$(stat -c '%a' mode.txt)" == '600' ]]
+    "$BIN" sync
+    id_output="$("$BIN" id)"
+    [[ "$id_output" == uid=* ]]
+    [[ "$id_output" == *' gid='* ]]
+    [[ -n "$("$BIN" hostname)" ]]
+    [[ "$("$BIN" uptime)" == *' seconds' ]]
+    "$BIN" sleep 0
+
+    printf 'a b\nc\n' > wc.txt
+    [[ "$("$BIN" wc wc.txt)" == '2 3 6' ]]
+
+    for n in {1..12}; do printf 'line%s\n' "$n"; done > all-lines.txt
+    for n in {1..10}; do printf 'line%s\n' "$n"; done > expected-head.txt
+    "$BIN" head all-lines.txt > actual-head.txt
+    cmp expected-head.txt actual-head.txt
+
+    [[ "$("$BIN" echo symlink-dispatch)" == 'symlink-dispatch' ]]
+    [[ "$("$BIN_LINKS/echo" symlink-dispatch)" == 'symlink-dispatch' ]]
+
+    "$BIN" rm sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt stat-file.txt .stat-hidden
+    if "$BIN" rm missing-file; then
+        printf 'rm succeeded for a missing file\n' >&2
+        exit 1
+    fi
+    if "$BIN" cat missing-file >/dev/null 2>&1; then
+        printf 'cat succeeded for a missing file\n' >&2
+        exit 1
+    fi
+)
+
+sleep 30 &
+child_pid=$!
+"$BIN" kill "$child_pid"
+wait "$child_pid" 2>/dev/null || true
+printf 'Flatcore Linux smoke tests passed.\n'
+ stat-nested-visible-output.txt
+    grep -q '^  Native hidden: no
         printf 'stat succeeded for a missing path\n' >&2
         exit 1
     fi

@@ -90,6 +90,13 @@ fc_cmd_touch:
     jmp .bad_option
 
 .short_option:
+    ; -r FILE copies both reference timestamps (or the selected -a/-m one).
+    mov rdi, rsi
+    mov rsi, fc_cmd_touch_opt_reference
+    call fc_streq
+    test eax, eax
+    jnz .reference_option
+    mov rsi, [r13 + r14 * 8]
     ; Accept clustered -a/-m/-c options.
     mov rbx, rsi
     inc rbx
@@ -119,6 +126,16 @@ fc_cmd_touch:
     inc r14
     jmp .parse
 
+.reference_option:
+    lea rax, [r14 + 1]
+    cmp rax, r12
+    jae .usage
+    mov rax, [r13 + rax * 8]
+    mov [fc_cmd_touch_reference], rax
+    or r15d, 16
+    add r14, 2
+    jmp .parse
+
 .set_no_create:
     or r15d, 4
     inc r14
@@ -134,6 +151,15 @@ fc_cmd_touch:
     test r15d, 3
     jnz .files
     or r15d, 3
+
+    ; Resolve the reference once before modifying any destination.
+    test r15d, 16
+    jz .files
+    mov rdi, [fc_cmd_touch_reference]
+    mov rsi, fc_cmd_touch_ref_info
+    call os_stat
+    test eax, eax
+    jnz .reference_error
 
 .files:
     cmp r14, r12
@@ -174,21 +200,38 @@ fc_cmd_touch:
     jnz .file_error
 
 .have_info:
+    test r15d, 16
+    jz .current_time
+    ; Reference mode: preserve unselected target timestamps and copy the
+    ; corresponding reference timestamp for each selected field.
+    mov rsi, [fc_cmd_touch_info + 24]
+    mov rdx, [fc_cmd_touch_info + 8]
+    test r15d, 1
+    jz .reference_keep_atime
+    mov rsi, [fc_cmd_touch_ref_info + 24]
+.reference_keep_atime:
+    test r15d, 2
+    jz .reference_keep_mtime
+    mov rdx, [fc_cmd_touch_ref_info + 8]
+.reference_keep_mtime:
+    jmp .timestamps_ready
+
+.current_time:
     mov rdi, fc_cmd_touch_now
     call os_get_time
     test eax, eax
     jnz .file_error
-
     mov rsi, [fc_cmd_touch_info + 24] ; preserve atime by default
     mov rdx, [fc_cmd_touch_info + 8]  ; preserve mtime by default
     test r15d, 1
-    jz .keep_atime
+    jz .current_keep_atime
     mov rsi, [fc_cmd_touch_now]
-.keep_atime:
+.current_keep_atime:
     test r15d, 2
-    jz .keep_mtime
+    jz .current_keep_mtime
     mov rdx, [fc_cmd_touch_now]
-.keep_mtime:
+.current_keep_mtime:
+.timestamps_ready:
     mov rdi, rbx
     call os_set_times
     test eax, eax
@@ -197,6 +240,12 @@ fc_cmd_touch:
 .next_file:
     inc r14
     jmp .files
+
+.reference_error:
+    mov rdi, [fc_cmd_touch_reference]
+    call fc_cmd_touch_error
+    mov eax, 1
+    jmp .return
 
 .file_error:
     mov rdi, rbx

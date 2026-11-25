@@ -201,8 +201,9 @@ fc_cmd_touch:
 .file_error:
     mov rdi, rbx
     call fc_cmd_touch_error
-    mov eax, 1
-    jmp .return
+    or r15d, 8
+    inc r14
+    jmp .files
 
 .help:
     mov rdi, [os_stdout]
@@ -243,5 +244,10 @@ fc_cmd_touch:
     ret
 
 .success:
+    test r15d, 8
+    jnz .failed_status
     xor eax, eax
+    jmp .return
+.failed_status:
+    mov eax, 1
     jmp .return

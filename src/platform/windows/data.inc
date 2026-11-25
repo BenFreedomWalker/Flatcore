@@ -44,6 +44,8 @@ fc_cmd_stat_info rb 64
 fc_cmd_stat_number rb 32
 align 8
 fc_cmd_touch_info rb 64
+fc_cmd_touch_ref_info rb 64
+fc_cmd_touch_reference dq 0
 fc_cmd_touch_handle dq 0
 fc_cmd_touch_now dq 0
 

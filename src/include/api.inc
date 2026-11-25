@@ -158,10 +158,13 @@ FC_TYPE_SOCKET = 5
 FC_TYPE_DEVICE = 6
 
 ; Attribute bits.
-FC_ATTR_HIDDEN    = 0001b
-FC_ATTR_READ_ONLY = 0010b
-FC_ATTR_SYSTEM    = 0100b
-FC_ATTR_ARCHIVE   = 1000b
+; FC_ATTR_HIDDEN is the shared leading-dot basename convention. Native
+; platform-specific hidden attributes may be retained in separate bits.
+FC_ATTR_HIDDEN        = 0001b
+FC_ATTR_READ_ONLY     = 0010b
+FC_ATTR_SYSTEM        = 0100b
+FC_ATTR_ARCHIVE       = 1000b
+FC_ATTR_NATIVE_HIDDEN = 10000b
 
 ; Optional backend capabilities.
 FC_CAP_SYMLINKS       = 0001b

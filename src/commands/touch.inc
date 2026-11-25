@@ -65,8 +65,8 @@ fc_cmd_touch:
     cmp r14, r12
     jae .parsed
     mov rsi, [r13 + r14 * 8]
-    test byte [rsi], '-'
-    jz .parsed
+    cmp byte [rsi], '-'
+    jne .parsed
     cmp byte [rsi + 1], 0
     je .parsed
     cmp byte [rsi + 1], '-'

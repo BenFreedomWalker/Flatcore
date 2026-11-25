@@ -209,8 +209,24 @@ os_stat:
 .stat_device:
     mov dword [r8 + 36], FC_TYPE_DEVICE
 .stat_attributes:
-    ; Hidden is a shared convention based on a leading dot in the basename.
-    cmp byte [rsi], '.'
+    ; Hidden is a shared convention: the final path component begins with '.'.
+    ; A trailing slash does not create an empty basename.
+    mov rdx, rsi
+    mov rax, rsi
+.stat_hidden_scan:
+    mov cl, [rdx]
+    test cl, cl
+    jz .stat_hidden_check
+    cmp cl, '/'
+    jne .stat_hidden_next
+    cmp byte [rdx + 1], 0
+    je .stat_hidden_next
+    lea rax, [rdx + 1]
+.stat_hidden_next:
+    inc rdx
+    jmp .stat_hidden_scan
+.stat_hidden_check:
+    cmp byte [rax], '.'
     jne .stat_readonly
     or dword [r8 + 32], FC_ATTR_HIDDEN
 .stat_readonly:

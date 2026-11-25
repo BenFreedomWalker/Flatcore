@@ -168,6 +168,7 @@ fc_cmd_stat_error_suffix db 39, ': operation failed', 10, 0
 
 ; Shared touch command options and diagnostics.
 fc_cmd_touch_opt_no_create db '--no-create', 0
+fc_cmd_touch_opt_reference db '-r', 0
 fc_cmd_touch_opt_help db '--help', 0
 fc_cmd_touch_opt_version db '--version', 0
 fc_cmd_touch_usage_text db 'Usage: touch [-acm] [--no-create] [--] FILE...', 10
@@ -179,6 +180,7 @@ fc_cmd_touch_error_prefix_length = $ - fc_cmd_touch_error_prefix
 fc_cmd_touch_error_suffix db 39, ': operation failed', 10
 fc_cmd_touch_error_suffix_length = $ - fc_cmd_touch_error_suffix
 fc_cmd_touch_help_text db 'Usage: touch [OPTION]... FILE...', 10
+                      db '  -r FILE        use FILE timestamps instead of current time', 10
                       db '  -a             change only the access time', 10
                       db '  -m             change only the modification time', 10
                       db '  -c, --no-create do not create missing files', 10

@@ -87,6 +87,18 @@ fc_cmd_stat:
     mov rdi, [os_stdout]
     call fc_cmd_stat_write_cstr
     mov rdi, [os_stdout]
+    mov rsi, fc_cmd_stat_native_hidden_prefix
+    call fc_cmd_stat_write_cstr
+    test dword [fc_cmd_stat_info + 32], FC_ATTR_NATIVE_HIDDEN
+    jz .stat_not_native_hidden
+    mov rsi, fc_cmd_stat_yes_newline
+    jmp .stat_native_hidden_write
+.stat_not_native_hidden:
+    mov rsi, fc_cmd_stat_no_newline
+.stat_native_hidden_write:
+    mov rdi, [os_stdout]
+    call fc_cmd_stat_write_cstr
+    mov rdi, [os_stdout]
     mov rsi, fc_cmd_stat_readonly_prefix
     call fc_cmd_stat_write_cstr
     test dword [fc_cmd_stat_info + 32], FC_ATTR_READ_ONLY

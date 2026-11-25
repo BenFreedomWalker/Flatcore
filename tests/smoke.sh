@@ -257,6 +257,31 @@ fi
         exit 1
     fi
 
+    # touch: create, multiple operands, clustered flags, no-create, and options.
+    "$BIN" touch touch-created.txt
+    [[ -f touch-created.txt ]]
+    "$BIN" touch touch-one.txt touch-two.txt
+    [[ -f touch-one.txt && -f touch-two.txt ]]
+    "$BIN" touch -am touch-created.txt
+    "$BIN" touch -c missing-touch-file
+    [[ ! -e missing-touch-file ]]
+    "$BIN" touch --no-create missing-touch-file-long
+    [[ ! -e missing-touch-file-long ]]
+    printf "leading\\n" > ./-touch-leading
+    "$BIN" touch -- ./-touch-leading
+    "$BIN" touch --help > touch-help.txt
+    grep -q -- "--no-create" touch-help.txt
+    "$BIN" touch --version > touch-version.txt
+    grep -q "Flatcore touch" touch-version.txt
+    if "$BIN" touch --not-a-real-option >/dev/null 2>&1; then
+        printf "touch accepted an unknown option\\n" >&2
+        exit 1
+    fi
+    if "$BIN" touch >/dev/null 2>&1; then
+        printf "touch accepted a missing operand\\n" >&2
+        exit 1
+    fi
+
     "$BIN" touch mode.txt
     "$BIN" chmod 600 mode.txt
     [[ "$(stat -c '%a' mode.txt)" == '600' ]]
@@ -279,7 +304,7 @@ fi
     [[ "$("$BIN" echo symlink-dispatch)" == 'symlink-dispatch' ]]
     [[ "$("$BIN_LINKS/echo" symlink-dispatch)" == 'symlink-dispatch' ]]
 
-    "$BIN" rm sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt stat-file.txt .stat-hidden
+    "$BIN" rm sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt stat-file.txt .stat-hidden touch-created.txt touch-one.txt touch-two.txt ./-touch-leading
     "$BIN" rm stat-hidden-dir/.nested-hidden stat-hidden-dir/visible
     "$BIN" rmdir stat-hidden-dir
     "$BIN" rmdir .stat-hidden-dir

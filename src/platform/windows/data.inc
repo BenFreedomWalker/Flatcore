@@ -39,6 +39,9 @@ windows_path_buffer2 rb 65536
 align 8
 windows_file_data rb 40
 windows_stat_find_data rb 592
+align 8
+fc_cmd_stat_info rb 64
+fc_cmd_stat_number rb 32
 
 ; Independent FindFirstFileW iterators (active, pending, HANDLE, FIND_DATA).
 align 16

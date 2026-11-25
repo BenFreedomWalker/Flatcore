@@ -150,6 +150,40 @@ set "STEP=stat rejects missing paths"
 "%BIN%" stat "%TEST_DIR%\missing-stat-file" >nul 2>nul
 if not errorlevel 1 goto failed
 
+set "STEP=touch creates files and accepts multiple operands"
+"%BIN%" touch "%TEST_DIR%\\touch-created.txt"
+if errorlevel 1 goto failed
+if not exist "%TEST_DIR%\\touch-created.txt" goto failed
+"%BIN%" touch "%TEST_DIR%\\touch-one.txt" "%TEST_DIR%\\touch-two.txt"
+if errorlevel 1 goto failed
+if not exist "%TEST_DIR%\\touch-one.txt" goto failed
+if not exist "%TEST_DIR%\\touch-two.txt" goto failed
+set "STEP=touch clustered timestamp flags"
+"%BIN%" touch -am "%TEST_DIR%\\touch-created.txt"
+if errorlevel 1 goto failed
+set "STEP=touch no-create options"
+"%BIN%" touch -c "%TEST_DIR%\\missing-touch.txt"
+if errorlevel 1 goto failed
+if exist "%TEST_DIR%\\missing-touch.txt" goto failed
+"%BIN%" touch --no-create "%TEST_DIR%\\missing-touch-long.txt"
+if errorlevel 1 goto failed
+if exist "%TEST_DIR%\\missing-touch-long.txt" goto failed
+set "STEP=touch help and version"
+"%BIN%" touch --help > "%OUT%"
+if errorlevel 1 goto failed
+findstr /c:"--no-create" "%OUT%" >nul
+if errorlevel 1 goto failed
+"%BIN%" touch --version > "%OUT%"
+if errorlevel 1 goto failed
+findstr /c:"Flatcore touch 0.1" "%OUT%" >nul
+if errorlevel 1 goto failed
+set "STEP=touch rejects invalid option"
+"%BIN%" touch --not-a-real-option >nul 2>nul
+if not errorlevel 1 goto failed
+set "STEP=touch requires an operand"
+"%BIN%" touch >nul 2>nul
+if not errorlevel 1 goto failed
+
 set "STEP=cat stdin redirection"
 "%BIN%" cat < "%TEST_DIR%\sample.txt" > "%OUT%"
 if errorlevel 1 goto failed

@@ -22,6 +22,7 @@ include 'src/commands/mkdir.inc'
 include 'src/commands/rmdir.inc'
 include 'src/commands/rm.inc'
 include 'src/commands/stat.inc'
+include 'src/commands/touch.inc'
 include 'src/platform/windows/io.inc'
 include 'src/platform/windows/filesystem.inc'
 include 'tests/windows-backend-selftest.inc'
@@ -67,4 +68,5 @@ import kernel32, \
     FindNextFileW, 'FindNextFileW', \
     FindClose, 'FindClose', \
     SetCurrentDirectoryW, 'SetCurrentDirectoryW', \
-    SetFileTime, 'SetFileTime'
+    SetFileTime, 'SetFileTime', \
+    GetSystemTimeAsFileTime, 'GetSystemTimeAsFileTime'

@@ -262,6 +262,8 @@ fi
     [[ -f touch-created.txt ]]
     "$BIN" touch touch-one.txt touch-two.txt
     [[ -f touch-one.txt && -f touch-two.txt ]]
+    "$BIN" touch -a touch-created.txt
+    "$BIN" touch -m touch-created.txt
     "$BIN" touch -am touch-created.txt
     "$BIN" touch -c missing-touch-file
     [[ ! -e missing-touch-file ]]
@@ -277,6 +279,14 @@ fi
         printf "touch accepted an unknown option\\n" >&2
         exit 1
     fi
+    "$BIN" mkdir touch-error-parent
+    if "$BIN" touch touch-error-parent/missing-parent.txt touch-after-error.txt >/dev/null 2>&1; then
+        printf "touch succeeded despite an operand error\\n" >&2
+        exit 1
+    fi
+    [[ -f touch-after-error.txt ]]
+    "$BIN" rm touch-after-error.txt
+    "$BIN" rmdir touch-error-parent
     if "$BIN" touch >/dev/null 2>&1; then
         printf "touch accepted a missing operand\\n" >&2
         exit 1

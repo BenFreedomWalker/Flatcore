@@ -36,7 +36,7 @@ fc_cmd_stat:
     mov rdi, [os_stdout]
     mov rsi, fc_cmd_stat_type_prefix
     call fc_cmd_stat_write_cstr
-    mov eax, [fc_cmd_stat_info + 36]
+    mov eax, dword [fc_cmd_stat_info + 36]
     cmp eax, FC_TYPE_REGULAR
     je .stat_regular
     cmp eax, FC_TYPE_DIRECTORY

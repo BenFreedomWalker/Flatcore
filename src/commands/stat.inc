@@ -28,7 +28,7 @@ fc_cmd_stat:
     mov rsi, fc_cmd_stat_size_prefix
     call fc_cmd_stat_write_cstr
     mov rdi, [os_stdout]
-    mov rsi, [fc_cmd_stat_info]
+    mov rsi, qword [fc_cmd_stat_info]
     call fc_cmd_stat_write_u64
     mov rdi, [os_stdout]
     mov rsi, fc_cmd_stat_bytes_newline

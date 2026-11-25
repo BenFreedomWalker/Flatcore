@@ -117,6 +117,12 @@ set "STEP=stat visible file inside hidden directory"
 if errorlevel 1 goto failed
 findstr /c:"Hidden: no" "%OUT%" >nul
 if errorlevel 1 goto failed
+set "STEP=stat hidden directory with trailing separator"
+mkdir "%TEST_DIR%\.stat-hidden-dir"
+"%BIN%" stat "%TEST_DIR%\.stat-hidden-dir/" > "%OUT%"
+if errorlevel 1 goto failed
+findstr /c:"Hidden: yes" "%OUT%" >nul
+if errorlevel 1 goto failed
 set "STEP=stat read-only attribute"
 > "%TEST_DIR%\readonly.txt" echo readonly
 attrib +R "%TEST_DIR%\readonly.txt"
@@ -319,6 +325,7 @@ if errorlevel 1 goto failed
 
 del "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
 rmdir "%TEST_DIR%\stat-hidden-dir" >nul 2>nul
+rmdir "%TEST_DIR%\.stat-hidden-dir" >nul 2>nul
 
 set "STEP=rmdir parents and verbose output"
 pushd "%TEST_DIR%"

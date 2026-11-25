@@ -374,11 +374,9 @@ os_stat:
 
     mov eax, [r13]
     mov r14d, eax
-    ; Translate the common DOS attribute bits.
-    test eax, 2                  ; FILE_ATTRIBUTE_HIDDEN
-    jz .stat_not_hidden
-    or dword [r12 + 32], FC_ATTR_HIDDEN
-.stat_not_hidden:
+    ; Translate DOS attributes that have a direct shared representation.
+    ; FC_ATTR_HIDDEN follows the shared dot-basename convention on both OSes;
+    ; the native FILE_ATTRIBUTE_HIDDEN bit is intentionally not conflated.
     test eax, 1                  ; FILE_ATTRIBUTE_READONLY
     jz .stat_not_readonly
     or dword [r12 + 32], FC_ATTR_READ_ONLY
@@ -388,10 +386,34 @@ os_stat:
     or dword [r12 + 32], FC_ATTR_SYSTEM
 .stat_not_system:
     test eax, 20h                ; FILE_ATTRIBUTE_ARCHIVE
-    jz .stat_type
+    jz .stat_hidden_scan
     or dword [r12 + 32], FC_ATTR_ARCHIVE
 
- .stat_type:
+.stat_hidden_scan:
+    ; Find the last non-empty path component, accepting both Win32 separators.
+    lea rdx, [windows_path_buffer]
+    mov r8, rdx
+.stat_hidden_loop:
+    mov cx, [rdx]
+    test cx, cx
+    jz .stat_hidden_check
+    cmp cx, '\\'
+    je .stat_hidden_separator
+    cmp cx, '/'
+    jne .stat_hidden_next
+.stat_hidden_separator:
+    cmp word [rdx + 2], 0
+    je .stat_hidden_next
+    lea r8, [rdx + 2]
+.stat_hidden_next:
+    add rdx, 2
+    jmp .stat_hidden_loop
+.stat_hidden_check:
+    cmp word [r8], '.'
+    jne .stat_type
+    or dword [r12 + 32], FC_ATTR_HIDDEN
+
+.stat_type:
     test eax, 400h               ; FILE_ATTRIBUTE_REPARSE_POINT
     jz .stat_not_reparse
     ; FindFirstFileW exposes dwReserved0, the reparse tag, which distinguishes

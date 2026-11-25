@@ -866,6 +866,21 @@ os_dir_close:
     pop r12
     ret
 
+; os_get_time(out_unix_ns)
+; Convert the current system FILETIME (100 ns ticks since 1601) to Unix ns.
+os_get_time:
+    sub rsp, 40
+    lea rcx, [rsp + 32]
+    call [GetSystemTimeAsFileTime]
+    mov rax, [rsp + 32]
+    mov rdx, 116444736000000000
+    sub rax, rdx
+    imul rax, 100
+    mov [rdi], rax
+    xor eax, eax
+    add rsp, 40
+    ret
+
 ; Windows can identify symbolic links by their reparse tag and supports
 ; FILETIME updates. POSIX modes, hard-link operations, and other optional
 ; interfaces are not exposed by this backend contract.

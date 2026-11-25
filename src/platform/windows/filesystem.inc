@@ -397,7 +397,7 @@ os_stat:
     mov cx, [rdx]
     test cx, cx
     jz .stat_hidden_check
-    cmp cx, '\\'
+    cmp cx, '\'
     je .stat_hidden_separator
     cmp cx, '/'
     jne .stat_hidden_next

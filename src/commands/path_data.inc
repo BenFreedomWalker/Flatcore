@@ -162,6 +162,3 @@ fc_cmd_stat_type_unknown db 'unknown', 0
 fc_cmd_stat_usage_text db 'Usage: stat FILE', 10, 0
 fc_cmd_stat_error_prefix db 'flatcore: stat: cannot stat ', 39, 0
 fc_cmd_stat_error_suffix db 39, ': operation failed', 10, 0
-align 8
-fc_cmd_stat_info rb 64
-fc_cmd_stat_number rb 32

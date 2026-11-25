@@ -7,6 +7,10 @@ os_error_code dd FC_ERR_NONE
 os_error_domain dd FC_ERROR_DOMAIN_NONE
 os_native_error dq 0
 
+align 8
+fc_cmd_stat_info rb 64
+fc_cmd_stat_number rb 32
+
 align 16
 fc_cmd_path_buffer rb 4096
 fc_cmd_path_length dq 0

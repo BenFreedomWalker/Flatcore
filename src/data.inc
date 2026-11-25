@@ -11,6 +11,8 @@ num_buffer   rb 32
 sysinfo_buffer rb 112
 sleep_request rq 2
 sleep_remaining rq 2
+fc_cmd_stat_info rb 64
+fc_cmd_stat_number rb 32
 
 binary_name db 'flatcore', 0
 
@@ -65,7 +67,7 @@ help_text db 'Flatcore - native Linux x86-64 userspace', 10
           db '  clear  uname  help', 10
           db '  basename  dirname  head  wc', 10
           db '  ln  readlink  chmod  kill  sync  id', 10
-          db '  hostname  uptime  sleep', 10
+          db '  hostname  uptime  sleep  stat', 10
           db 'Commands can also be invoked through symlinks.', 10, 0
 
 ; ls implementation state and Linux stat layout.

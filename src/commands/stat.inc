@@ -1,13 +1,13 @@
 ; Shared stat command built on the FC_FILE_INFO backend contract.
 ; Reports metadata that both native backends can represent without guessing.
 fc_cmd_stat:
-    cmp rdi, 2
-    jne .stat_usage
     push rbx
     push r12
     push r13
     push r14
     push r15
+    cmp rdi, 2
+    jne .stat_usage
     mov r12, rsi
     mov r13, [r12 + 8]
     mov rdi, r13
@@ -105,7 +105,7 @@ fc_cmd_stat:
     mov rsi, fc_cmd_stat_usage_text
     call fc_cmd_stat_write_cstr
     mov eax, 2
-    ret
+    jmp .stat_return
 .stat_error:
     mov rdi, [os_stderr]
     mov rsi, fc_cmd_stat_error_prefix

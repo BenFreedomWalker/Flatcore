@@ -311,9 +311,9 @@ os_get_time:
     syscall
     test rax, rax
     js .get_time_error
-    mov rax, [linux_time_buffer]
+    mov rax, qword [linux_time_buffer]
     imul rax, 1000000000
-    add rax, [linux_time_buffer + 8]
+    add rax, qword [linux_time_buffer + 8]
     mov [r8], rax
     xor eax, eax
     ret

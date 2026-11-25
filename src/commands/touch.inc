@@ -149,9 +149,9 @@ fc_cmd_touch:
     jae .usage
     ; No explicit timestamp selector means update both.
     test r15d, 3
-    jnz .files
+    jnz .timestamps_selected
     or r15d, 3
-
+.timestamps_selected:
     ; Resolve the reference once before modifying any destination.
     test r15d, 16
     jz .files

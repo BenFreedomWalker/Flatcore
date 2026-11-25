@@ -374,9 +374,12 @@ os_stat:
 
     mov eax, [r13]
     mov r14d, eax
-    ; Translate DOS attributes that have a direct shared representation.
-    ; FC_ATTR_HIDDEN follows the shared dot-basename convention on both OSes;
-    ; the native FILE_ATTRIBUTE_HIDDEN bit is intentionally not conflated.
+    ; Preserve the native hidden attribute separately from the shared
+    ; leading-dot basename convention exposed through FC_ATTR_HIDDEN.
+    test eax, 2                  ; FILE_ATTRIBUTE_HIDDEN
+    jz .stat_not_native_hidden
+    or dword [r12 + 32], FC_ATTR_NATIVE_HIDDEN
+.stat_not_native_hidden:
     test eax, 1                  ; FILE_ATTRIBUTE_READONLY
     jz .stat_not_readonly
     or dword [r12 + 32], FC_ATTR_READ_ONLY

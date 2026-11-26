@@ -212,3 +212,19 @@ fc_cmd_mv_bad_option_text db 'flatcore: mv: invalid option', 10
 fc_cmd_mv_bad_option_length = $ - fc_cmd_mv_bad_option_text
 fc_cmd_mv_error_text db 'flatcore: mv: move failed', 10
 fc_cmd_mv_error_length = $ - fc_cmd_mv_error_text
+
+fc_cmd_cp_opt_help db '--help', 0
+fc_cmd_cp_opt_version db '--version', 0
+fc_cmd_cp_help_text db 'Usage: cp [--] SOURCE DEST', 10
+                    db '  --       end option parsing', 10
+fc_cmd_cp_help_length = $ - fc_cmd_cp_help_text
+fc_cmd_cp_version_text db 'Flatcore cp 0.1', 10
+fc_cmd_cp_version_length = $ - fc_cmd_cp_version_text
+
+fc_cmd_mv_opt_help db '--help', 0
+fc_cmd_mv_opt_version db '--version', 0
+fc_cmd_mv_help_text db 'Usage: mv [--] SOURCE DEST', 10
+                    db '  --       end option parsing', 10
+fc_cmd_mv_help_length = $ - fc_cmd_mv_help_text
+fc_cmd_mv_version_text db 'Flatcore mv 0.1', 10
+fc_cmd_mv_version_length = $ - fc_cmd_mv_version_text

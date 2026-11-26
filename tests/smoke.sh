@@ -62,8 +62,18 @@ fi
     cmp cat-first.bin cat-after-error.bin
     "$BIN" cp input.txt copied.txt
     cmp input.txt copied.txt
+    if "$BIN" cp -- input.txt input.txt >/dev/null 2>&1; then
+        printf 'cp accepted identical source and destination paths\\n' >&2
+        exit 1
+    fi
+    cmp input.txt copied.txt
     "$BIN" mv copied.txt moved.txt
     cmp input.txt moved.txt
+    printf 'old destination\\n' > move-destination.txt
+    printf 'new source\\n' > move-source.txt
+    "$BIN" mv -- move-source.txt move-destination.txt
+    grep -qx 'new source' move-destination.txt
+    test ! -e move-source.txt
 
     "$BIN" mkdir ls-dir
     printf 'visible\n' > ls-dir/visible

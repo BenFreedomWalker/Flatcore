@@ -104,6 +104,9 @@
 ; os_rmdir(path_utf8)
 ; os_unlink(path_utf8)
 ; os_rename(old_path_utf8, new_path_utf8)
+; Rename within the same filesystem/volume. If the destination names an existing
+; file, replace it; directory replacement follows native OS restrictions.
+; Cross-volume moves are not implied and must fail rather than copy implicitly.
 ; os_getcwd(buffer, capacity, out_length)
 ; os_chdir(path_utf8)
 ; os_get_time(out_unix_ns) returns the current UTC realtime clock in nanoseconds.

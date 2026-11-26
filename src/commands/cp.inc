@@ -1,0 +1,134 @@
+; Shared FC64 cp implementation.
+; cp [--] SOURCE DEST
+; Copies a regular file through the common read/write backend. The destination
+; is created or truncated; source and destination must be different paths.
+
+fc_cmd_cp_write:
+    mov rcx, os_write
+    jmp fc_write_all
+
+fc_cmd_cp:
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, 1
+
+    cmp r12, 2
+    jbe .usage
+    mov rsi, [r13 + 8]
+    cmp byte [rsi], '-'
+    jne .operands
+    cmp byte [rsi + 1], '-'
+    jne .bad_option
+    cmp byte [rsi + 2], 0
+    jne .bad_option
+    mov r14, 2
+.operands:
+    lea rax, [r14 + 2]
+    cmp r12, rax
+    jne .usage
+
+    mov rsi, [r13 + r14 * 8]
+    mov rdi, [r13 + r14 * 8 + 8]
+    call fc_streq
+    test eax, eax
+    jnz .same_file
+
+    mov rdi, [r13 + r14 * 8]
+    mov esi, FC_OPEN_READ
+    xor edx, edx
+    mov rcx, fc_cmd_cp_source_handle
+    call os_open
+    test rax, rax
+    jnz .operation_error
+
+    mov rdi, [r13 + r14 * 8 + 8]
+    mov esi, FC_OPEN_WRITE or FC_OPEN_CREATE or FC_OPEN_TRUNCATE
+    mov edx, 0644o
+    mov rcx, fc_cmd_cp_destination_handle
+    call os_open
+    test rax, rax
+    jnz .close_source_error
+
+    mov r15, [fc_cmd_cp_source_handle]
+    mov rbx, [fc_cmd_cp_destination_handle]
+.copy_loop:
+    mov rdi, r15
+    mov rsi, io_buffer
+    mov edx, 4096
+    mov rcx, fc_cmd_cp_read_count
+    call os_read
+    test rax, rax
+    jnz .copy_failed
+    mov rdx, [fc_cmd_cp_read_count]
+    test rdx, rdx
+    jz .copy_complete
+    mov rdi, rbx
+    mov rsi, io_buffer
+    mov rcx, os_write
+    call fc_write_all
+    test rax, rax
+    jnz .copy_failed
+    jmp .copy_loop
+
+.copy_complete:
+    mov rdi, rbx
+    call os_close
+    test rax, rax
+    jnz .close_source_error
+    mov rdi, r15
+    call os_close
+    test rax, rax
+    jnz .operation_error
+    xor eax, eax
+    jmp .return
+
+.copy_failed:
+    mov rdi, rbx
+    call os_close
+    mov rdi, r15
+    call os_close
+    jmp .operation_error
+
+.close_source_error:
+    mov rdi, [fc_cmd_cp_source_handle]
+    call os_close
+.operation_error:
+    mov rdi, [os_stderr]
+    mov rsi, fc_cmd_cp_error_text
+    mov edx, fc_cmd_cp_error_length
+    call fc_cmd_cp_write
+    mov eax, 1
+    jmp .return
+.same_file:
+    mov rdi, [os_stderr]
+    mov rsi, fc_cmd_cp_same_text
+    mov edx, fc_cmd_cp_same_length
+    call fc_cmd_cp_write
+    mov eax, 1
+    jmp .return
+.bad_option:
+    mov rdi, [os_stderr]
+    mov rsi, fc_cmd_cp_bad_option_text
+    mov edx, fc_cmd_cp_bad_option_length
+    call fc_cmd_cp_write
+    mov eax, 2
+    jmp .return
+.usage:
+    mov rdi, [os_stderr]
+    mov rsi, fc_cmd_cp_usage_text
+    mov edx, fc_cmd_cp_usage_length
+    call fc_cmd_cp_write
+    mov eax, 2
+    jmp .return
+.return:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    ret

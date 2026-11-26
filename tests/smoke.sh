@@ -63,14 +63,14 @@ fi
     "$BIN" cp input.txt copied.txt
     cmp input.txt copied.txt
     if "$BIN" cp -- input.txt input.txt >/dev/null 2>&1; then
-        printf 'cp accepted identical source and destination paths\\n' >&2
+        printf 'cp accepted identical source and destination paths\n' >&2
         exit 1
     fi
     cmp input.txt copied.txt
     "$BIN" mv copied.txt moved.txt
     cmp input.txt moved.txt
-    printf 'old destination\\n' > move-destination.txt
-    printf 'new source\\n' > move-source.txt
+    printf 'old destination\n' > move-destination.txt
+    printf 'new source\n' > move-source.txt
     "$BIN" mv -- move-source.txt move-destination.txt
     grep -qx 'new source' move-destination.txt
     test ! -e move-source.txt
@@ -158,25 +158,25 @@ fi
     ln -s missing-rm-target rm-force-dangling-link
     "$BIN" rm -f rm-force-dangling-link
     [[ ! -L rm-force-dangling-link ]]
-    printf 'keep target\\n' > rm-link-target
+    printf 'keep target\n' > rm-link-target
     ln -s rm-link-target rm-file-link
     "$BIN" rm rm-file-link
     [[ -f rm-link-target && ! -L rm-file-link ]]
-    printf 'verbose removal\\n' > rm-verbose-file
+    printf 'verbose removal\n' > rm-verbose-file
     "$BIN" rm -v rm-verbose-file > rm-verbose.txt
     grep -q "removed 'rm-verbose-file'" rm-verbose.txt
     "$BIN" mkdir rm-empty-dir
     "$BIN" rm -dv rm-empty-dir > rm-dir-verbose.txt
     grep -q "removed 'rm-empty-dir'" rm-dir-verbose.txt
     "$BIN" mkdir rm-nonempty-dir
-    printf 'keep\\n' > rm-nonempty-dir/file
+    printf 'keep\n' > rm-nonempty-dir/file
     if "$BIN" rm -d rm-nonempty-dir; then
-        printf 'rm -d removed a non-empty directory\\n' >&2
+        printf 'rm -d removed a non-empty directory\n' >&2
         exit 1
     fi
     "$BIN" rm rm-nonempty-dir/file
     "$BIN" rm -d rm-nonempty-dir
-    printf 'leading\\n' > ./-rm-leading
+    printf 'leading\n' > ./-rm-leading
     "$BIN" rm -- ./-rm-leading
     "$BIN" rm ls-dir/visible ls-dir/.hidden ls-file-one ls-file-two ./-ls-leading
     "$BIN" rmdir ls-dir
@@ -283,26 +283,26 @@ fi
     [[ ! -e missing-touch-file ]]
     "$BIN" touch --no-create missing-touch-file-long
     [[ ! -e missing-touch-file-long ]]
-    printf "leading\\n" > ./-touch-leading
+    printf "leading\n" > ./-touch-leading
     "$BIN" touch -- ./-touch-leading
     "$BIN" touch --help > touch-help.txt
     grep -q -- "--no-create" touch-help.txt
     "$BIN" touch --version > touch-version.txt
     grep -q "Flatcore touch" touch-version.txt
     if "$BIN" touch --not-a-real-option >/dev/null 2>&1; then
-        printf "touch accepted an unknown option\\n" >&2
+        printf "touch accepted an unknown option\n" >&2
         exit 1
     fi
     "$BIN" mkdir touch-error-parent
     if "$BIN" touch touch-error-parent/missing/child.txt touch-after-error.txt >/dev/null 2>&1; then
-        printf "touch succeeded despite an operand error\\n" >&2
+        printf "touch succeeded despite an operand error\n" >&2
         exit 1
     fi
     [[ -f touch-after-error.txt ]]
     "$BIN" rm touch-after-error.txt
     "$BIN" rmdir touch-error-parent
     if "$BIN" touch >/dev/null 2>&1; then
-        printf "touch accepted a missing operand\\n" >&2
+        printf "touch accepted a missing operand\n" >&2
         exit 1
     fi
 

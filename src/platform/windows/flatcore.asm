@@ -881,7 +881,7 @@ import kernel32, \
     CreateDirectoryW, 'CreateDirectoryW', \
     RemoveDirectoryW, 'RemoveDirectoryW', \
     DeleteFileW, 'DeleteFileW', \
-    MoveFileW, 'MoveFileW', \
+    MoveFileExW, 'MoveFileExW', \
     GetCurrentDirectoryW, 'GetCurrentDirectoryW', \
     GetFileAttributesExW, 'GetFileAttributesExW', \
     FindFirstFileW, 'FindFirstFileW', \

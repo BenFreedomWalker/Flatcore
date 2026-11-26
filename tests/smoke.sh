@@ -60,6 +60,10 @@ fi
         exit 1
     fi
     cmp cat-first.bin cat-after-error.bin
+    "$BIN" cp --help > cp-help.txt
+    grep -q '^Usage: cp ' cp-help.txt
+    "$BIN" mv --version > mv-version.txt
+    grep -qx 'Flatcore mv 0.1' mv-version.txt
     "$BIN" cp input.txt copied.txt
     cmp input.txt copied.txt
     if "$BIN" cp -- input.txt input.txt >/dev/null 2>&1; then

@@ -18,6 +18,19 @@ fc_cmd_cp:
     mov r14, 1
 
     cmp r12, 2
+    jne .parse_options
+    mov rsi, [r13 + 8]
+    mov rdi, fc_cmd_cp_opt_help
+    call fc_streq
+    test eax, eax
+    jnz .help
+    mov rsi, [r13 + 8]
+    mov rdi, fc_cmd_cp_opt_version
+    call fc_streq
+    test eax, eax
+    jnz .version
+.parse_options:
+    cmp r12, 2
     jbe .usage
     mov rsi, [r13 + 8]
     cmp byte [rsi], '-'
@@ -97,6 +110,20 @@ fc_cmd_cp:
 .close_source_error:
     mov rdi, [fc_cmd_cp_source_handle]
     call os_close
+.help:
+    mov rdi, [os_stdout]
+    mov rsi, fc_cmd_cp_help_text
+    mov edx, fc_cmd_cp_help_length
+    call fc_cmd_cp_write
+    xor eax, eax
+    jmp .return
+.version:
+    mov rdi, [os_stdout]
+    mov rsi, fc_cmd_cp_version_text
+    mov edx, fc_cmd_cp_version_length
+    call fc_cmd_cp_write
+    xor eax, eax
+    jmp .return
 .operation_error:
     mov rdi, [os_stderr]
     mov rsi, fc_cmd_cp_error_text

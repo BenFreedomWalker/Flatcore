@@ -71,7 +71,7 @@ fc_cmd_cp:
     mov rbx, [fc_cmd_cp_destination_handle]
 .copy_loop:
     mov rdi, r15
-    mov rsi, io_buffer
+    mov rsi, fc_cmd_cp_buffer
     mov edx, 4096
     mov rcx, fc_cmd_cp_read_count
     call os_read
@@ -81,7 +81,7 @@ fc_cmd_cp:
     test rdx, rdx
     jz .copy_complete
     mov rdi, rbx
-    mov rsi, io_buffer
+    mov rsi, fc_cmd_cp_buffer
     mov rcx, os_write
     call fc_write_all
     test rax, rax
@@ -110,6 +110,7 @@ fc_cmd_cp:
 .close_source_error:
     mov rdi, [fc_cmd_cp_source_handle]
     call os_close
+    jmp .operation_error
 .help:
     mov rdi, [os_stdout]
     mov rsi, fc_cmd_cp_help_text

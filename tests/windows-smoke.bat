@@ -292,8 +292,10 @@ if errorlevel 1 goto failed
 
 set "STEP=mv version option"
 "%BIN%" mv --version > "%OUT%"
-findstr /x /c:"Flatcore mv 0.1" "%OUT%" >nul
 if errorlevel 1 goto failed
+set "MV_VERSION_MATCH="
+for /f "usebackq delims=" %%A in ("%OUT%") do if "%%A"=="Flatcore mv 0.1" set "MV_VERSION_MATCH=1"
+if not defined MV_VERSION_MATCH goto failed
 
 set "STEP=copy file"
 "%BIN%" cp "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt"

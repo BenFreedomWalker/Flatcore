@@ -230,7 +230,8 @@ os_rename:
     je .rename_encoding
     mov rcx, windows_path_buffer
     mov rdx, windows_path_buffer2
-    call [MoveFileW]
+    mov r8d, 1                 ; MOVEFILE_REPLACE_EXISTING, matching Linux rename
+    call [MoveFileExW]
     test eax, eax
     jz .rename_error
     xor eax, eax

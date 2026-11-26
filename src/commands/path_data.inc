@@ -13,7 +13,9 @@ fc_basic_registry:
     dq fc_cmd_rm_name, fc_cmd_rm
     dq fc_cmd_stat_name, fc_cmd_stat
     dq fc_cmd_touch_name, fc_cmd_touch
-fc_basic_registry_count = 13
+    dq fc_cmd_cp_name, fc_cmd_cp
+    dq fc_cmd_mv_name, fc_cmd_mv
+fc_basic_registry_count = 15
 
 fc_cmd_true_name     db 'true', 0
 fc_cmd_false_name    db 'false', 0
@@ -28,6 +30,8 @@ fc_cmd_rmdir_name    db 'rmdir', 0
 fc_cmd_rm_name       db 'rm', 0
 fc_cmd_stat_name     db 'stat', 0
 fc_cmd_touch_name    db 'touch', 0
+fc_cmd_cp_name       db 'cp', 0
+fc_cmd_mv_name       db 'mv', 0
 fc_cmd_cat_stdin_name db '-', 0
 fc_cmd_cat_error_text db 'flatcore: cat: input/output error', 10
 fc_cmd_cat_error_length = $ - fc_cmd_cat_error_text
@@ -188,3 +192,23 @@ fc_cmd_touch_help_text db 'Usage: touch [OPTION]... FILE...', 10
 fc_cmd_touch_help_length = $ - fc_cmd_touch_help_text
 fc_cmd_touch_version_text db 'Flatcore touch 0.1', 10
 fc_cmd_touch_version_length = $ - fc_cmd_touch_version_text
+
+; Shared cp/mv command diagnostics and scratch state.
+fc_cmd_cp_usage_text db 'usage: cp [--] SOURCE DEST', 10
+fc_cmd_cp_usage_length = $ - fc_cmd_cp_usage_text
+fc_cmd_cp_bad_option_text db 'flatcore: cp: invalid option', 10
+fc_cmd_cp_bad_option_length = $ - fc_cmd_cp_bad_option_text
+fc_cmd_cp_error_text db 'flatcore: cp: copy failed', 10
+fc_cmd_cp_error_length = $ - fc_cmd_cp_error_text
+fc_cmd_cp_same_text db 'flatcore: cp: source and destination are the same file', 10
+fc_cmd_cp_same_length = $ - fc_cmd_cp_same_text
+fc_cmd_cp_source_handle dq 0
+fc_cmd_cp_destination_handle dq 0
+fc_cmd_cp_read_count dq 0
+
+fc_cmd_mv_usage_text db 'usage: mv [--] SOURCE DEST', 10
+fc_cmd_mv_usage_length = $ - fc_cmd_mv_usage_text
+fc_cmd_mv_bad_option_text db 'flatcore: mv: invalid option', 10
+fc_cmd_mv_bad_option_length = $ - fc_cmd_mv_bad_option_text
+fc_cmd_mv_error_text db 'flatcore: mv: move failed', 10
+fc_cmd_mv_error_length = $ - fc_cmd_mv_error_text

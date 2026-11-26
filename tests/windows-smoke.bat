@@ -285,6 +285,16 @@ set "STEP=ls invalid option"
 "%BIN%" ls --not-a-real-option >nul 2>nul
 if not errorlevel 1 goto failed
 
+set "STEP=cp help option"
+"%BIN%" cp --help > "%OUT%"
+findstr /b /c:"Usage: cp " "%OUT%" >nul
+if errorlevel 1 goto failed
+
+set "STEP=mv version option"
+"%BIN%" mv --version > "%OUT%"
+findstr /x /c:"Flatcore mv 0.1" "%OUT%" >nul
+if errorlevel 1 goto failed
+
 set "STEP=copy file"
 "%BIN%" cp "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt"
 if errorlevel 1 goto failed

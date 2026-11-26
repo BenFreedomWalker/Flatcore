@@ -289,9 +289,22 @@ set "STEP=copy file"
 "%BIN%" cp "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt"
 if errorlevel 1 goto failed
 
+set "STEP=cp identical source and destination"
+"%BIN%" cp -- "%TEST_DIR%\sample.txt" "%TEST_DIR%\sample.txt" >nul 2>nul
+if not errorlevel 1 goto failed
+
 set "STEP=move file"
 "%BIN%" mv "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
+
+set "STEP=move replaces existing destination"
+> "%TEST_DIR%\move-destination.txt" echo old destination
+> "%TEST_DIR%\move-source.txt" echo new source
+"%BIN%" mv -- "%TEST_DIR%\move-source.txt" "%TEST_DIR%\move-destination.txt"
+if errorlevel 1 goto failed
+findstr /x /c:"new source" "%TEST_DIR%\move-destination.txt" >nul
+if errorlevel 1 goto failed
+if exist "%TEST_DIR%\move-source.txt" goto failed
 
 set "STEP=cat file"
 "%BIN%" cat "%TEST_DIR%\moved.txt" >nul

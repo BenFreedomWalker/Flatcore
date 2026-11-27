@@ -323,12 +323,12 @@ set "STEP=move file"
 if errorlevel 1 goto failed
 
 set "STEP=move file into existing directory"
-mkdir "%TEST_DIR%\\mv target dir"
-> "%TEST_DIR%\\mv source file.txt" echo move into directory
-"%BIN%" mv "%TEST_DIR%\\mv source file.txt" "%TEST_DIR%\\mv target dir"
+mkdir "%TEST_DIR%\mv target dir"
+> "%TEST_DIR%\mv source file.txt" echo move into directory
+"%BIN%" mv "%TEST_DIR%\mv source file.txt" "%TEST_DIR%\mv target dir"
 if errorlevel 1 goto failed
-if not exist "%TEST_DIR%\\mv target dir\\mv source file.txt" goto failed
-if exist "%TEST_DIR%\\mv source file.txt" goto failed
+if not exist "%TEST_DIR%\mv target dir\\mv source file.txt" goto failed
+if exist "%TEST_DIR%\mv source file.txt" goto failed
 
 set "STEP=move replaces existing destination"
 > "%TEST_DIR%\move-destination.txt" echo old destination

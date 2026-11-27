@@ -884,7 +884,6 @@ import kernel32, \
     MoveFileExW, 'MoveFileExW', \
     GetCurrentDirectoryW, 'GetCurrentDirectoryW', \
     GetFileAttributesExW, 'GetFileAttributesExW', \
-    GetFileInformationByHandle, 'GetFileInformationByHandle', \
     FindFirstFileW, 'FindFirstFileW', \
     FindNextFileW, 'FindNextFileW', \
     SetCurrentDirectoryW, 'SetCurrentDirectoryW', \
@@ -905,4 +904,5 @@ import kernel32, \
     MoveFileA, 'MoveFileA', \
     GetStdHandle, 'GetStdHandle', \
     WriteFile, 'WriteFile', \
-    ExitProcess, 'ExitProcess'
+    ExitProcess, 'ExitProcess', \
+    GetFileInformationByHandle, 'GetFileInformationByHandle'

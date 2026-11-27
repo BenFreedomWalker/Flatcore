@@ -51,6 +51,14 @@ fc_cmd_cp:
     test eax, eax
     jnz .same_file
 
+    ; Reject aliases (hard links and symlinks) before opening the destination
+    ; with truncation enabled.
+    mov rdi, [r13 + r14 * 8]
+    mov rsi, [r13 + r14 * 8 + 8]
+    call os_same_file
+    test eax, eax
+    jnz .same_file
+
     mov rdi, [r13 + r14 * 8]
     mov esi, FC_OPEN_READ
     xor edx, edx

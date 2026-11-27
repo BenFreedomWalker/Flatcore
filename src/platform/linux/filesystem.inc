@@ -74,7 +74,7 @@ os_same_file:
     syscall
     test rax, rax
     js .same_different
-    mov rax, [linux_stat_buffer]
+    mov rax, qword [linux_stat_buffer]
     cmp rax, [linux_stat_buffer2] ; st_dev
     jne .same_different
     mov rax, [linux_stat_buffer + 8]

@@ -283,6 +283,38 @@ fi
     printf 'target\n' > touch-reference-target.txt
     "$BIN" touch -r touch-reference.txt touch-reference-target.txt
     [[ "$(stat -c '%X %Y' touch-reference.txt)" == "$(stat -c '%X %Y' touch-reference-target.txt)" ]]
+
+    # Selected reference timestamps must leave the unselected field untouched.
+    touch -a -t 200101010101.01 touch-reference.txt
+    touch -m -t 200202020202.02 touch-reference.txt
+    touch -a -t 200303030303.03 touch-reference-target.txt
+    touch -m -t 200404040404.04 touch-reference-target.txt
+    target_mtime="$(stat -c '%Y' touch-reference-target.txt)"
+    "$BIN" touch -a -r touch-reference.txt touch-reference-target.txt
+    [[ "$(stat -c '%X' touch-reference-target.txt)" == "$(stat -c '%X' touch-reference.txt)" ]]
+    [[ "$(stat -c '%Y' touch-reference-target.txt)" == "$target_mtime" ]]
+
+    target_atime="$(stat -c '%X' touch-reference-target.txt)"
+    "$BIN" touch -m -r touch-reference.txt touch-reference-target.txt
+    [[ "$(stat -c '%Y' touch-reference-target.txt)" == "$(stat -c '%Y' touch-reference.txt)" ]]
+    [[ "$(stat -c '%X' touch-reference-target.txt)" == "$target_atime" ]]
+
+    "$BIN" touch -am -r touch-reference.txt touch-reference-target.txt
+    [[ "$(stat -c '%X %Y' touch-reference.txt)" == "$(stat -c '%X %Y' touch-reference-target.txt)" ]]
+
+    # -c suppresses creation, not updates to existing files.
+    touch -m -t 200101010101.01 touch-reference-target.txt
+    target_mtime="$(stat -c '%Y' touch-reference-target.txt)"
+    "$BIN" touch -c touch-reference-target.txt
+    [[ "$(stat -c '%Y' touch-reference-target.txt)" -gt "$target_mtime" ]]
+
+    # A missing reference must fail before changing any destination.
+    target_mtime="$(stat -c '%Y' touch-reference-target.txt)"
+    if "$BIN" touch -r missing-touch-reference.txt touch-reference-target.txt >/dev/null 2>&1; then
+        printf "touch accepted a missing reference file\n" >&2
+        exit 1
+    fi
+    [[ "$(stat -c '%Y' touch-reference-target.txt)" == "$target_mtime" ]]
     "$BIN" touch -c missing-touch-file
     [[ ! -e missing-touch-file ]]
     "$BIN" touch --no-create missing-touch-file-long

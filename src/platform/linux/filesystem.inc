@@ -75,10 +75,10 @@ os_same_file:
     test rax, rax
     js .same_different
     mov rax, qword [linux_stat_buffer]
-    cmp rax, [linux_stat_buffer2] ; st_dev
+    cmp rax, qword [linux_stat_buffer2] ; st_dev
     jne .same_different
     mov rax, [linux_stat_buffer + 8]
-    cmp rax, [linux_stat_buffer2 + 8] ; st_ino
+    cmp rax, qword [linux_stat_buffer2 + 8] ; st_ino
     jne .same_different
     mov eax, 1
     ret

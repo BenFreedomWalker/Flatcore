@@ -86,6 +86,11 @@ fi
     "$BIN" mv 'mv source file.txt' 'mv target dir'
     grep -qx 'move into directory' 'mv target dir/mv source file.txt'
     test ! -e 'mv source file.txt'
+    "$BIN" mkdir 'mv source dir'
+    printf 'move directory into directory\\n' > 'mv source dir/inside.txt'
+    "$BIN" mv 'mv source dir' 'mv target dir'
+    grep -qx 'move directory into directory' 'mv target dir/mv source dir/inside.txt'
+    test ! -e 'mv source dir'
     printf 'old destination\n' > move-destination.txt
     printf 'new source\n' > move-source.txt
     "$BIN" mv -- move-source.txt move-destination.txt

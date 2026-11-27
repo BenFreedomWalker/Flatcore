@@ -202,10 +202,6 @@ fc_cmd_cp_error_text db 'flatcore: cp: copy failed', 10
 fc_cmd_cp_error_length = $ - fc_cmd_cp_error_text
 fc_cmd_cp_same_text db 'flatcore: cp: source and destination are the same file', 10
 fc_cmd_cp_same_length = $ - fc_cmd_cp_same_text
-fc_cmd_cp_source_handle dq 0
-fc_cmd_cp_destination_handle dq 0
-fc_cmd_cp_read_count dq 0
-fc_cmd_cp_buffer rb 4096
 
 fc_cmd_mv_usage_text db 'usage: mv [--] SOURCE DEST', 10
 fc_cmd_mv_usage_length = $ - fc_cmd_mv_usage_text

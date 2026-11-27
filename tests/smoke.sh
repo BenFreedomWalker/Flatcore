@@ -70,6 +70,14 @@ fi
         printf 'cp accepted identical source and destination paths\n' >&2
         exit 1
     fi
+    printf 'hard-link source data\n' > cp-hardlink-original.txt
+    "$BIN" ln cp-hardlink-original.txt cp-hardlink-alias.txt
+    if "$BIN" cp cp-hardlink-original.txt cp-hardlink-alias.txt >/dev/null 2>&1; then
+        printf 'cp accepted hard-link aliases\n' >&2
+        exit 1
+    fi
+    cmp cp-hardlink-original.txt cp-hardlink-alias.txt
+    grep -qx 'hard-link source data' cp-hardlink-original.txt
     cmp input.txt copied.txt
     "$BIN" mv copied.txt moved.txt
     cmp input.txt moved.txt
@@ -364,7 +372,7 @@ fi
     [[ "$("$BIN" echo symlink-dispatch)" == 'symlink-dispatch' ]]
     [[ "$("$BIN_LINKS/echo" symlink-dispatch)" == 'symlink-dispatch' ]]
 
-    "$BIN" rm sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt stat-file.txt .stat-hidden touch-created.txt touch-one.txt touch-two.txt touch-reference.txt touch-reference-target.txt ./-touch-leading
+    "$BIN" rm cp-hardlink-original.txt cp-hardlink-alias.txt sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt stat-file.txt .stat-hidden touch-created.txt touch-one.txt touch-two.txt touch-reference.txt touch-reference-target.txt ./-touch-leading
     "$BIN" rm stat-hidden-dir/.nested-hidden stat-hidden-dir/visible
     "$BIN" rmdir stat-hidden-dir
     "$BIN" rmdir .stat-hidden-dir

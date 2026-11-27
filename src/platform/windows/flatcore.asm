@@ -884,6 +884,7 @@ import kernel32, \
     MoveFileExW, 'MoveFileExW', \
     GetCurrentDirectoryW, 'GetCurrentDirectoryW', \
     GetFileAttributesExW, 'GetFileAttributesExW', \
+    GetFileInformationByHandle, 'GetFileInformationByHandle', \
     FindFirstFileW, 'FindFirstFileW', \
     FindNextFileW, 'FindNextFileW', \
     SetCurrentDirectoryW, 'SetCurrentDirectoryW', \

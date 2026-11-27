@@ -307,6 +307,16 @@ if errorlevel 1 goto failed
 set "STEP=cp identical source and destination"
 "%BIN%" cp -- "%TEST_DIR%\sample.txt" "%TEST_DIR%\sample.txt" >nul 2>nul
 if not errorlevel 1 goto failed
+set "STEP=cp hard-link alias rejection"
+> "%TEST_DIR%\cp-hardlink-original.txt" echo hard-link source data
+mklink /H "%TEST_DIR%\cp-hardlink-alias.txt" "%TEST_DIR%\cp-hardlink-original.txt" >nul
+if errorlevel 1 goto failed
+"%BIN%" cp "%TEST_DIR%\cp-hardlink-original.txt" "%TEST_DIR%\cp-hardlink-alias.txt" >nul 2>nul
+if not errorlevel 1 goto failed
+findstr /x /c:"hard-link source data" "%TEST_DIR%\cp-hardlink-original.txt" >nul
+if errorlevel 1 goto failed
+fc /b "%TEST_DIR%\cp-hardlink-original.txt" "%TEST_DIR%\cp-hardlink-alias.txt" >nul
+if errorlevel 1 goto failed
 
 set "STEP=move file"
 "%BIN%" mv "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt"
@@ -398,7 +408,7 @@ set "STEP=remove moved file"
 "%BIN%" rm "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
 
-del "%TEST_DIR%\touch-created.txt" "%TEST_DIR%\touch-one.txt" "%TEST_DIR%\touch-two.txt" "%TEST_DIR%\touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt" "%TEST_DIR%\touch-after-error.txt" "%TEST_DIR%\move-destination.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
+del "%TEST_DIR%\cp-hardlink-original.txt" "%TEST_DIR%\cp-hardlink-alias.txt" "%TEST_DIR%\cp-hardlink-original.txt" "%TEST_DIR%\cp-hardlink-alias.txt" "%TEST_DIR%\touch-created.txt" "%TEST_DIR%\touch-one.txt" "%TEST_DIR%\touch-two.txt" "%TEST_DIR%\touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt" "%TEST_DIR%\touch-after-error.txt" "%TEST_DIR%\move-destination.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
 rmdir "%TEST_DIR%\stat-hidden-dir" >nul 2>nul
 rmdir "%TEST_DIR%\.stat-hidden-dir" >nul 2>nul
 

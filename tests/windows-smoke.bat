@@ -408,7 +408,7 @@ set "STEP=remove moved file"
 "%BIN%" rm "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
 
-del "%TEST_DIR%\cp-hardlink-original.txt" "%TEST_DIR%\cp-hardlink-alias.txt" "%TEST_DIR%\cp-hardlink-original.txt" "%TEST_DIR%\cp-hardlink-alias.txt" "%TEST_DIR%\touch-created.txt" "%TEST_DIR%\touch-one.txt" "%TEST_DIR%\touch-two.txt" "%TEST_DIR%\touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt" "%TEST_DIR%\touch-after-error.txt" "%TEST_DIR%\move-destination.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
+del "%TEST_DIR%\cp-hardlink-original.txt" "%TEST_DIR%\cp-hardlink-alias.txt" "%TEST_DIR%\touch-created.txt" "%TEST_DIR%\touch-one.txt" "%TEST_DIR%\touch-two.txt" "%TEST_DIR%\touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt" "%TEST_DIR%\touch-after-error.txt" "%TEST_DIR%\move-destination.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
 rmdir "%TEST_DIR%\stat-hidden-dir" >nul 2>nul
 rmdir "%TEST_DIR%\.stat-hidden-dir" >nul 2>nul
 
@@ -481,7 +481,7 @@ echo Flatcore Windows smoke test failed at: %STEP%
 if defined TEST_DIR (
     attrib -R "%TEST_DIR%\readonly.txt" >nul 2>nul
     attrib -H "%TEST_DIR%\native-hidden.txt" >nul 2>nul
-    del "%TEST_DIR%\touch-created.txt" "%TEST_DIR%\touch-one.txt" "%TEST_DIR%\touch-two.txt" "%TEST_DIR%\touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt" "%TEST_DIR%\move-destination.txt" "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
+    del "%TEST_DIR%\cp-hardlink-original.txt" "%TEST_DIR%\cp-hardlink-alias.txt" "%TEST_DIR%\touch-created.txt" "%TEST_DIR%\touch-one.txt" "%TEST_DIR%\touch-two.txt" "%TEST_DIR%\touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt" "%TEST_DIR%\move-destination.txt" "%TEST_DIR%\sample.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\copy.txt" "%TEST_DIR%\moved.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" >nul 2>nul
     rmdir /s /q "%TEST_DIR%" >nul 2>nul
 )
 del "%OUT%" "%EXPECTED%" >nul 2>nul

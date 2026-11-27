@@ -92,6 +92,116 @@ os_open:
     pop r12
     ret
 
+; os_same_file(path1_utf8, path2_utf8)
+; Compare file identities using volume serial and file index from native handles.
+; Failure to open either path means they are treated as different; cp's normal
+; open path handles the actual error.
+os_same_file:
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp, 152
+    mov r14, rdi
+    mov r15, rsi
+    mov r12, -1
+    mov r13, -1
+
+    mov rdi, r14
+    mov rsi, windows_path_buffer
+    mov edx, 32768
+    call fc_utf8_to_utf16
+    cmp rax, -1
+    je .same_done
+    mov rcx, windows_path_buffer
+    mov edx, 80000000h          ; GENERIC_READ
+    mov r8d, 7                  ; share read/write/delete
+    xor r9d, r9d
+    mov qword [rsp + 32], 0
+    mov qword [rsp + 40], 3     ; OPEN_EXISTING
+    mov qword [rsp + 48], 80h  ; FILE_ATTRIBUTE_NORMAL
+    mov qword [rsp + 56], 0
+    call [CreateFileW]
+    cmp rax, -1
+    je .same_done
+    mov r12, rax
+
+    mov rdi, r15
+    mov rsi, windows_path_buffer2
+    mov edx, 32768
+    call fc_utf8_to_utf16
+    cmp rax, -1
+    je .same_close_first
+    mov rcx, windows_path_buffer2
+    mov edx, 80000000h
+    mov r8d, 7
+    xor r9d, r9d
+    mov qword [rsp + 32], 0
+    mov qword [rsp + 40], 3
+    mov qword [rsp + 48], 80h
+    mov qword [rsp + 56], 0
+    call [CreateFileW]
+    cmp rax, -1
+    je .same_close_first
+    mov r13, rax
+
+    mov rcx, r12
+    lea rdx, [rsp + 64]
+    call [GetFileInformationByHandle]
+    test eax, eax
+    jz .same_close_both
+    mov rcx, r13
+    lea rdx, [rsp + 120]
+    call [GetFileInformationByHandle]
+    test eax, eax
+    jz .same_close_both
+
+    ; BY_HANDLE_FILE_INFORMATION: volume serial at +28, file index at +44/+48.
+    mov eax, [rsp + 64 + 28]
+    cmp eax, [rsp + 120 + 28]
+    jne .same_close_both
+    mov eax, [rsp + 64 + 44]
+    cmp eax, [rsp + 120 + 44]
+    jne .same_close_both
+    mov eax, [rsp + 64 + 48]
+    cmp eax, [rsp + 120 + 48]
+    jne .same_close_both
+    mov ebx, 1
+    jmp .same_close_both
+
+.same_close_first:
+    mov rcx, r12
+    call [CloseHandle]
+    jmp .same_done
+.same_close_both:
+    xor ebx, ebx
+    ; If identities matched, preserve the true result from comparison.
+    mov eax, [rsp + 64 + 28]
+    cmp eax, [rsp + 120 + 28]
+    jne .same_cleanup
+    mov eax, [rsp + 64 + 44]
+    cmp eax, [rsp + 120 + 44]
+    jne .same_cleanup
+    mov eax, [rsp + 64 + 48]
+    cmp eax, [rsp + 120 + 48]
+    jne .same_cleanup
+    mov ebx, 1
+.same_cleanup:
+    mov rcx, r13
+    call [CloseHandle]
+    mov rcx, r12
+    call [CloseHandle]
+    mov eax, ebx
+    jmp .same_done
+.same_done:
+    xor eax, eax
+    add rsp, 152
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    ret
+
 ; os_mkdir(path_utf8, mode). Windows does not expose POSIX creation modes.
 os_mkdir:
     push r12

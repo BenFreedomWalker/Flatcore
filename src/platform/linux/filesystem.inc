@@ -7,7 +7,7 @@ os_open:
     mov r10, rdx
     mov r11d, esi
     and r11d, FC_OPEN_READ or FC_OPEN_WRITE
-    mov eax, 2
+    xor eax, eax                ; O_RDONLY
     cmp r11d, FC_OPEN_READ
     je .access_ready
     cmp r11d, FC_OPEN_WRITE

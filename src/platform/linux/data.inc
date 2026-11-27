@@ -39,6 +39,8 @@ fc_cmd_cp_destination_handle dq 0
 fc_cmd_cp_read_count dq 0
 align 16
 fc_cmd_cp_buffer rb 4096
+align 16
+fc_cmd_mv_target_path rb 65536
 
 align 8
 fc_cmd_stat_info rb 64

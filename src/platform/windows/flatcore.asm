@@ -905,4 +905,4 @@ import kernel32, \
     GetStdHandle, 'GetStdHandle', \
     WriteFile, 'WriteFile', \
     ExitProcess, 'ExitProcess', \
-    GetFileInformationByHandle, 'GetFileInformationByHandle'
+    GetFileInfoByHandle, 'GetFileInformationByHandle'

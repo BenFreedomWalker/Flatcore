@@ -71,4 +71,5 @@ import kernel32, \
     FindClose, 'FindClose', \
     SetCurrentDirectoryW, 'SetCurrentDirectoryW', \
     SetFileTime, 'SetFileTime', \
-    GetSystemTimeAsFileTime, 'GetSystemTimeAsFileTime'
+    GetSystemTimeAsFileTime, 'GetSystemTimeAsFileTime', \
+    GetFileInfoByHandle, 'GetFileInformationByHandle'

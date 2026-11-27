@@ -77,7 +77,7 @@ os_same_file:
     mov rax, qword [linux_stat_buffer]
     cmp rax, qword [linux_stat_buffer2] ; st_dev
     jne .same_different
-    mov rax, [linux_stat_buffer + 8]
+    mov rax, qword [linux_stat_buffer + 8]
     cmp rax, qword [linux_stat_buffer2 + 8] ; st_ino
     jne .same_different
     mov eax, 1

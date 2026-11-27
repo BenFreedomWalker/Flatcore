@@ -97,15 +97,17 @@ os_open:
 ; Failure to open either path means they are treated as different; cp's normal
 ; open path handles the actual error.
 os_same_file:
+    push rbx
     push r12
     push r13
     push r14
     push r15
-    sub rsp, 152
+    sub rsp, 192
     mov r14, rdi
     mov r15, rsi
     mov r12, -1
     mov r13, -1
+    xor ebx, ebx
 
     mov rdi, r14
     mov rsi, windows_path_buffer
@@ -116,11 +118,10 @@ os_same_file:
     mov rcx, windows_path_buffer
     mov edx, 80000000h          ; GENERIC_READ
     mov r8d, 7                  ; share read/write/delete
-    xor r9d, r9d
-    mov qword [rsp + 32], 0
-    mov qword [rsp + 40], 3     ; OPEN_EXISTING
-    mov qword [rsp + 48], 80h  ; FILE_ATTRIBUTE_NORMAL
-    mov qword [rsp + 56], 0
+    xor r9d, r9d                ; no security attributes
+    mov qword [rsp + 32], 3     ; OPEN_EXISTING
+    mov qword [rsp + 40], 80h  ; FILE_ATTRIBUTE_NORMAL
+    mov qword [rsp + 48], 0     ; no template handle
     call [CreateFileW]
     cmp rax, -1
     je .same_done
@@ -136,10 +137,9 @@ os_same_file:
     mov edx, 80000000h
     mov r8d, 7
     xor r9d, r9d
-    mov qword [rsp + 32], 0
-    mov qword [rsp + 40], 3
-    mov qword [rsp + 48], 80h
-    mov qword [rsp + 56], 0
+    mov qword [rsp + 32], 3
+    mov qword [rsp + 40], 80h
+    mov qword [rsp + 48], 0
     call [CreateFileW]
     cmp rax, -1
     je .same_close_first
@@ -174,32 +174,18 @@ os_same_file:
     call [CloseHandle]
     jmp .same_done
 .same_close_both:
-    xor ebx, ebx
-    ; If identities matched, preserve the true result from comparison.
-    mov eax, [rsp + 64 + 28]
-    cmp eax, [rsp + 120 + 28]
-    jne .same_cleanup
-    mov eax, [rsp + 64 + 44]
-    cmp eax, [rsp + 120 + 44]
-    jne .same_cleanup
-    mov eax, [rsp + 64 + 48]
-    cmp eax, [rsp + 120 + 48]
-    jne .same_cleanup
-    mov ebx, 1
-.same_cleanup:
     mov rcx, r13
     call [CloseHandle]
     mov rcx, r12
     call [CloseHandle]
-    mov eax, ebx
-    jmp .same_done
 .same_done:
-    xor eax, eax
-    add rsp, 152
+    mov eax, ebx
+    add rsp, 192
     pop r15
     pop r14
     pop r13
     pop r12
+    pop rbx
     ret
 
 ; os_mkdir(path_utf8, mode). Windows does not expose POSIX creation modes.

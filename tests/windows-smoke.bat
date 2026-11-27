@@ -331,7 +331,7 @@ if not exist "%TEST_DIR%\mv target dir\mv source file.txt" goto failed
 if exist "%TEST_DIR%\mv source file.txt" goto failed
 mkdir "%TEST_DIR%\mv source dir"
 > "%TEST_DIR%\mv source dir\inside.txt" echo move directory into directory
-"%BIN%" mv "%TEST_DIR%\mv source dir" "%TEST_DIR%\mv target dir"
+"%BIN%" mv "%TEST_DIR%\mv source dir\" "%TEST_DIR%\mv target dir\"
 if not exist "%TEST_DIR%\mv target dir\mv source dir\inside.txt" goto failed
 findstr /x /c:"move directory into directory" "%TEST_DIR%\mv target dir\mv source dir\inside.txt" >nul
 if exist "%TEST_DIR%\mv source dir" goto failed

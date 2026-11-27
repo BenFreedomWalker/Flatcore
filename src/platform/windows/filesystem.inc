@@ -72,8 +72,28 @@ os_open:
     call [CreateFileW]
     cmp rax, -1
     je .open_error
+    test r14d, FC_OPEN_DIRECTORY
+    jz .open_store_handle
+    ; FILE_FLAG_BACKUP_SEMANTICS permits opening directories but does not
+    ; reject regular files. Enforce the FC_OPEN_DIRECTORY contract explicitly.
+    mov [rsp + 56], rax
+    mov rcx, rax
+    lea rdx, [windows_stat_find_data]
+    call [GetFileInfoByHandle]
+    test eax, eax
+    jz .open_not_directory
+    test dword [windows_stat_find_data], 10h ; FILE_ATTRIBUTE_DIRECTORY
+    jz .open_not_directory
+    mov rax, [rsp + 56]
+.open_store_handle:
     mov [r13], rax
     xor eax, eax
+    jmp .open_done
+.open_not_directory:
+    mov rcx, [rsp + 56]
+    call [CloseHandle]
+    mov eax, FC_ERR_NOT_DIR
+    call fc_windows_set_normalized_error
     jmp .open_done
 .open_encoding:
     mov eax, FC_ERR_ENCODING

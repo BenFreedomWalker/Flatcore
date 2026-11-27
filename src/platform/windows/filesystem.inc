@@ -147,12 +147,12 @@ os_same_file:
 
     mov rcx, r12
     lea rdx, [rsp + 64]
-    call [GetFileInformationByHandle]
+    call [GetFileInfoByHandle]
     test eax, eax
     jz .same_close_both
     mov rcx, r13
     lea rdx, [rsp + 120]
-    call [GetFileInformationByHandle]
+    call [GetFileInfoByHandle]
     test eax, eax
     jz .same_close_both
 

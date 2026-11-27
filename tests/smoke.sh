@@ -81,6 +81,11 @@ fi
     cmp input.txt copied.txt
     "$BIN" mv copied.txt moved.txt
     cmp input.txt moved.txt
+    "$BIN" mkdir 'mv target dir'
+    printf 'move into directory\\n' > 'mv source file.txt'
+    "$BIN" mv 'mv source file.txt' 'mv target dir'
+    grep -qx 'move into directory' 'mv target dir/mv source file.txt'
+    test ! -e 'mv source file.txt'
     printf 'old destination\n' > move-destination.txt
     printf 'new source\n' > move-source.txt
     "$BIN" mv -- move-source.txt move-destination.txt

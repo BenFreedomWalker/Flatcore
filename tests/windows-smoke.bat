@@ -170,6 +170,9 @@ set "STEP=touch reference timestamps"
 > "%TEST_DIR%\touch-reference-target.txt" echo target
 "%BIN%" touch -r "%TEST_DIR%\touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt"
 if errorlevel 1 goto failed
+set "STEP=touch rejects a missing reference"
+"%BIN%" touch -r "%TEST_DIR%\missing-touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt" >nul 2>nul
+if not errorlevel 1 goto failed
 set "STEP=touch no-create options"
 "%BIN%" touch -c "%TEST_DIR%\missing-touch.txt"
 if errorlevel 1 goto failed

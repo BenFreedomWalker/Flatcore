@@ -56,6 +56,36 @@ os_open:
     neg eax
     jmp fc_linux_set_error
 
+; os_same_file(path1_utf8, path2_utf8)
+; Compare underlying file identity while following symbolic links. A missing
+; destination is treated as different; cp's subsequent open reports errors.
+os_same_file:
+    mov r8, rdi
+    mov r9, rsi
+    mov rdi, r8
+    lea rsi, [linux_stat_buffer]
+    mov eax, 4                  ; SYS_stat (follows symlinks)
+    syscall
+    test rax, rax
+    js .same_different
+    mov rdi, r9
+    lea rsi, [linux_stat_buffer2]
+    mov eax, 4
+    syscall
+    test rax, rax
+    js .same_different
+    mov rax, [linux_stat_buffer]
+    cmp rax, [linux_stat_buffer2] ; st_dev
+    jne .same_different
+    mov rax, [linux_stat_buffer + 8]
+    cmp rax, [linux_stat_buffer2 + 8] ; st_ino
+    jne .same_different
+    mov eax, 1
+    ret
+.same_different:
+    xor eax, eax
+    ret
+
 ; os_mkdir(path_utf8, mode)
 os_mkdir:
     mov eax, 83

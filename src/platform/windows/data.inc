@@ -32,6 +32,13 @@ fc_cmd_rmdir_work_path rb 8192
 align 16
 fc_cmd_rm_flags dq 0
 fc_cmd_rm_info rb 64
+align 8
+fc_cmd_cp_source_handle dq 0
+fc_cmd_cp_destination_handle dq 0
+fc_cmd_cp_read_count dq 0
+align 16
+fc_cmd_cp_buffer rb 4096
+
 align 16
 windows_path_buffer rb 65536
 windows_path_buffer2 rb 65536

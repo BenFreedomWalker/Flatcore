@@ -665,7 +665,7 @@ os_stat_follow:
     je .stat_follow_error
     mov r13, rax
 
-    lea r15, [r15]
+    mov r15, windows_stat_find_data
     mov rcx, r13
     mov rdx, r15
     call [GetFileInfoByHandle]

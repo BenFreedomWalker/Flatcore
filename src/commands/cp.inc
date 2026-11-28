@@ -51,14 +51,8 @@ fc_cmd_cp:
     test eax, eax
     jnz .same_file
 
-    ; Reject aliases (hard links and symlinks) before opening the destination
-    ; with truncation enabled.
-    mov rdi, [r13 + r14 * 8]
-    mov rsi, [r13 + r14 * 8 + 8]
-    call os_same_file
-    test eax, eax
-    jnz .same_file
-
+    ; A path-based check is not authoritative: a concurrent rename could replace
+    ; the destination after the check. Compare the opened objects below.
     mov rdi, [r13 + r14 * 8]
     mov esi, FC_OPEN_READ
     xor edx, edx
@@ -68,7 +62,7 @@ fc_cmd_cp:
     jnz .operation_error
 
     mov rdi, [r13 + r14 * 8 + 8]
-    mov esi, FC_OPEN_WRITE or FC_OPEN_CREATE or FC_OPEN_TRUNCATE
+    mov esi, FC_OPEN_WRITE or FC_OPEN_CREATE
     mov edx, 0644o
     mov rcx, fc_cmd_cp_destination_handle
     call os_open
@@ -77,6 +71,19 @@ fc_cmd_cp:
 
     mov r15, [fc_cmd_cp_source_handle]
     mov rbx, [fc_cmd_cp_destination_handle]
+    mov rdi, r15
+    mov rsi, rbx
+    call os_same_handle
+    cmp eax, 1
+    je .same_open_file
+    test eax, eax
+    js .open_identity_error
+
+    ; Truncate only the destination handle whose identity was just checked.
+    mov rdi, rbx
+    call os_truncate
+    test rax, rax
+    jnz .copy_failed
 .copy_loop:
     mov rdi, r15
     mov rsi, fc_cmd_cp_buffer
@@ -114,6 +121,20 @@ fc_cmd_cp:
     mov rdi, r15
     call os_close
     jmp .operation_error
+
+.open_identity_error:
+    mov rdi, rbx
+    call os_close
+    mov rdi, r15
+    call os_close
+    jmp .operation_error
+
+.same_open_file:
+    mov rdi, rbx
+    call os_close
+    mov rdi, r15
+    call os_close
+    jmp .same_file
 
 .close_source_error:
     mov rdi, [fc_cmd_cp_source_handle]

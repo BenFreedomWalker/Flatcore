@@ -67,9 +67,9 @@ fi
     "$BIN" cp input.txt copied.txt
     cmp input.txt copied.txt
     "$BIN" mkdir cp-source-dir
-    printf 'destination preserved\\n' > cp-directory-destination.txt
+    printf '%s\n' 'destination preserved' > cp-directory-destination.txt
     if "$BIN" cp cp-source-dir cp-directory-destination.txt >/dev/null 2>&1; then
-        printf 'cp accepted a directory source\\n' >&2
+        printf '%s\n' 'cp accepted a directory source' >&2
         exit 1
     fi
     grep -qx 'destination preserved' cp-directory-destination.txt

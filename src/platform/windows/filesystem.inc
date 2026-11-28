@@ -208,6 +208,71 @@ os_same_file:
     pop rbx
     ret
 
+; os_same_handle(handle1, handle2)
+; Compare file identities from already-open handles. Return 1 same, 0 different,
+; or -1 if either handle cannot be queried.
+os_same_handle:
+    push r12
+    push r13
+    sub rsp, 152
+    mov r12, rdi
+    mov r13, rsi
+    mov rcx, r12
+    lea rdx, [rsp + 32]
+    call [GetFileInfoByHandle]
+    test eax, eax
+    jz .same_handle_error
+    mov rcx, r13
+    lea rdx, [rsp + 88]
+    call [GetFileInfoByHandle]
+    test eax, eax
+    jz .same_handle_error
+    mov eax, [rsp + 32 + 28]
+    cmp eax, [rsp + 88 + 28]
+    jne .same_handle_different
+    mov eax, [rsp + 32 + 44]
+    cmp eax, [rsp + 88 + 44]
+    jne .same_handle_different
+    mov eax, [rsp + 32 + 48]
+    cmp eax, [rsp + 88 + 48]
+    jne .same_handle_different
+    mov eax, 1
+    jmp .same_handle_done
+.same_handle_different:
+    xor eax, eax
+    jmp .same_handle_done
+.same_handle_error:
+    call fc_windows_set_error
+    mov eax, -1
+.same_handle_done:
+    add rsp, 152
+    pop r13
+    pop r12
+    ret
+
+; os_truncate(handle): reset the file pointer and truncate the open file to zero.
+os_truncate:
+    sub rsp, 40
+    mov qword [rsp + 32], 0
+    mov rcx, rdi
+    lea rdx, [rsp + 32]
+    xor r8d, r8d
+    xor r9d, r9d                ; FILE_BEGIN
+    call [SetFilePointerEx]
+    test eax, eax
+    jz .truncate_error
+    mov rcx, rdi
+    call [SetEndOfFile]
+    test eax, eax
+    jz .truncate_error
+    xor eax, eax
+    jmp .truncate_done
+.truncate_error:
+    call fc_windows_set_error
+.truncate_done:
+    add rsp, 40
+    ret
+
 ; os_mkdir(path_utf8, mode). Windows does not expose POSIX creation modes.
 os_mkdir:
     push r12

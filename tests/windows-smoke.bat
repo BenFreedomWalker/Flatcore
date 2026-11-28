@@ -53,6 +53,13 @@ if not exist "%TEST_DIR%\nested\one\two" goto failed
 set "STEP=mkdir parents already exist"
 "%BIN%" mkdir -p "%TEST_DIR%\nested\one\two"
 if errorlevel 1 goto failed
+set "STEP=mkdir -p follows directory junction parents"
+mkdir "%TEST_DIR%\mkdir-junction-target"
+mklink /J "%TEST_DIR%\mkdir-junction-parent" "%TEST_DIR%\mkdir-junction-target" >nul
+if errorlevel 1 goto failed
+"%BIN%" mkdir -p "%TEST_DIR%\mkdir-junction-parent\child"
+if errorlevel 1 goto failed
+if not exist "%TEST_DIR%\mkdir-junction-target\child" goto failed
 set "STEP=mkdir verbose output"
 "%BIN%" mkdir -pv "%TEST_DIR%\verbose\deep" > "%OUT%"
 if errorlevel 1 goto failed
@@ -170,6 +177,13 @@ set "STEP=touch reference timestamps"
 > "%TEST_DIR%\touch-reference-target.txt" echo target
 "%BIN%" touch -r "%TEST_DIR%\touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt"
 if errorlevel 1 goto failed
+set "STEP=touch creates dangling symbolic-link target when supported"
+mklink "%TEST_DIR%\touch-dangling-link.txt" "%TEST_DIR%\touch-dangling-target.txt" >nul 2>nul
+if not errorlevel 1 (
+    "%BIN%" touch "%TEST_DIR%\touch-dangling-link.txt"
+    if errorlevel 1 goto failed
+    if not exist "%TEST_DIR%\touch-dangling-target.txt" goto failed
+)
 set "STEP=touch rejects a missing reference"
 "%BIN%" touch -r "%TEST_DIR%\missing-touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt" >nul 2>nul
 if not errorlevel 1 goto failed
@@ -422,10 +436,13 @@ set "STEP=remove moved file"
 "%BIN%" rm "%TEST_DIR%\moved.txt"
 if errorlevel 1 goto failed
 
-del "%TEST_DIR%\cp-hardlink-original.txt" "%TEST_DIR%\cp-hardlink-alias.txt" "%TEST_DIR%\touch-created.txt" "%TEST_DIR%\touch-one.txt" "%TEST_DIR%\touch-two.txt" "%TEST_DIR%\touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt" "%TEST_DIR%\touch-after-error.txt" "%TEST_DIR%\move-destination.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" "%TEST_DIR%\mv target dir\mv source file.txt" "%TEST_DIR%\mv target dir\mv source dir\inside.txt" >nul 2>nul
+del "%TEST_DIR%\cp-hardlink-original.txt" "%TEST_DIR%\cp-hardlink-alias.txt" "%TEST_DIR%\touch-created.txt" "%TEST_DIR%\touch-one.txt" "%TEST_DIR%\touch-two.txt" "%TEST_DIR%\touch-reference.txt" "%TEST_DIR%\touch-reference-target.txt" "%TEST_DIR%\touch-dangling-link.txt" "%TEST_DIR%\touch-dangling-target.txt" "%TEST_DIR%\touch-after-error.txt" "%TEST_DIR%\move-destination.txt" "%TEST_DIR%\second.txt" "%TEST_DIR%\empty.txt" "%TEST_DIR%\.hidden" "%TEST_DIR%\.stat-hidden" "%TEST_DIR%\visible" "%TEST_DIR%\readonly.txt" "%TEST_DIR%\native-hidden.txt" "%TEST_DIR%\stat-hidden-dir\.nested-hidden" "%TEST_DIR%\stat-hidden-dir\visible" "%TEST_DIR%\mv target dir\mv source file.txt" "%TEST_DIR%\mv target dir\mv source dir\inside.txt" >nul 2>nul
 rmdir "%TEST_DIR%\mv target dir\mv source dir" >nul 2>nul
 rmdir "%TEST_DIR%\mv target dir" >nul 2>nul
 rmdir "%TEST_DIR%\stat-hidden-dir" >nul 2>nul
+rmdir "%TEST_DIR%\mkdir-junction-parent" >nul 2>nul
+rmdir "%TEST_DIR%\mkdir-junction-target\child" >nul 2>nul
+rmdir "%TEST_DIR%\mkdir-junction-target" >nul 2>nul
 rmdir "%TEST_DIR%\.stat-hidden-dir" >nul 2>nul
 
 set "STEP=rmdir parents and verbose output"

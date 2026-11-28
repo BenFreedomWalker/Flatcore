@@ -104,11 +104,11 @@ os_same_handle:
     syscall
     test rax, rax
     js .same_handle_error
-    mov rax, [linux_stat_buffer]
-    cmp rax, [linux_stat_buffer2] ; st_dev
+    mov rax, qword [linux_stat_buffer]
+    cmp rax, qword [linux_stat_buffer2] ; st_dev
     jne .same_handle_different
-    mov rax, [linux_stat_buffer + 8]
-    cmp rax, [linux_stat_buffer2 + 8] ; st_ino
+    mov rax, qword [linux_stat_buffer + 8]
+    cmp rax, qword [linux_stat_buffer2 + 8] ; st_ino
     jne .same_handle_different
     mov eax, 1
     ret

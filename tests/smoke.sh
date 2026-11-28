@@ -140,6 +140,10 @@ fi
     # mkdir: recursive creation, existing parents, modes, verbose output.
     "$BIN" mkdir -p mkdir-tree/one/two
     [[ -d mkdir-tree/one/two ]]
+    "$BIN" mkdir mkdir-symlink-target
+    ln -s mkdir-symlink-target mkdir-symlink-parent
+    "$BIN" mkdir -p mkdir-symlink-parent/child
+    [[ -d mkdir-symlink-target/child ]]
     "$BIN" mkdir -p mkdir-tree/one/two
     "$BIN" mkdir -pv mkdir-verbose/a/b > mkdir-verbose.txt
     [[ -d mkdir-verbose/a/b ]]
@@ -320,6 +324,24 @@ fi
     "$BIN" touch -am -r touch-reference.txt touch-reference-target.txt
     [[ "$(stat -c '%X %Y' touch-reference.txt)" == "$(stat -c '%X %Y' touch-reference-target.txt)" ]]
 
+    # Timestamp selection through a symlink must preserve the target's
+    # unselected timestamp, not copy metadata from the link itself.
+    printf 'symlink target\\n' > touch-symlink-target.txt
+    ln -s touch-symlink-target.txt touch-symlink.txt
+    touch -a -t 200101010101.01 touch-symlink-target.txt
+    touch -m -t 200202020202.02 touch-symlink-target.txt
+    target_mtime="$(stat -c '%Y' touch-symlink-target.txt)"
+    "$BIN" touch -a -r touch-reference.txt touch-symlink.txt
+    [[ "$(stat -c '%Y' touch-symlink-target.txt)" == "$target_mtime" ]]
+    target_atime="$(stat -c '%X' touch-symlink-target.txt)"
+    "$BIN" touch -m -r touch-reference.txt touch-symlink.txt
+    [[ "$(stat -c '%X' touch-symlink-target.txt)" == "$target_atime" ]]
+
+    # A dangling symbolic link is retained and its missing target is created.
+    ln -s touch-dangling-target.txt touch-dangling-link.txt
+    "$BIN" touch touch-dangling-link.txt
+    [[ -L touch-dangling-link.txt && -f touch-dangling-target.txt ]]
+
     # -c suppresses creation, not updates to existing files.
     touch -m -t 200101010101.01 touch-reference-target.txt
     target_mtime="$(stat -c '%Y' touch-reference-target.txt)"
@@ -382,8 +404,11 @@ fi
     [[ "$("$BIN" echo symlink-dispatch)" == 'symlink-dispatch' ]]
     [[ "$("$BIN_LINKS/echo" symlink-dispatch)" == 'symlink-dispatch' ]]
 
-    "$BIN" rm cp-hardlink-original.txt cp-hardlink-alias.txt sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt stat-file.txt .stat-hidden touch-created.txt touch-one.txt touch-two.txt touch-reference.txt touch-reference-target.txt ./-touch-leading
+    "$BIN" rm cp-hardlink-original.txt cp-hardlink-alias.txt sample.txt input.txt moved.txt input-link hard-link mode.txt wc.txt stat-file.txt .stat-hidden touch-created.txt touch-one.txt touch-two.txt touch-reference.txt touch-reference-target.txt touch-symlink.txt touch-symlink-target.txt touch-dangling-link.txt touch-dangling-target.txt ./-touch-leading
     "$BIN" rm stat-hidden-dir/.nested-hidden stat-hidden-dir/visible
+    "$BIN" rmdir mkdir-symlink-target/child
+    "$BIN" rm mkdir-symlink-parent
+    "$BIN" rmdir mkdir-symlink-target
     "$BIN" rmdir stat-hidden-dir
     "$BIN" rmdir .stat-hidden-dir
     if "$BIN" rm missing-file; then

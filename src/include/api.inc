@@ -95,7 +95,9 @@
 ; os_write(handle, buffer, byte_count, out_bytes_written)
 ; os_open(path_utf8, flags, mode, out_handle)
 ; os_close(handle)
-; os_stat(path_utf8, out_fc_file_info)
+; os_stat(path_utf8, out_fc_file_info) does not follow symbolic links.
+; os_stat_follow(path_utf8, out_fc_file_info) resolves symbolic links and
+; directory reparse points, returning metadata for the target.
 ; os_same_handle(handle1, handle2) compares identities after both handles are open.
 ; Returns 1 for the same object, 0 for different objects, -1 on inspection error.
 ; os_truncate(handle) truncates the already-open file to zero bytes and resets

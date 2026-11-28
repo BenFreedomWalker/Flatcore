@@ -318,6 +318,16 @@ set "STEP=copy file"
 "%BIN%" cp "%TEST_DIR%\sample.txt" "%TEST_DIR%\copy.txt"
 if errorlevel 1 goto failed
 
+set "STEP=cp directory source preserves destination"
+mkdir "%TEST_DIR%\cp-source-dir"
+> "%TEST_DIR%\cp-directory-destination.txt" echo destination preserved
+"%BIN%" cp "%TEST_DIR%\cp-source-dir" "%TEST_DIR%\cp-directory-destination.txt" >nul 2>nul
+if not errorlevel 1 goto failed
+findstr /x /c:"destination preserved" "%TEST_DIR%\cp-directory-destination.txt" >nul
+if errorlevel 1 goto failed
+rmdir "%TEST_DIR%\cp-source-dir"
+del "%TEST_DIR%\cp-directory-destination.txt"
+
 set "STEP=cp identical source and destination"
 "%BIN%" cp -- "%TEST_DIR%\sample.txt" "%TEST_DIR%\sample.txt" >nul 2>nul
 if not errorlevel 1 goto failed

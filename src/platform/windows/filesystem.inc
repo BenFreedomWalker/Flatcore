@@ -726,7 +726,7 @@ os_stat_follow:
     mov cx, [rdx]
     test cx, cx
     jz .stat_follow_hidden_check
-    cmp cx, '\\'
+    cmp cx, '\'
     je .stat_follow_hidden_separator
     cmp cx, '/'
     jne .stat_follow_hidden_next

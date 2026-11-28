@@ -926,4 +926,4 @@ import kernel32, \
     WriteFile, 'WriteFile', \
     ExitProcess, 'ExitProcess', \
     GetFileInfoByHandle, 'GetFileInformationByHandle', \
-    SetEndOfFile, 'SetEndOfFile'
+    SetEndOfFileAPI, 'SetEndOfFile'

@@ -253,14 +253,8 @@ os_same_handle:
 ; os_truncate(handle): reset the file pointer and truncate the open file to zero.
 os_truncate:
     sub rsp, 40
-    mov qword [rsp + 32], 0
-    mov rcx, rdi
-    lea rdx, [rsp + 32]
-    xor r8d, r8d
-    xor r9d, r9d                ; FILE_BEGIN
-    call [SetFilePointerEx]
-    test eax, eax
-    jz .truncate_error
+    ; CreateFileW returns a new handle positioned at offset zero.
+    ; Keep that position and truncate through the same open handle.
     mov rcx, rdi
     call [SetEndOfFile]
     test eax, eax

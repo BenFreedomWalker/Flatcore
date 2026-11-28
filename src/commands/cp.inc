@@ -61,6 +61,16 @@ fc_cmd_cp:
     test rax, rax
     jnz .operation_error
 
+    ; Read the first block before opening/truncating the destination. This
+    ; rejects unreadable sources and directories without destroying a target.
+    mov rdi, [fc_cmd_cp_source_handle]
+    mov rsi, fc_cmd_cp_buffer
+    mov edx, 4096
+    mov rcx, fc_cmd_cp_read_count
+    call os_read
+    test rax, rax
+    jnz .close_source_error
+
     mov rdi, [r13 + r14 * 8 + 8]
     mov esi, FC_OPEN_WRITE or FC_OPEN_CREATE
     mov edx, 0644o
@@ -82,6 +92,17 @@ fc_cmd_cp:
     ; Truncate only the destination handle whose identity was just checked.
     mov rdi, rbx
     call os_truncate
+    test rax, rax
+    jnz .copy_failed
+
+    ; The prefetched block is already consumed from the source handle.
+    mov rdx, [fc_cmd_cp_read_count]
+    test rdx, rdx
+    jz .copy_loop
+    mov rdi, rbx
+    mov rsi, fc_cmd_cp_buffer
+    mov rcx, os_write
+    call fc_write_all
     test rax, rax
     jnz .copy_failed
 .copy_loop:

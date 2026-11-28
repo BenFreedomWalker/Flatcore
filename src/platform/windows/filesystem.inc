@@ -645,7 +645,6 @@ os_stat_follow:
     push r15
     sub rsp, 56
     mov r12, rsi
-    mov rdi, rdi
     mov rsi, windows_path_buffer
     mov edx, 32768
     call fc_utf8_to_utf16

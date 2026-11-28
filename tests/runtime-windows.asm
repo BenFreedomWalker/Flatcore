@@ -72,4 +72,5 @@ import kernel32, \
     SetCurrentDirectoryW, 'SetCurrentDirectoryW', \
     SetFileTime, 'SetFileTime', \
     GetSystemTimeAsFileTime, 'GetSystemTimeAsFileTime', \
-    GetFileInfoByHandle, 'GetFileInformationByHandle'
+    GetFileInfoByHandle, 'GetFileInformationByHandle', \
+    SetEndOfFileAPI, 'SetEndOfFile'

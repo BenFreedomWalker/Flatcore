@@ -126,6 +126,13 @@ os_truncate:
     syscall
     test rax, rax
     js .truncate_error
+    ; Keep the cross-platform contract: the handle is positioned at byte zero.
+    xor esi, esi
+    xor edx, edx                ; SEEK_SET
+    mov eax, 8                  ; SYS_lseek
+    syscall
+    test rax, rax
+    js .truncate_error
     xor eax, eax
     ret
 .truncate_error:

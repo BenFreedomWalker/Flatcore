@@ -86,6 +86,52 @@ os_same_file:
     xor eax, eax
     ret
 
+; os_same_handle(handle1, handle2)
+; Compare identities from already-open descriptors. Return 1 same, 0 different,
+; or -1 if either descriptor cannot be inspected.
+os_same_handle:
+    mov r8, rdi
+    mov r9, rsi
+    mov edi, r8d
+    lea rsi, [linux_stat_buffer]
+    mov eax, 5                  ; SYS_fstat
+    syscall
+    test rax, rax
+    js .same_handle_error
+    mov edi, r9d
+    lea rsi, [linux_stat_buffer2]
+    mov eax, 5
+    syscall
+    test rax, rax
+    js .same_handle_error
+    mov rax, [linux_stat_buffer]
+    cmp rax, [linux_stat_buffer2] ; st_dev
+    jne .same_handle_different
+    mov rax, [linux_stat_buffer + 8]
+    cmp rax, [linux_stat_buffer2 + 8] ; st_ino
+    jne .same_handle_different
+    mov eax, 1
+    ret
+.same_handle_different:
+    xor eax, eax
+    ret
+.same_handle_error:
+    neg eax
+    jmp fc_linux_set_error
+
+; os_truncate(handle): truncate the already-open file to zero bytes.
+os_truncate:
+    xor esi, esi
+    mov eax, 77                 ; SYS_ftruncate
+    syscall
+    test rax, rax
+    js .truncate_error
+    xor eax, eax
+    ret
+.truncate_error:
+    neg eax
+    jmp fc_linux_set_error
+
 ; os_mkdir(path_utf8, mode)
 os_mkdir:
     mov eax, 83

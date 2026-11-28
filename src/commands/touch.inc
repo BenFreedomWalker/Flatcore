@@ -157,7 +157,7 @@ fc_cmd_touch:
     jz .files
     mov rdi, qword [fc_cmd_touch_reference]
     mov rsi, fc_cmd_touch_ref_info
-    call os_stat
+    call os_stat_follow
     test eax, eax
     jnz .reference_error
 
@@ -166,11 +166,11 @@ fc_cmd_touch:
     jae .success
     mov rbx, [r13 + r14 * 8]
 
-    ; Existing entries are not opened: this permits timestamp updates on
-    ; read-only files when the OS grants attribute/metadata access.
+    ; Resolve symbolic links before reading timestamps. os_set_times follows
+    ; links too, so both operations must refer to the same target object.
     mov rdi, rbx
     mov rsi, fc_cmd_touch_info
-    call os_stat
+    call os_stat_follow
     test eax, eax
     jz .have_info
     cmp dword [os_error_code], FC_ERR_NOT_FOUND
@@ -179,6 +179,7 @@ fc_cmd_touch:
     jnz .next_file
 
     ; Create a missing file without truncating anything (CREATE + WRITE).
+    ; For a dangling symlink this creates its missing target, as touch normally does.
     mov rdi, rbx
     mov esi, FC_OPEN_WRITE or FC_OPEN_CREATE
     mov edx, 0644o
@@ -195,7 +196,7 @@ fc_cmd_touch:
     ; preserve the unselected timestamp.
     mov rdi, rbx
     mov rsi, fc_cmd_touch_info
-    call os_stat
+    call os_stat_follow
     test eax, eax
     jnz .file_error
 

@@ -665,8 +665,9 @@ os_stat_follow:
     je .stat_follow_error
     mov r13, rax
 
+    lea r15, [r15]
     mov rcx, r13
-    mov rdx, windows_stat_find_data
+    mov rdx, r15
     call [GetFileInfoByHandle]
     test eax, eax
     jz .stat_follow_info_error
@@ -678,31 +679,31 @@ os_stat_follow:
     mov ecx, 8
     rep stosq
 
-    mov eax, [windows_stat_find_data + 32]
+    mov eax, [r15 + 32]
     shl rax, 32
-    mov edx, [windows_stat_find_data + 36]
+    mov edx, [r15 + 36]
     or rax, rdx
     mov [r12], rax
 
-    mov rax, [windows_stat_find_data + 4]
+    mov rax, [r15 + 4]
     mov rdx, 116444736000000000
     sub rax, rdx
     imul rax, 100
     mov [r12 + 16], rax
 
-    mov rax, [windows_stat_find_data + 20]
+    mov rax, [r15 + 20]
     mov rdx, 116444736000000000
     sub rax, rdx
     imul rax, 100
     mov [r12 + 8], rax
 
-    mov rax, [windows_stat_find_data + 12]
+    mov rax, [r15 + 12]
     mov rdx, 116444736000000000
     sub rax, rdx
     imul rax, 100
     mov [r12 + 24], rax
 
-    mov r14d, [windows_stat_find_data]
+    mov r14d, [r15]
     test r14d, 2                  ; FILE_ATTRIBUTE_HIDDEN
     jz .stat_follow_not_hidden
     or dword [r12 + 32], FC_ATTR_NATIVE_HIDDEN

@@ -928,4 +928,3 @@ import kernel32, \
     GetFileInfoByHandle, 'GetFileInformationByHandle', \
     SetEndOfFileAPI, 'SetEndOfFile'
 
-import kernel32, SetEndOfFileAPI, 'SetEndOfFile'

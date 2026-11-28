@@ -634,6 +634,151 @@ os_stat:
     pop r12
     ret
 
+; os_stat_follow(path_utf8, out_fc_file_info)
+; Query the resolved target through a normal Win32 handle. Omitting
+; FILE_FLAG_OPEN_REPARSE_POINT makes CreateFileW follow symbolic links and
+; junctions, matching Linux stat(2) semantics.
+os_stat_follow:
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp, 56
+    mov r12, rsi
+    mov rdi, rdi
+    mov rsi, windows_path_buffer
+    mov edx, 32768
+    call fc_utf8_to_utf16
+    cmp rax, -1
+    je .stat_follow_encoding
+
+    ; FILE_READ_ATTRIBUTES, share read/write/delete, OPEN_EXISTING.
+    ; BACKUP_SEMANTICS permits directory targets as well as files.
+    mov rcx, windows_path_buffer
+    mov edx, 80h
+    mov r8d, 7
+    xor r9d, r9d
+    mov qword [rsp + 32], 3
+    mov qword [rsp + 40], 02000000h
+    mov qword [rsp + 48], 0
+    call [CreateFileW]
+    cmp rax, -1
+    je .stat_follow_error
+    mov r13, rax
+
+    mov rcx, r13
+    mov rdx, windows_stat_find_data
+    call [GetFileInfoByHandle]
+    test eax, eax
+    jz .stat_follow_info_error
+
+    ; BY_HANDLE_FILE_INFORMATION layout differs from
+    ; WIN32_FILE_ATTRIBUTE_DATA: size high/low are at +32/+36.
+    mov rdi, r12
+    xor eax, eax
+    mov ecx, 8
+    rep stosq
+
+    mov eax, [windows_stat_find_data + 32]
+    shl rax, 32
+    mov edx, [windows_stat_find_data + 36]
+    or rax, rdx
+    mov [r12], rax
+
+    mov rax, [windows_stat_find_data + 4]
+    mov rdx, 116444736000000000
+    sub rax, rdx
+    imul rax, 100
+    mov [r12 + 16], rax
+
+    mov rax, [windows_stat_find_data + 20]
+    mov rdx, 116444736000000000
+    sub rax, rdx
+    imul rax, 100
+    mov [r12 + 8], rax
+
+    mov rax, [windows_stat_find_data + 12]
+    mov rdx, 116444736000000000
+    sub rax, rdx
+    imul rax, 100
+    mov [r12 + 24], rax
+
+    mov r14d, [windows_stat_find_data]
+    test r14d, 2                  ; FILE_ATTRIBUTE_HIDDEN
+    jz .stat_follow_not_hidden
+    or dword [r12 + 32], FC_ATTR_NATIVE_HIDDEN
+.stat_follow_not_hidden:
+    test r14d, 1                  ; FILE_ATTRIBUTE_READONLY
+    jz .stat_follow_not_readonly
+    or dword [r12 + 32], FC_ATTR_READ_ONLY
+.stat_follow_not_readonly:
+    test r14d, 4                  ; FILE_ATTRIBUTE_SYSTEM
+    jz .stat_follow_not_system
+    or dword [r12 + 32], FC_ATTR_SYSTEM
+.stat_follow_not_system:
+    test r14d, 20h                ; FILE_ATTRIBUTE_ARCHIVE
+    jz .stat_follow_hidden_scan
+    or dword [r12 + 32], FC_ATTR_ARCHIVE
+
+.stat_follow_hidden_scan:
+    lea rdx, [windows_path_buffer]
+    mov r8, rdx
+.stat_follow_hidden_loop:
+    mov cx, [rdx]
+    test cx, cx
+    jz .stat_follow_hidden_check
+    cmp cx, '\\'
+    je .stat_follow_hidden_separator
+    cmp cx, '/'
+    jne .stat_follow_hidden_next
+.stat_follow_hidden_separator:
+    cmp word [rdx + 2], 0
+    je .stat_follow_hidden_next
+    lea r8, [rdx + 2]
+.stat_follow_hidden_next:
+    add rdx, 2
+    jmp .stat_follow_hidden_loop
+.stat_follow_hidden_check:
+    cmp word [r8], '.'
+    jne .stat_follow_type
+    or dword [r12 + 32], FC_ATTR_HIDDEN
+.stat_follow_type:
+    test r14d, 10h                ; FILE_ATTRIBUTE_DIRECTORY
+    jz .stat_follow_regular
+    mov dword [r12 + 36], FC_TYPE_DIRECTORY
+    jmp .stat_follow_close
+.stat_follow_regular:
+    mov dword [r12 + 36], FC_TYPE_REGULAR
+
+.stat_follow_close:
+    mov rcx, r13
+    call [CloseHandle]
+    test eax, eax
+    jz .stat_follow_error
+    xor eax, eax
+    jmp .stat_follow_return
+
+.stat_follow_info_error:
+    call fc_windows_set_error
+    mov r15, rax
+    mov rcx, r13
+    call [CloseHandle]
+    mov rax, r15
+    jmp .stat_follow_return
+.stat_follow_encoding:
+    mov eax, FC_ERR_ENCODING
+    call fc_windows_set_normalized_error
+    jmp .stat_follow_return
+.stat_follow_error:
+    call fc_windows_set_error
+.stat_follow_return:
+    add rsp, 56
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    ret
+
 ; os_set_times(path_utf8, accessed_ns, modified_ns)
 ; Set access and modification times through a temporary FILE_WRITE_ATTRIBUTES
 ; handle. Windows FILETIME precision is 100 ns, so sub-100 ns input is rounded

@@ -84,7 +84,23 @@ fc_cmd_mkdir_ensure:
     test rax, rax
     jnz .ensure_create
     cmp dword [fc_cmd_mkdir_info + 36], FC_TYPE_DIRECTORY
+    je .ensure_existing
+    ; A symlink (or an unclassified Windows reparse point such as a junction)
+    ; may resolve to an existing directory. Check the resolved target before
+    ; deciding that the path is a non-directory.
+    cmp dword [fc_cmd_mkdir_info + 36], FC_TYPE_SYMLINK
+    je .ensure_follow
+    cmp dword [fc_cmd_mkdir_info + 36], FC_TYPE_UNKNOWN
     jne .ensure_failed
+.ensure_follow:
+    mov rdi, r12
+    mov rsi, fc_cmd_mkdir_info
+    call os_stat_follow
+    test rax, rax
+    jnz .ensure_failed
+    cmp dword [fc_cmd_mkdir_info + 36], FC_TYPE_DIRECTORY
+    jne .ensure_failed
+.ensure_existing:
     xor eax, eax
     jmp .ensure_done
 .ensure_create:
@@ -110,7 +126,20 @@ fc_cmd_mkdir_ensure:
     test rax, rax
     jnz .ensure_failed
     cmp dword [fc_cmd_mkdir_info + 36], FC_TYPE_DIRECTORY
+    je .ensure_race_directory
+    cmp dword [fc_cmd_mkdir_info + 36], FC_TYPE_SYMLINK
+    je .ensure_race_follow
+    cmp dword [fc_cmd_mkdir_info + 36], FC_TYPE_UNKNOWN
     jne .ensure_failed
+.ensure_race_follow:
+    mov rdi, r12
+    mov rsi, fc_cmd_mkdir_info
+    call os_stat_follow
+    test rax, rax
+    jnz .ensure_failed
+    cmp dword [fc_cmd_mkdir_info + 36], FC_TYPE_DIRECTORY
+    jne .ensure_failed
+.ensure_race_directory:
     xor eax, eax
     jmp .ensure_done
 .ensure_failed:

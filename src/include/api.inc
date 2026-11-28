@@ -96,6 +96,10 @@
 ; os_open(path_utf8, flags, mode, out_handle)
 ; os_close(handle)
 ; os_stat(path_utf8, out_fc_file_info)
+; os_same_handle(handle1, handle2) compares identities after both handles are open.
+; Returns 1 for the same object, 0 for different objects, -1 on inspection error.
+; os_truncate(handle) truncates the already-open file to zero bytes and resets
+; its file position to the beginning. It never resolves the path again.
 ; os_dir_open(path_utf8, out_dir_handle)
 ; os_dir_next(dir_handle, out_fc_file_info, name_buffer, name_capacity,
 ;             out_name_len) -- special RAX result documented above.

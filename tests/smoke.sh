@@ -326,7 +326,7 @@ fi
 
     # Timestamp selection through a symlink must preserve the target's
     # unselected timestamp, not copy metadata from the link itself.
-    printf 'symlink target\\n' > touch-symlink-target.txt
+    printf 'symlink target\n' > touch-symlink-target.txt
     ln -s touch-symlink-target.txt touch-symlink.txt
     touch -a -t 200101010101.01 touch-symlink-target.txt
     touch -m -t 200202020202.02 touch-symlink-target.txt

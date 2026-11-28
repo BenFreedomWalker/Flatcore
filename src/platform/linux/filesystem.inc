@@ -219,12 +219,19 @@ os_chdir:
 ; os_stat(path_utf8, out_fc_file_info)
 ; Linux x86-64 struct stat is collected with newfstatat(AT_FDCWD, ...).
 os_stat:
+    mov r10d, 100h             ; AT_SYMLINK_NOFOLLOW
+    jmp os_stat_common
+
+; os_stat_follow(path_utf8, out_fc_file_info) follows symbolic links.
+os_stat_follow:
+    xor r10d, r10d
+
+os_stat_common:
     mov r8, rsi
     mov rsi, rdi
     mov edi, -100
     lea rdx, [linux_stat_buffer]
     mov r9, rdx
-    mov r10d, 100h             ; AT_SYMLINK_NOFOLLOW (lstat semantics)
     mov eax, 262
     syscall
     test rax, rax

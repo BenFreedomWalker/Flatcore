@@ -979,7 +979,7 @@ os_dir_close:
 .dir_close_error:
     call fc_windows_set_error
 .dir_close_done:
-    add rsp, 40
+    add rsp, 32
     pop r12
     ret
 

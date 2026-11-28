@@ -256,7 +256,7 @@ os_truncate:
     ; CreateFileW returns a new handle positioned at offset zero.
     ; Keep that position and truncate through the same open handle.
     mov rcx, rdi
-    call [SetEndOfFile]
+    call [SetEndOfFileAPI]
     test eax, eax
     jz .truncate_error
     xor eax, eax

@@ -66,6 +66,15 @@ fi
     grep -qx 'Flatcore mv 0.1' mv-version.txt
     "$BIN" cp input.txt copied.txt
     cmp input.txt copied.txt
+    "$BIN" mkdir cp-source-dir
+    printf 'destination preserved\\n' > cp-directory-destination.txt
+    if "$BIN" cp cp-source-dir cp-directory-destination.txt >/dev/null 2>&1; then
+        printf 'cp accepted a directory source\\n' >&2
+        exit 1
+    fi
+    grep -qx 'destination preserved' cp-directory-destination.txt
+    "$BIN" rm cp-directory-destination.txt
+    "$BIN" rmdir cp-source-dir
     if "$BIN" cp -- input.txt input.txt >/dev/null 2>&1; then
         printf 'cp accepted identical source and destination paths\n' >&2
         exit 1

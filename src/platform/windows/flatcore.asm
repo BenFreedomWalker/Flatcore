@@ -56,7 +56,26 @@ start:
     ; The legacy command bodies remain active during migration. They continue
     ; consuming the original command-line tail until the shared commands land.
     call [GetCommandLineA]
-    mov r12, rax
+    test rax, rax
+    jz .startup_error
+
+    ; GetCommandLineA returns a system-managed buffer. Copy it into bounded
+    ; writable storage before the legacy parser edits it in place.
+    mov rsi, rax
+    mov rdi, windows_legacy_command_line
+    mov ecx, 131072
+.legacy_command_line_copy:
+    mov al, [rsi]
+    mov [rdi], al
+    inc rsi
+    inc rdi
+    test al, al
+    jz .legacy_command_line_copied
+    dec ecx
+    jnz .legacy_command_line_copy
+    jmp .startup_error
+.legacy_command_line_copied:
+    mov r12, windows_legacy_command_line
 
     ; Skip argv[0], honoring a quoted executable path.
     mov rsi, r12
@@ -858,6 +877,7 @@ windows_normalized_argc rq 1
 windows_normalized_argv rq 1
 windows_utf8_command_line rb 131072
 windows_arg_storage rb 131072
+windows_legacy_command_line rb 131072
 align 8
 windows_argv rq 16385
 startup_error_text db 'flatcore: invalid or oversized Windows command line', 13, 10, 0
